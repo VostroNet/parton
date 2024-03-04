@@ -1,0 +1,37 @@
+{
+  "models": {
+    "w": true,
+    "d": true,
+    "models": {
+      "Config": {
+        "w": true
+      },
+      "EventLog": {
+        "r": true
+      },
+      "Role": {
+        "w": true
+      },
+      "User": {
+        "w": true
+      },
+      "UserAuth": {
+        "w": true
+      }
+    }
+  },
+  "items": {
+    "r": false,
+    "sets": [{
+      "permissions": {
+        "r": true
+      },
+      "paths": [
+        "/templates/*",
+        "/components/**/*",
+        "/web/localhost/**/*"
+      ]
+    }]
+  }
+
+}

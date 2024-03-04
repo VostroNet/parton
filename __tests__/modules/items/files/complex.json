@@ -1,0 +1,10 @@
+[{
+  "name": "item1",
+  "children": [{"ref": "./ref-single.json"}]
+}, {
+  "name": "item2",
+  "children": {"ref": "./ref-array.json"}
+}, {
+  "name": "item3",
+  "children": {"ref": "./subfolder/relative.json"}
+}]

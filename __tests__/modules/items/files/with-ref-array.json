@@ -1,0 +1,4 @@
+[{
+  "name": "with-ref-array-item1",
+  "children": {"ref": "./ref-array.json"}
+}]

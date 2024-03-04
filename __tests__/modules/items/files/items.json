@@ -1,0 +1,118 @@
+[
+  {
+    "name": "files",
+    "displayName": "Files",
+    "data": {},
+    "children": [{
+      "name": "icon",
+      "displayName": "Icon",
+      "type": "file",
+      "file": "./icon.png",
+      "data": {
+        "type": "image/png"
+      }
+    }]
+  },  {
+    "name": "components",
+    "displayName": "Components",
+    "data": {},
+    "children": [{
+      "name": "layouts",
+      "displayName": "Layouts",
+      "data": {},
+      "children":[]
+    }, {
+      "name": "sublayouts",
+      "displayName": "Sublayouts",
+      "data": {},
+      "children":[]
+    }]
+  },
+  {
+    "name": "templates",
+    "displayName": "Templates",
+    "data": {},
+    "children": [{
+      "name": "folder",
+      "displayName": "Folder",
+      "type": "template",
+      "data": {
+        "fields": {
+          "icon": {
+            "type": "text"
+          }
+        }
+      }
+    },
+    {
+      "name": "page",
+      "displayName": "Page",
+      "type": "template",
+      "template": "/templates/folder",
+      "data": {
+        "fields": {
+          "layout": {
+            "type": "item",
+            "filter": "layouts"
+          },
+          "sublayouts": {
+            "type": "sublayouts"
+          },
+          "dynamic": {
+            "type": "bool"
+          },
+          "hidden": {
+            "type": "bool"
+          }
+        }
+      }
+    },
+    {
+      "name": "website",
+      "displayName": "Website",
+      "type": "template",
+      "template": "/templates/page",
+      "data": {
+        "fields": {
+          "hostname": {
+            "type": "text"
+          },
+          "logo": {
+            "type": "file"
+          }
+        }
+      }
+    }]
+  },
+  {
+    "name": "web",
+    "displayName": "Web",
+    "children": [
+      {
+        "name": "localhost",
+        "displayName": "Home",
+        "type": "page",
+        "template": "/templates/page",
+        "data": {
+          "layout": "/components/layouts/page",
+          "sublayouts": [
+            {
+              "path": "/components/sublayouts/title",
+              "props": {
+                "text": "Hello World"
+              },
+              "placeholder": "main"
+            }
+          ],
+          "hostname": [
+            "localhost"
+          ],
+          "logoIcon": "/files/icon"
+        },
+        "children": {
+          "ref": "./pages.json"
+        }
+      }
+    ]
+  }
+]

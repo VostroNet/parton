@@ -1,0 +1,4 @@
+[{
+  "name": "with-ref-single-item1",
+  "children": [{"ref": "./ref-single.json"}]
+}]
