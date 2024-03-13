@@ -10,7 +10,7 @@ import { IModule } from '../../src/types/system';
 
 import "../../__mocks__/http";
 
-describe('modules:http', () => {
+describe('modules:express', () => {
   test('event firing order', async () => {
     const arr: string[] = [];
 

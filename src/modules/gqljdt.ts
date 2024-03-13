@@ -47,7 +47,7 @@ export const gqljdtModule: IGqlJdtModule = {
   },
   [ExpressEvent.Initialize]: async (express, system) => {
     express.get('/gqljdt.api', async (req, res) => {
-      const { role } = await createContextFromRequest(req, res, system);
+      const { role } = await createContextFromRequest(req, system);
       if (role) {
         const roleHex = createHexString(role.id);
         return res.redirect(`/gqljdt.api/${roleHex}`);
@@ -55,7 +55,7 @@ export const gqljdtModule: IGqlJdtModule = {
       return res.redirect('/');
     });
     express.get('/gqljdt.api/:roleHex', async (req, res) => {
-      const { role } = await createContextFromRequest(req, res, system);
+      const { role } = await createContextFromRequest(req, system);
       if (role) {
         const roleHex = createHexString(role.id);
         if (roleHex !== req.params.roleHex) {

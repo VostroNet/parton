@@ -3,6 +3,7 @@
 import { GraphQLError } from 'graphql';
 
 import { Role } from '../../../types/models/models/role';
+import { DataContext } from '../../data/types';
 import {
   Item,
   ItemIdRef,
@@ -14,7 +15,6 @@ import {
   RoleWebCacheDoc,
 } from '../types';
 import { getItemByPath } from '../utils';
-import { DataContext } from '../../data/types';
 
 // export function getTopItemFromUri(store: RoleWebCacheDoc, uri: Url.URL) {
 //   const hostname = uri

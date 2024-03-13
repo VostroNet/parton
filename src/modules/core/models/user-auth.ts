@@ -26,7 +26,7 @@ const userAuthModel: IDefinition = {
     type: {
       //TODO: update gqlize to support enum
       type: DataTypes.ENUM,
-      values: ['local', 'bearer'],
+      values: ['local'],
       allowNull: false,
       comment: 'This is the type of user auth for organized identification.',
     } as any,
@@ -91,7 +91,7 @@ const userAuthModel: IDefinition = {
             false,
           );
 
-          if (['local', 'bearer'].indexOf(instance.type) > -1) {
+          if (instance.type === 'local') {
             instance._token = instance.token;
             const salt = await bcrypt.genSalt(5);
             instance.token = await bcrypt.hash(instance.token, salt);

@@ -1,13 +1,13 @@
 import { describe, expect, test } from '@jest/globals';
 
 import coreModule from '../../../src/modules/core';
-import { fieldHashModule } from '../../../src/modules/utils/field-hash';
-import { roleUpsertModule } from '../../../src/modules/utils/role-upsert';
 import { CoreConfig } from '../../../src/modules/core/types';
 import dataModule, { createOptions, getDatabase } from '../../../src/modules/data';
 import itemModule from '../../../src/modules/items';
 import { ItemTemplateDataType, ItemType, RoleItemDoc } from '../../../src/modules/items/types';
 import { getItemByPath } from '../../../src/modules/items/utils';
+import { fieldHashModule } from '../../../src/modules/utils/field-hash';
+import { roleUpsertModule } from '../../../src/modules/utils/role-upsert';
 import { createContext, System } from '../../../src/system';
 
 import { createSiteSetupModule } from './utils';

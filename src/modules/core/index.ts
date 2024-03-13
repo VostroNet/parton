@@ -1,18 +1,22 @@
+/* eslint-disable functional/no-loop-statements */
+import { promisify } from 'util';
+
 import { stitchSchemas } from '@graphql-tools/stitch';
 import { createSchema } from '@vostro/gqlize';
 import GQLManager from '@vostro/gqlize/lib/manager';
-import bcrypt from 'bcrypt';
+import bodyParser from "body-parser";
 import { GraphQLSchema } from 'graphql';
-import passport from 'passport';
-import { Strategy as BearerStrategy } from 'passport-http-bearer';
+import passport, { PassportStatic } from 'passport';
 import { Op } from 'sequelize';
 
 import { System } from '../../system';
 import { Role } from '../../types/models/models/role';
+import { User } from '../../types/models/models/user';
+import { Context } from '../../types/system';
 import waterfall from '../../utils/waterfall';
 import { CliEvent, ClIModule } from '../cli';
 import { createOptions, DataEvent, DataModule, getDatabase } from '../data';
-import { ExpressEvent, ExpressModuleEvents } from '../express';
+import { createContextFromRequest, ExpressEvent, ExpressModuleEvents } from '../express';
 
 import { generateTypes } from './functions/generate-types';
 import models from './models';
@@ -21,9 +25,10 @@ import { RoleDoc } from './types';
 export enum CoreModuleEvent {
   GraphQLSchemaConfigure = 'core:graphql-schema:configure',
   GraphQLSchemaCreate = 'core:graphql-schema:create',
-  AuthBearerProviderRegister = 'core:auth:bearer-provider:register',
+  AuthProviderRegister = 'core:auth:provider:register',
   AuthLogoutRequest = 'core:auth:logout:request',
   AuthLoginRequest = 'core:auth:login:request',
+  AuthLoginSuccessResponse = 'core:auth:login:success',
 }
 
 export interface CoreModuleEvents {
@@ -36,6 +41,13 @@ export interface CoreModuleEvents {
     role: Role,
     core: System,
   ) => Promise<void>;
+  [CoreModuleEvent.AuthProviderRegister]?: (passport: PassportStatic, system: System) => Promise<IAuthProvider>;
+  [CoreModuleEvent.AuthLoginSuccessResponse]?: (loginResponse: any, user: User, context: Context) => Promise<any>
+}
+
+export interface IAuthProvider {
+  name: string;
+  isBearer?: boolean;
 }
 
 export interface ICoreModule
@@ -99,10 +111,14 @@ export const coreModule: ICoreModule = {
     // }
   },
   [ExpressEvent.Initialize]: async (express, system: System) => {
-    const bearerProviders = await system.all<string>(
-      CoreModuleEvent.AuthBearerProviderRegister,
+    const providers = await system.all<IAuthProvider>(
+      CoreModuleEvent.AuthProviderRegister,
+      passport,
       system,
     );
+    const bearerProviders = providers
+      .filter((p) => p.isBearer)
+      .map((b) => b.name);
 
     passport.serializeUser(function (user: any, done) {
       done(null, user.id);
@@ -117,6 +133,7 @@ export const coreModule: ICoreModule = {
           createOptions(
             {
               // transaction
+              override: true,
             },
             {
               where: {
@@ -141,93 +158,69 @@ export const coreModule: ICoreModule = {
         return done(err, undefined);
       }
     });
-    passport.use(
-      new BearerStrategy(async (token, done) => {
-        try {
-          const db = await getDatabase(system);
-          const { UserAuth, Role } = db.models;
-
-          const userAuths = await UserAuth.findAll(
-            createOptions(
-              {
-                override: true,
-              },
-              {
-                where: {
-                  type: 'bearer',
-                },
-              },
-            ),
-          );
-          if (!userAuths) {
-            return done(null, false);
-          }
-          const userAuth = userAuths.find((ua) =>
-            bcrypt.compareSync(token, ua.token),
-          );
-          if (userAuth) {
-            const user = await userAuth.getUser(
-              createOptions(
-                {
-                  override: true,
-                },
-                {
-                  include: [
-                    {
-                      model: Role,
-                      as: 'role',
-                    },
-                  ],
-                },
-              ),
-            );
-            return done(null, user, { scope: 'all' });
-          }
-          return done(null, false);
-        } catch (err) {
-          return done(err);
-        }
-      }),
-    );
+    
+    const jsonParser = bodyParser.json();
     express.use(passport.initialize());
     express.use(passport.session());
-    express.get('/auth.api/logout', (req, res) => {
-      req.logout(
-        {
-          keepSessionInfo: false,
-        },
-        (err: any) => {
-          system.logger.error(err);
-        },
-      );
-      res.redirect('/');
-    });
-    express.post('/auth.api/login', async (req, res, next) => {
-      // TODO: Login Event chain?
+    express.use(async (req: any, res: any, next: any) => {
+      if (req.logout) {
+        req.logoutAsync = promisify(req.logout);
+      }
       return next();
     });
+    express.get('/auth.api/logout', async(req, res) => {
+      const context = await createContextFromRequest(req, system, true);
+      const user = await context.getUser();
+      if(user) {
+        await system.execute(CoreModuleEvent.AuthLogoutRequest, user, context);
+        // this feels unnecessary
+        try {
+          await (req as any).logoutAsync({
+            keepSessionInfo: false,
+          });
+        } catch(err: any) {
+          system.logger.error(err);
+        }
+      }
+      return res.redirect('/');
+    });
+    express.post('/auth.api/login', jsonParser, async (req, res) => {
+      // TODO: Login Event chain?
+      const context = await createContextFromRequest(req, system, true);
+      try {
+        // TODO: apply type to response
+        const response = await system.execute(CoreModuleEvent.AuthLoginRequest, req.body, context);
+        if (response?.success) {
+          //todo: ensure context is set properly and has user available
+          const result = await system.execute(CoreModuleEvent.AuthLoginSuccessResponse, response, context.getUser(), context);
+          return res.status(200)
+            .json(result);
+        }
+        return res.status(400)
+          .json(response);
+      } catch (err: any) {
+        system.logger.error(err);
+        return res.status(500).json({
+          success: false,
+          error: err.message,
+        });
+      }
+    });
     express.use(async (req, res, next) => {
-      if (req.headers.Authorization || req.headers.authorization) {
-        await waterfall(
-          ['bearer'].concat(bearerProviders),
-          async (bearerProvider, success) => {
-            try {
-              const response = (await authenticateAsync(
-                bearerProvider,
-                req,
-                res,
-              )) as any;
-              if (response?.user) {
-                await assignUserToRequest(req, response.user);
-                return true;
-              }
-              return success;
-            } catch (err) {
-              system.logger.error(`${bearerProvider} failed`, err);
-            }
-            return false;
-          },
-        );
+      for(const bearerProvider of bearerProviders) {
+        try {
+          const response = (await authenticateAsync(passport,
+            bearerProvider,
+            req,
+            res,
+          )) as any;
+          if (response?.user) {
+            await assignUserToRequest(req, response.user);
+            break;
+          }
+        } catch (err) {
+          system.logger.error(`${bearerProvider} failed`, err);
+        }
       }
       return next();
     });
@@ -235,16 +228,17 @@ export const coreModule: ICoreModule = {
   },
 };
 
-export function authenticateAsync(
+export function authenticateAsync(passport: PassportStatic,
   strategy: string | passport.Strategy | string[],
   req: any,
   res: any,
+  session = false,
 ) {
   return new Promise((resolve, reject) => {
     try {
       return passport.authenticate(
         strategy,
-        { session: false },
+        { session },
         (err: any, user: any, info: any) => {
           if (!err) {
             return resolve({ user, info });
@@ -263,7 +257,7 @@ export function authenticateAsync(
   });
 }
 
-async function assignUserToRequest(req: any, user: any) {
+export async function assignUserToRequest(req: any, user: any) {
   req.user = user;
   const role = await user.getRole({ override: true });
   req.role = role;

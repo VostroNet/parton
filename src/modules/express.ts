@@ -58,6 +58,7 @@ export interface ExpressModuleEvents {
   [ExpressEvent.Use]?: (
     req: Express.Request,
     res: Express.Response,
+    system: System,
   ) => Promise<boolean>;
   [ExpressEvent.Get]?: (
     req: Express.Request,
@@ -220,7 +221,6 @@ export default expressModule;
 
 export async function createContextFromRequest(
   req: Express.Request,
-  res: Express.Response,
   system: System,
   override = false,
   transaction?: any,
