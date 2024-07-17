@@ -1,12 +1,9 @@
 import { DataTypes } from 'sequelize';
 
-import { ItemEvent } from '..';
 import { SiteRole } from '../../../types/models/models/site-role';
-import { createOptions, getSystemFromContext } from '../../data';
+import { createOptions } from '../../data';
 import { IHashDefinition } from '../../utils/field-hash';
-import { beforeRoleValidate } from '../logic/role';
-import { SiteRoleDoc, SiteDoc, SiteRoleCacheDoc } from '../types';
-import { createRoleItemsCache } from '../utils';
+import { beforeSiteRoleValidate, updateSiteRoleCache } from '../logic/site-role';
 
 const siteRoleModel: IHashDefinition = {
   define: {
@@ -17,7 +14,7 @@ const siteRoleModel: IHashDefinition = {
     cacheDoc: 'cacheDocHash',
   },
   hooks: {
-    beforeValidate: [beforeRoleValidate],
+    beforeValidate: [beforeSiteRoleValidate],
   },
   expose: {
     instanceMethods: {
@@ -35,33 +32,7 @@ const siteRoleModel: IHashDefinition = {
         _: any,
         context: any,
       ) {
-        const site = await this.getSite(createOptions(context));
-        // await updateRoleCache(this, site, context);
-        const siteRoleDoc: SiteRoleDoc = this.doc;
-        if (!siteRoleDoc?.items) {
-          throw new Error('Invalid item permissions');
-        }
-        const siteDoc: SiteDoc = site.doc;
-        if (!siteDoc?.data) {
-          throw new Error('Invalid site item data');
-        }
-        const newItemStore = await createRoleItemsCache(siteDoc, siteRoleDoc, context);
-
-        const cacheDoc: SiteRoleCacheDoc = {
-          ...this.cacheDoc,
-          // roleHash: role.docHash,
-          siteHash: site.docHash,
-          data: newItemStore,
-        };
-        const core = getSystemFromContext(context);
-        this.set("cacheDoc", await core.execute(
-          ItemEvent.ProcessSiteRoleCacheDoc,
-          cacheDoc,
-          this,
-          site,
-          context,
-        ));
-
+        await updateSiteRoleCache(this, context);
         return this.save(createOptions(context));
       },
     },

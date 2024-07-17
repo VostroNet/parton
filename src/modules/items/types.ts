@@ -109,6 +109,9 @@ export interface ImportSite<T> {
   default?: boolean;
   hostnames?: string[];
   sitePath: string;
+  roles: {
+    [roleName: string]: SiteRoleDoc;
+  }
   items: ImportItem<T>[] | ImportRef;
 }
 

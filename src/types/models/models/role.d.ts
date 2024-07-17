@@ -9,6 +9,8 @@ import {User} from "./user";
 export interface RoleCreationAttributes {
   cacheDoc?: any;
   cacheDocHash?: string;
+  doc?: any;
+  docHash?: string;
   enabled?: any;
   name?: string;
 
@@ -17,6 +19,8 @@ export interface RoleAttributes {
   cacheDoc: any;
   cacheDocHash: string;
   createdAt: any;
+  doc: any;
+  docHash: string;
   enabled: any;
   id: number;
   name: string;
@@ -28,6 +32,8 @@ export class Role extends Model<RoleAttributes, RoleCreationAttributes> {
   cacheDoc: any;
   cacheDocHash: string;
   createdAt: any;
+  doc: any;
+  docHash: string;
   enabled: any;
   id: number;
   name: string;

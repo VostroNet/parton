@@ -48,7 +48,7 @@ export async function upsertSiteFromImportSite(
   cwd = process.cwd(),
 ): Promise<Site> {
   const db = await getDatabaseFromContext(context);
-  const { Site } = db.models;
+  const { Site, Role, SiteRole } = db.models;
 
   const itemsData = await createItemDataFromImportItems(importSite.items, cwd);
   let site = await Site.findOne(
@@ -80,6 +80,37 @@ export async function upsertSiteFromImportSite(
       },
       createOptions(context),
     );
+  }
+  if (importSite.roles) {
+    await waterfall(Object.keys(importSite.roles), async (roleName) => {
+      const siteRoleRef = importSite.roles[roleName];
+      const role = await Role.findOne(createOptions(context, {
+        where: {
+          name: roleName,
+        }
+      }));
+
+      if (!role) {
+        throw new Error(`Role ${roleName} not found, unable to create site role`);
+      }
+      const siteRole = await SiteRole.findOne(createOptions(context, {
+        where: {
+          siteId: site.id,
+          roleId: role.id,
+        }
+      }));
+      if(!siteRole) {
+        await SiteRole.create({
+          siteId: site.id,
+          roleId: role.id,
+          doc: siteRoleRef,
+        }, createOptions(context));
+      } else {
+        await siteRole.update({
+          doc: siteRoleRef,
+        }, createOptions(context));
+      }
+    });
   }
   return site;
 }

@@ -11,13 +11,12 @@ import expressSession, { SessionOptions } from 'express-session';
 import { createContext, System } from '../system';
 import { Config } from '../types/config';
 import { SystemEvent } from '../types/events';
+import { Role } from '../types/models/models/role';
 import { User } from '../types/models/models/user';
 import waterfall from '../utils/waterfall';
 
-import { HttpEventType, HttpModule } from './http';
 import { createOptions, getDatabase } from './data';
-import { Op } from 'sequelize';
-import { Role } from '../types/models/models/role';
+import { HttpEventType, HttpModule } from './http';
 
 export enum ExpressEvent {
   Initialize = 'express:initialize',
@@ -226,10 +225,10 @@ export default expressModule;
 export async function getDefaultRoleFromUri(
   uri: string,
   system: System,
-) {
+) : Promise<Role> {
   const context = await createContext(system, undefined, undefined, true);
   const db = await getDatabase(system);
-  const { Site } = db.models;
+  const { Site, Role } = db.models;
   const url = new URL(uri);
 
   //TODO: check cache?
@@ -251,15 +250,21 @@ export async function getDefaultRoleFromUri(
   if(!site) {
     throw new Error('No default site found');
   }
-  let roles = await site.getRoles(createOptions(context, {
+  const siteRoles = await site.getSiteRoles(createOptions(context, {
     where: {
       default: true,
-    }
+    },
+    include: [{
+      model: Role,
+      as: "role",
+      required: true,
+    }]
   }));
-  if(roles.length === 0) {
+  if(siteRoles.length === 0) {
     throw new Error('No default role found');
   }
-  return roles[0];
+
+  return siteRoles[0].role;
 }
 
 export async function createContextFromRequest(

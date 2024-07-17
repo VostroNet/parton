@@ -30,13 +30,13 @@ import { getItemByPath } from '../utils';
 
 // we use the PagePath type instead of string to ensure that the path has been created here.
 // we may change the type from a string to an object in the future.
-export function getPagePathFromUri(uri: string): PagePath {
-  const url = new URL(uri);
-  return {
-    path: `${url.hostname}${url.pathname}`,
-    webPath: url.pathname,
-  };
-}
+// export function getPagePathFromUri(uri: string): PagePath {
+//   const url = new URL(uri);
+//   return {
+//     path: `${url.hostname}${url.pathname}`,
+//     webPath: url.pathname,
+//   };
+// }
 
 export async function getPageFromRoleWebCache(
   rwcd: SiteRoleWebCacheDoc,
