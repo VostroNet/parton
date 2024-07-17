@@ -37,6 +37,7 @@ describe("modules:items:page", () => {
           name: 'test',
           displayName: 'Test',
           default: true,
+          sitePath: "/localhost",
           items: [{
             name: "layouts",
             type: ItemType.Folder,
@@ -136,7 +137,7 @@ describe("modules:items:page", () => {
     }
     const db = await getDatabase(core);
 
-    const context = await createContext(core, undefined, "system", true);
+    const context = await createContext(core, undefined, undefined, true);
     const { Role } = db.models;
     const role = await Role.findOne(
       createOptions(context, { where: { name: 'test' } }),
@@ -205,6 +206,7 @@ describe("modules:items:page", () => {
           name: 'test',
           displayName: 'Test',
           default: true,
+          sitePath: "/",
           items: [{
             name: "layouts",
             type: ItemType.Folder,
@@ -327,7 +329,7 @@ describe("modules:items:page", () => {
     }
     const db = await getDatabase(core);
 
-    const context = await createContext(core, undefined, "system", true);
+    const context = await createContext(core, undefined, undefined, true);
     const { Role } = db.models;
     const role = await Role.findOne(
       createOptions(context, { where: { name: 'test' } }),
@@ -388,6 +390,7 @@ describe("modules:items:page", () => {
           name: 'test',
           displayName: 'Test',
           default: true,
+          sitePath: "/",
           items: [{
             name: "layouts",
             type: ItemType.Folder,
@@ -487,7 +490,7 @@ describe("modules:items:page", () => {
     }
     const db = await getDatabase(core);
 
-    const systemContext = await createContext(core, undefined, "system", true);
+    const systemContext = await createContext(core, undefined, undefined, true);
     const { Role } = db.models;
     const role = await Role.findOne(
       createOptions(systemContext, { where: { name: 'test' } }),
@@ -495,7 +498,7 @@ describe("modules:items:page", () => {
     expect(role).toBeDefined();
     expect(role).not.toBeNull();
 
-    const roleContext = await createContext(core, undefined, "test", false);
+    const roleContext = await createContext(core, undefined, role, false);
     const page = await getPageResolver({}, {uri: 'https://localhost.com:788/sub', levels: 0}, roleContext);
     expect(page).toBeDefined();
     expect(page?.layout).toBeDefined();

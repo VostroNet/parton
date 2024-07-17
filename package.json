@@ -1,5 +1,5 @@
 {
-  "name": "@vostro/parton",
+  "name": "@parton/core",
   "version": "0.1.2",
   "description": "parton",
   "module": "lib/index.js",
@@ -9,6 +9,7 @@
   "license": "MIT",
   "keywords": [],
   "scripts": {
+    "prepare": "husky || true",
     "demo": "./cli.sh --cwd ./demo/",
     "apps:server": "./cli.sh --cwd ./apps/server/",
     "build": "run-p build:*",
@@ -39,7 +40,7 @@
     "version": "standard-version",
     "reset-hard": "git clean -dfx && git reset --hard && yarn",
     "prepare-release": "run-s reset-hard test cov:check doc:html version doc:publish",
-    "prepublishOnly": "yarn build && yalc retreat --all",
+    "prepublishOnly": "pnpm run build; echo next; yalc retreat --all",
     "postpublish": "yalc restore"
   },
   "engines": {
@@ -112,7 +113,7 @@
     "jest": "^29.7.0",
     "jest-mock-req-res": "^1.0.2",
     "mkdirp": "^3.0.1",
-    "npm-run-all": "^4.1.5",
+    "npm-run-all2": "^6.2.2",
     "nyc": "^15.1.0",
     "open-cli": "^8.0.0",
     "pg": "^8.11.3",
@@ -134,11 +135,6 @@
     "LICENSE",
     "README.md"
   ],
-  "config": {
-    "commitizen": {
-      "path": "cz-conventional-changelog"
-    }
-  },
   "prettier": {
     "singleQuote": true
   },

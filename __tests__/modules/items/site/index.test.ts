@@ -3,12 +3,12 @@
 import { describe, expect, test } from '@jest/globals';
 
 import coreModule from '../../../../src/modules/core';
-import { fieldHashModule } from '../../../../src/modules/utils/field-hash';
-import { roleUpsertModule } from '../../../../src/modules/utils/role-upsert';
 import { CoreConfig } from '../../../../src/modules/core/types';
 import dataModule, { createOptions, getDatabase } from '../../../../src/modules/data';
 import itemModule from '../../../../src/modules/items';
 import { RoleItemDoc } from '../../../../src/modules/items/types';
+import { fieldHashModule } from '../../../../src/modules/utils/field-hash';
+import { roleUpsertModule } from '../../../../src/modules/utils/role-upsert';
 import { createContext, System } from '../../../../src/system';
 import { createSiteSetupModule } from '../utils';
 // import { SystemEvent } from '../../../src/types/events';
@@ -62,6 +62,7 @@ describe("modules:items:utils", () => {
           name: 'test',
           displayName: 'Test',
           default: true,
+          sitePath: "/",
           items: [],
         })],
         clone: true,
@@ -91,7 +92,7 @@ describe("modules:items:utils", () => {
     }
     const db = await getDatabase(core);
 
-    const context = await createContext(core, undefined, "system", true);
+    const context = await createContext(core, undefined, undefined, true);
     const {Site} = db.models;
     const s = await Site.findOne(createOptions(context, {where: {name: 'test'}}));
     expect(s).toBeDefined();
@@ -114,6 +115,7 @@ describe("modules:items:utils", () => {
         name: 'test',
         displayName: 'Test',
         default: true,
+        sitePath: "/",
         items: [{
           name: 'test',
           type: 'folder',
@@ -156,7 +158,7 @@ describe("modules:items:utils", () => {
     }
     const db = await getDatabase(core);
 
-    const context = await createContext(core, undefined, "system", true);
+    const context = await createContext(core, undefined, undefined, true);
     const {Site} = db.models;
     const s = await Site.findOne(createOptions(context, {where: {name: 'test'}}));
     expect(s).toBeDefined();

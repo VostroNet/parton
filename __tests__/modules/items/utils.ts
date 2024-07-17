@@ -14,7 +14,7 @@ export function createSiteSetupModule(importSite: ImportSite<any>) {
       }
     }],
     [DataEvent.Setup]: async (core: System) => {
-      const context = await createContext(core, undefined, "system", true);
+      const context = await createContext(core, undefined, undefined, true);
       await upsertSiteFromImportSite(importSite, context);
     }
   };

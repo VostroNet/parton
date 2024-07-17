@@ -3,31 +3,23 @@
 
 import {DbOptions, Model} from "../data";
 
-import {Site} from "./site";
+import {SiteRole} from "./site-role";
 import {User} from "./user";
 
 export interface RoleCreationAttributes {
   cacheDoc?: any;
   cacheDocHash?: string;
-  default?: any;
-  doc?: any;
-  docHash?: string;
   enabled?: any;
   name?: string;
-  siteId?: number | null;
 
 }
 export interface RoleAttributes {
   cacheDoc: any;
   cacheDocHash: string;
   createdAt: any;
-  default: any;
-  doc: any;
-  docHash: string;
   enabled: any;
   id: number;
   name: string;
-  siteId: number | null;
   updatedAt: any;
 
 }
@@ -36,19 +28,22 @@ export class Role extends Model<RoleAttributes, RoleCreationAttributes> {
   cacheDoc: any;
   cacheDocHash: string;
   createdAt: any;
-  default: any;
-  doc: any;
-  docHash: string;
   enabled: any;
   id: number;
   name: string;
-  siteId: number | null;
   updatedAt: any;
-  site?: Site | null;
+  siteRoles?: SiteRole[] | null;
   users?: User[] | null;
-  createSite(item: Site, options: DbOptions): Promise<Site>;
-  getSite(options: DbOptions): Promise<Site>;
-  setSite(item: Site, options: DbOptions): Promise<void>;
+  addSiteRole(item: SiteRole, options: DbOptions): Promise<SiteRole>;
+  addSiteRoles(items: SiteRole[], options: DbOptions): Promise<SiteRole[]>;
+  countSiteRoles(options: DbOptions): Promise<number>;
+  createSiteRole(item: SiteRole, options: DbOptions): Promise<SiteRole>;
+  getSiteRoles(options: DbOptions): Promise<SiteRole[]>;
+  hasSiteRoles(items: SiteRole[], options: DbOptions): Promise<boolean>;
+  hasSiteRole(item: SiteRole, options: DbOptions): Promise<boolean>;
+  removeSiteRole(item: SiteRole, options: DbOptions): Promise<void>;
+  removeSiteRoles(items: SiteRole[], options: DbOptions): Promise<void>;
+  setSiteRoles(items: SiteRole[], options: DbOptions): Promise<void>;
   addUser(item: User, options: DbOptions): Promise<User>;
   addUsers(items: User[], options: DbOptions): Promise<User[]>;
   countUsers(options: DbOptions): Promise<number>;

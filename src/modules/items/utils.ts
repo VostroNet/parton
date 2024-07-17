@@ -17,8 +17,8 @@ import {
   ItemPermissions,
   ItemTemplateData,
   ItemType,
-  RoleItemDoc,
-  RoleItemStore,
+  SiteRoleDoc,
+  SiteRoleItemStore,
   SiteDoc,
 } from './types';
 
@@ -162,19 +162,19 @@ export function cloneItemData<ItemData>(store: ItemData): ItemData {
 
 export async function createRoleItemsCache(
   siteDoc: SiteDoc,
-  roleDoc: RoleItemDoc,
+  siteRoleDoc: SiteRoleDoc,
   context: DataContext,
 ) {
-  if (!roleDoc?.items) {
+  if (!siteRoleDoc?.items) {
     throw new Error('Invalid item permissions');
   }
   if (!siteDoc?.data) {
     throw new Error('Invalid site item data');
   }
   const current = siteDoc.data;
-  const permissions = roleDoc.items;
+  const permissions = siteRoleDoc.items;
 
-  const store: RoleItemStore = {
+  const store: SiteRoleItemStore = {
     templateData: {},
     ...cloneItemData(current),
   };
@@ -196,7 +196,7 @@ export async function createRoleItemsCache(
         ItemEvent.ProcessItem,
         item,
         siteDoc,
-        roleDoc,
+        siteRoleDoc,
         store,
         context,
       );
@@ -206,7 +206,7 @@ export async function createRoleItemsCache(
 }
 async function processTemplateFieldsForItem(
   item: Item<any>,
-  store: RoleItemStore,
+  store: SiteRoleItemStore,
   context: DataContext,
 ) {
   if (!item.templatePath || !item.data) {
@@ -238,11 +238,11 @@ async function processTemplateFieldsForItem(
   );
 }
 
-export function getItemByPath<T>(path: string, store: RoleItemStore) {
+export function getItemByPath<T>(path: string, store: SiteRoleItemStore) {
   return store.items[store.paths[path]] as Item<T>;
 }
 
-export function getTemplateDataForItem(item: Item<any>, store: RoleItemStore) {
+export function getTemplateDataForItem(item: Item<any>, store: SiteRoleItemStore) {
   if (!item.templatePath) {
     return {};
   }

@@ -11,7 +11,7 @@ export const roleUpsertModule: DataEvents & IModule = {
     const cfg = system.getConfig<CoreConfig>();
     const roles = cfg?.roles || {};
 
-    const context = await createContext(system, undefined, "system", true);
+    const context = await createContext(system, undefined,  undefined, true);
     await waterfall(Object.keys(roles || {}), async (roleName: string) => {
       
       const roleSchema = roles[roleName];

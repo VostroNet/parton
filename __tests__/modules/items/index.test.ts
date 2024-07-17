@@ -37,6 +37,7 @@ describe("modules:items", () => {
           name: 'test',
           displayName: 'Test',
           default: true,
+          sitePath: "/localhost",
           items: [{
             name: "layouts",
             type: ItemType.Folder,
@@ -157,7 +158,7 @@ describe("modules:items", () => {
     }
     const db = await getDatabase(core);
 
-    const context = await createContext(core, undefined, "system", true);
+    const context = await createContext(core, undefined, undefined, true);
     const { Role } = db.models;
     const role = await Role.findOne(
       createOptions(context, { where: { name: 'test' } }),

@@ -12,31 +12,31 @@ const roleModel: IHashDefinition = {
       user: 'role hasMany user',
     },
   },
-  hashFields: {
-    doc: 'docHash',
-  },
+  // hashFields: {
+  //   doc: 'docHash',
+  // },
   define: {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
       comment: 'This is the name of the role.',
     },
-    default: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-      comment: 'This is the default role.',
-    },
-    docHash: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      comment: 'This is the hash of the role.',
-    },
-    doc: {
-      type: DataTypes.JSONB,
-      allowNull: false,
-      defaultValue: {},
-    },
+    // default: {
+    //   type: DataTypes.BOOLEAN,
+    //   allowNull: false,
+    //   defaultValue: false,
+    //   comment: 'This is the default role.',
+    // },
+    // docHash: {
+    //   type: DataTypes.STRING,
+    //   allowNull: false,
+    //   comment: 'This is the hash of the role.',
+    // },
+    // doc: {
+    //   type: DataTypes.JSONB,
+    //   allowNull: false,
+    //   defaultValue: {},
+    // },
     enabled: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
@@ -54,14 +54,26 @@ const roleModel: IHashDefinition = {
         foreignKey: 'roleId',
       },
     },
+    // {
+    //   type: RelationshipType.BelongsToMany,
+    //   model: 'Site',
+    //   name: 'site',
+    //   options: {
+    //     through: {
+    //       model: 'SiteRole',
+    //       foreignKey: 'roleId',
+    //       otherKey: 'siteId',
+    //     }
+    //   },
+    // },
     {
-      type: RelationshipType.BelongsTo,
-      model: 'Site',
-      name: 'site',
+      type: RelationshipType.HasMany,
+      model: 'SiteRole',
+      name: 'siteRoles',
       options: {
-        foreignKey: 'siteId',
+        foreignKey: 'roleId',
       },
-    },
+    }
   ],
   options: {
     tableName: 'roles',

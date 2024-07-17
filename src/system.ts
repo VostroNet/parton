@@ -47,30 +47,40 @@ export class System extends Loaf {
 export async function createContext(
   system: System,
   user?: User,
-  roleName = 'system',
+  role?: Role,
   override = false,
   transaction?: any,
 ): Promise<Context> {
-  const db = await getDatabase(system);
-  const { Role } = db.models;
-  let role: Role | undefined = undefined;
+  // const db = await getDatabase(system);
+  // const { Role } = db.models;
   if (user?.role) {
     role = user.role;
   } else if (user) {
     role = await user.getRole(createOptions({ override: true }));
-  } else if (roleName) {
+  } 
+  // else if (roleName) {
+    // role = await Role.findOne(
+    //   createOptions({
+    //     override: true,
+    //     where: { name: roleName, enabled: true },
+    //   }),
+    // );
+  // }
+
+  if (!role && override) {
+    const db = await getDatabase(system);
+    const { Role } = db.models;
     role = await Role.findOne(
       createOptions({
         override: true,
-        where: { name: roleName, enabled: true },
+        where: { name: "system", enabled: true },
       }),
     );
-  }
-
-  if (!role && override) {
-    role = {
-      name: roleName || 'system',
-    } as any;
+    if(!role) {
+      role = {
+        name: 'system',
+      } as any;
+    }
   }
 
   const context: Context = {

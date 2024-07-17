@@ -1,2 +1,2 @@
 #!/bin/sh
-bun ./src/cli.ts "$@" 
+pnpm exec tsx ./src/cli.ts "$@" 

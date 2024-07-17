@@ -22,7 +22,7 @@ export const bearerAuthModule: BearerAuthModule = {
         try {
           const db = await getDatabase(system);
           const { UserAuth, Role } = db.models;
-          const context = await createContext(system, undefined, "system", true);
+          const context = await createContext(system, undefined,  undefined, true);
 
           const userAuths = await UserAuth.findAll(
             createOptions(context, {

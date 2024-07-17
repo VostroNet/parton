@@ -7,6 +7,7 @@ const siteDefinition: IHashDefinition = {
     doc: 'docHash',
   },
   define: {
+    sitePath: { type: DataTypes.STRING, allowNull: false, defaultValue: '/' },
     doc: { type: DataTypes.JSONB, allowNull: false, defaultValue: {} },
     docHash: { type: DataTypes.STRING, allowNull: false },
   },

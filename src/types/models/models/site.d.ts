@@ -2,14 +2,16 @@
 
 import {DbOptions, Model} from "../data";
 
-import {Role} from "./role";
+import {SiteRole} from "./site-role";
 
 export interface SiteCreationAttributes {
   default?: any;
   displayName?: string;
   doc?: any;
   docHash?: string;
+  hostnames?: any;
   name?: string;
+  sitePath?: string;
 
 }
 export interface SiteAttributes {
@@ -18,8 +20,10 @@ export interface SiteAttributes {
   displayName: string;
   doc: any;
   docHash: string;
+  hostnames: any;
   id: number;
   name: string;
+  sitePath: string;
   updatedAt: any;
 
 }
@@ -30,19 +34,21 @@ export class Site extends Model<SiteAttributes, SiteCreationAttributes> {
   displayName: string;
   doc: any;
   docHash: string;
+  hostnames: any;
   id: number;
   name: string;
+  sitePath: string;
   updatedAt: any;
-  roles?: Role[] | null;
-  addRole(item: Role, options: DbOptions): Promise<Role>;
-  addRoles(items: Role[], options: DbOptions): Promise<Role[]>;
-  countRoles(options: DbOptions): Promise<number>;
-  createRole(item: Role, options: DbOptions): Promise<Role>;
-  getRoles(options: DbOptions): Promise<Role[]>;
-  hasRoles(items: Role[], options: DbOptions): Promise<boolean>;
-  hasRole(item: Role, options: DbOptions): Promise<boolean>;
-  removeRole(item: Role, options: DbOptions): Promise<void>;
-  removeRoles(items: Role[], options: DbOptions): Promise<void>;
-  setRoles(items: Role[], options: DbOptions): Promise<void>;
+  siteRoles?: SiteRole[] | null;
+  addSiteRole(item: SiteRole, options: DbOptions): Promise<SiteRole>;
+  addSiteRoles(items: SiteRole[], options: DbOptions): Promise<SiteRole[]>;
+  countSiteRoles(options: DbOptions): Promise<number>;
+  createSiteRole(item: SiteRole, options: DbOptions): Promise<SiteRole>;
+  getSiteRoles(options: DbOptions): Promise<SiteRole[]>;
+  hasSiteRoles(items: SiteRole[], options: DbOptions): Promise<boolean>;
+  hasSiteRole(item: SiteRole, options: DbOptions): Promise<boolean>;
+  removeSiteRole(item: SiteRole, options: DbOptions): Promise<void>;
+  removeSiteRoles(items: SiteRole[], options: DbOptions): Promise<void>;
+  setSiteRoles(items: SiteRole[], options: DbOptions): Promise<void>;
 
 }

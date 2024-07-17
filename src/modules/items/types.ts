@@ -55,7 +55,7 @@ export interface ItemData {
   };
 }
 
-export interface RoleItemStore extends ItemData {
+export interface SiteRoleItemStore extends ItemData {
   templateData: {
     [key: ItemId]: ItemTemplateData;
   };
@@ -95,7 +95,7 @@ export interface ItemPermissions extends ItemPermission {
   sets: ItemPermissionSet[];
 }
 
-export interface RoleItemDoc extends RoleDoc {
+export interface SiteRoleDoc {
   items: ItemPermissions;
 }
 
@@ -107,19 +107,21 @@ export interface ImportSite<T> {
   name: string;
   displayName?: string;
   default?: boolean;
+  hostnames?: string[];
+  sitePath: string;
   items: ImportItem<T>[] | ImportRef;
 }
 
-export interface RoleCacheDoc {
+export interface SiteRoleCacheDoc {
   // roleHash: string;
   siteHash: string;
-  data: RoleItemStore;
+  data: SiteRoleItemStore
 }
 
-export type PagePath = {
-  path: string;
-  webPath: string;
-};
+// export type PagePath = {
+//   path: string;
+//   webPath: string;
+// };
 export interface WebData {
   hostnames: {
     [key: string]: ItemId;
@@ -128,7 +130,7 @@ export interface WebData {
     [key: string]: ItemId;
   };
 }
-export interface RoleWebCacheDoc extends RoleCacheDoc {
+export interface SiteRoleWebCacheDoc extends SiteRoleCacheDoc {
   web?: WebData;
 }
 

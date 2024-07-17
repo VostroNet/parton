@@ -34,10 +34,10 @@ export async function afterSiteUpdate(site: Site, options: FindOptions) {
   // const db = await getDatabaseFromOptions(options);
   const context = getContextFromOptions(options);
   if (site.changed('docHash')) {
-    const roles = await site.getRoles(createOptions(context));
-    await waterfall(roles, async (role) => {
-      await role.updateCache({}, context);
-      return role.save(createOptions(context));
+    const siteRoles = await site.getSiteRoles(createOptions(context));
+    await waterfall(siteRoles, async (siteRole) => {
+      await siteRole.updateCache({}, context);
+      return siteRole.save(createOptions(context));
     });
   }
 }

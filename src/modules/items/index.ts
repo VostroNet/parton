@@ -4,8 +4,8 @@ import { JSONDefinition } from 'graphql-scalars';
 import { createSchema } from 'graphql-yoga';
 
 import { SystemEvents } from '../../types/events';
-import { Role } from '../../types/models/models/role';
 import { Site } from '../../types/models/models/site';
+import { SiteRole } from '../../types/models/models/site-role';
 import { IModule } from '../../types/system';
 import { CoreModuleEvent, CoreModuleEvents } from '../core';
 import { RoleDoc } from '../core/types';
@@ -24,10 +24,10 @@ import {
   ItemHostData,
   ItemTemplateDataType,
   ItemTemplateFieldDefinition,
-  RoleCacheDoc,
-  RoleItemStore,
-  RoleWebCacheDoc,
   SiteDoc,
+  SiteRoleCacheDoc,
+  SiteRoleItemStore,
+  SiteRoleWebCacheDoc,
   WebData,
 } from './types';
 
@@ -35,28 +35,28 @@ export enum ItemEvent {
   // Configure = 'item:configure',
   ProcessItem = 'item:process-item',
   ProcessItemField = 'item:process-item-field',
-  ProcessRoleCacheDoc = 'item:process-role-cache-doc',
+  ProcessSiteRoleCacheDoc = 'item:process-site-role-cache-doc',
 }
 export type ItemEvents = {
   readonly [ItemEvent.ProcessItem]?: (
     item: Item<any>,
     siteDoc: SiteDoc,
     roleDoc: RoleDoc,
-    store: RoleItemStore,
+    store: SiteRoleItemStore,
     context: DataContext,
   ) => Promise<Item<any>>;
-  readonly [ItemEvent.ProcessRoleCacheDoc]?: <T extends RoleCacheDoc>(
+  readonly [ItemEvent.ProcessSiteRoleCacheDoc]?: <T extends SiteRoleCacheDoc>(
     doc: T,
-    role: Role,
+    siteRole: SiteRole,
     site: Site,
     context: DataContext,
-  ) => Promise<RoleCacheDoc>;
+  ) => Promise<SiteRoleCacheDoc>;
   readonly [ItemEvent.ProcessItemField]?: (
     fieldValue: any,
     item: Item<any>,
     fieldName: string,
     definition: ItemTemplateFieldDefinition,
-    store: RoleItemStore,
+    store: SiteRoleItemStore,
     context: DataContext,
   ) => Promise<any>;
 };
@@ -102,7 +102,7 @@ export const itemModule: ItemModule = {
   name: 'item',
   models,
   dependencies: ['data'],
-  [ItemEvent.ProcessRoleCacheDoc]: async (doc: RoleWebCacheDoc) => {
+  [ItemEvent.ProcessSiteRoleCacheDoc]: async (doc: SiteRoleWebCacheDoc) => {
     const store = doc.data;
     const topLevelItems: Item<ItemHostData>[] = [];
     Object.keys(store.items).map(async (itemId) => {
@@ -145,7 +145,7 @@ export const itemModule: ItemModule = {
       { hostnames: {}, paths: {} } as WebData,
     );
 
-    return doc as RoleCacheDoc;
+    return doc as SiteRoleCacheDoc;
   },
   [ItemEvent.ProcessItemField]: async (value, item, fieldName, definition) => {
     let newValue = value;

@@ -11,8 +11,8 @@ import {
   ItemPageData,
   ItemSublayoutData,
   Page,
-  PagePath,
-  RoleWebCacheDoc,
+  // PagePath,
+  SiteRoleWebCacheDoc,
 } from '../types';
 import { getItemByPath } from '../utils';
 
@@ -39,22 +39,22 @@ export function getPagePathFromUri(uri: string): PagePath {
 }
 
 export async function getPageFromRoleWebCache(
-  rwcd: RoleWebCacheDoc,
-  pagePath: PagePath,
+  rwcd: SiteRoleWebCacheDoc,
+  webPath: string,
   levels: number = 0,
 ): Promise<Page | undefined> {
-  const itemId = rwcd.web?.paths[pagePath.path];
+  const itemId = rwcd.web?.paths[webPath];
   if (!itemId) {
     return undefined;
   }
   const item: Item<ItemPageData> = rwcd.data.items[itemId];
-  return getPageFromItem(rwcd, item, pagePath, levels);
+  return getPageFromItem(rwcd, item, webPath, levels);
 }
 
 export async function getPageFromItem(
-  rwcd: RoleWebCacheDoc,
+  rwcd: SiteRoleWebCacheDoc,
   item: Item<ItemPageData>,
-  pagePath: PagePath,
+  webPath: string,
   levels: number = 0,
 ) {
   const store = rwcd.data;
@@ -97,7 +97,7 @@ export async function getPageFromItem(
       ),
     },
     sublayouts,
-    webPath: pagePath.webPath,
+    webPath: webPath,
     values: item.values,
     name: item.name,
     displayName: item.displayName,
@@ -106,11 +106,7 @@ export async function getPageFromItem(
         item.children.map((c) => {
           if (levels > 0) {
             const item: Item<ItemPageData> = rwcd.data.items[c];
-            const pp = {
-              path: pagePath.path + '/' + item.name,
-              webPath: pagePath.webPath + '/' + item.name,
-            };
-            return getPageFromItem(rwcd, item, pp, levels - 1);
+            return getPageFromItem(rwcd, item, `${webPath}/${item.name}`, levels - 1);
           } else {
             return { id: c } as ItemIdRef;
           }
@@ -121,22 +117,23 @@ export async function getPageFromItem(
   return page;
 }
 
-export async function getPageFromRole(role: Role, uri: string, levels = 0) {
-  const pagePath = getPagePathFromUri(uri);
-  return getPageFromRoleWebCache(role.cacheDoc, pagePath, levels);
+export async function getPageFromRole(role: Role, path: string, levels = 0) {
+  // const pagePath = getPagePathFromUri(uri);
+  return getPageFromRoleWebCache(role.cacheDoc, path, levels);
 }
 
 export async function getPageResolver(
   _root: any,
-  args: { uri: string; levels: number },
+  args: { path: string; levels: number },
   context: DataContext,
 ) {
-  const { uri, levels } = args;
+  const { path, levels } = args;
   if (!context.role) {
     throw new GraphQLError('Role not found');
   }
   const { role } = context;
 
-  const page = await getPageFromRole(role, uri, levels);
+
+  const page = await getPageFromRole(role, path, levels);
   return page;
 }

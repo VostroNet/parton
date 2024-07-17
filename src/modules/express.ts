@@ -15,6 +15,9 @@ import { User } from '../types/models/models/user';
 import waterfall from '../utils/waterfall';
 
 import { HttpEventType, HttpModule } from './http';
+import { createOptions, getDatabase } from './data';
+import { Op } from 'sequelize';
+import { Role } from '../types/models/models/role';
 
 export enum ExpressEvent {
   Initialize = 'express:initialize',
@@ -219,16 +222,60 @@ export const expressModule: IExpressModule = {
 };
 export default expressModule;
 
+
+export async function getDefaultRoleFromUri(
+  uri: string,
+  system: System,
+) {
+  const context = await createContext(system, undefined, undefined, true);
+  const db = await getDatabase(system);
+  const { Site } = db.models;
+  const url = new URL(uri);
+
+  //TODO: check cache?
+
+  let site = await Site.findOne(
+    createOptions(context, {
+      where: db.literal(`("hostnames" @> '['${db.escape(url.hostname)}']')`), // TODO: check if this works as intended
+    }),
+  );
+  if(!site) {
+    site = await Site.findOne(
+      createOptions(context, {
+        where: {
+          default: true,
+        },
+      }),
+    );
+  }
+  if(!site) {
+    throw new Error('No default site found');
+  }
+  let roles = await site.getRoles(createOptions(context, {
+    where: {
+      default: true,
+    }
+  }));
+  if(roles.length === 0) {
+    throw new Error('No default role found');
+  }
+  return roles[0];
+}
+
 export async function createContextFromRequest(
   req: Express.Request,
   system: System,
   override = false,
   transaction?: any,
 ) {
+  let role: Role | undefined;
+  if(!req.user) {
+    role = await getDefaultRoleFromUri(req.url, system);
+  }
   const context = await createContext(
     system,
     req.user as User,
-    undefined,
+    role,
     override,
     transaction,
   );

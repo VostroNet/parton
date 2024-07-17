@@ -9,12 +9,25 @@ const siteDefinition: IDefinition = {
     name: { type: DataTypes.STRING, allowNull: false },
     displayName: { type: DataTypes.STRING },
     default: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+    hostnames: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] },
   },
   relationships: [
+    // {
+    //   type: RelationshipType.BelongsToMany,
+    //   model: 'Role',
+    //   name: 'roles',
+    //   options: {
+    //     through: {
+    //       model: 'SiteRole',
+    //       foreignKey: 'siteId',
+    //       otherKey: 'roleId',
+    //     },
+    //   },
+    // },
     {
       type: RelationshipType.HasMany,
-      model: 'Role',
-      name: 'roles',
+      model: 'SiteRole',
+      name: 'siteRoles',
       options: {
         foreignKey: 'siteId',
       },

@@ -2,13 +2,13 @@ import { describe, expect, test } from '@jest/globals';
 import { execute, GraphQLSchema, parse } from 'graphql';
 
 import coreModule, { CoreModuleEvent, CoreModuleEvents } from '../../../src/modules/core';
-import { fieldHashModule } from '../../../src/modules/utils/field-hash';
-import { roleUpsertModule } from '../../../src/modules/utils/role-upsert';
 import { CoreConfig } from '../../../src/modules/core/types';
 import dataModule, { createOptions, getDatabase } from '../../../src/modules/data';
 import itemModule from '../../../src/modules/items';
 // import { getPageFromRoleWebCache, getPagePathFromUri } from '../../../src/modules/items/logic/web';
 import { ItemType, Page, RoleItemDoc } from '../../../src/modules/items/types';
+import { fieldHashModule } from '../../../src/modules/utils/field-hash';
+import { roleUpsertModule } from '../../../src/modules/utils/role-upsert';
 import { createContext, System } from '../../../src/system';
 import { Role } from '../../../src/types/models/models/role';
 import { IDependencies } from '../../../src/types/system';
@@ -50,6 +50,7 @@ describe("modules:items:graphql", () => {
           name: 'test',
           displayName: 'Test',
           default: true,
+          sitePath: '/localhost',
           items: [{
             name: "layouts",
             type: ItemType.Folder,
@@ -174,7 +175,7 @@ describe("modules:items:graphql", () => {
     }
     const db = await getDatabase(core);
 
-    const context = await createContext(core, undefined, "system", true);
+    const context = await createContext(core, undefined, undefined, true);
     const { Role } = db.models;
     const role = await Role.findOne(
       createOptions(context, { where: { name: 'test' } }),
@@ -182,7 +183,7 @@ describe("modules:items:graphql", () => {
     expect(role).toBeDefined();
     expect(role).not.toBeNull();
     
-    const roleContext = await createContext(core, undefined, role?.name, true);
+    const roleContext = await createContext(core, undefined, role, true);
     const results = await execute({
       schema: schemas[role?.name], 
       document: parse(`query getPage($uri: String!, $levels: Int) {
@@ -263,6 +264,7 @@ describe("modules:items:graphql", () => {
           name: 'test',
           displayName: 'Test',
           default: true,
+          sitePath: '/localhost',
           items: [{
             name: "layouts",
             type: ItemType.Folder,
@@ -387,7 +389,7 @@ describe("modules:items:graphql", () => {
     }
     const db = await getDatabase(core);
 
-    const context = await createContext(core, undefined, "system", true);
+    const context = await createContext(core, undefined, undefined, true);
     const { Role } = db.models;
     const role = await Role.findOne(
       createOptions(context, { where: { name: 'test' } }),
@@ -395,7 +397,7 @@ describe("modules:items:graphql", () => {
     expect(role).toBeDefined();
     expect(role).not.toBeNull();
     
-    const roleContext = await createContext(core, undefined, role?.name, true);
+    const roleContext = await createContext(core, undefined, role, true);
     const results = await execute({
       schema: schemas[role?.name], 
       document: parse(`query getPage($uri: String!, $levels: Int) {

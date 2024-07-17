@@ -8,7 +8,7 @@ import {
   getSystemFromContext,
 } from '../../data';
 import { DataContext, FindOptions } from '../../data/types';
-import { RoleCacheDoc, RoleItemDoc, SiteDoc } from '../types';
+import { SiteRoleCacheDoc, SiteRoleDoc, SiteDoc } from '../types';
 import { createRoleItemsCache } from '../utils';
 
 export async function beforeRoleValidate(role: Role, options: FindOptions) {
@@ -51,7 +51,7 @@ export async function updateRoleCache(
   site: Site,
   context: DataContext,
 ) {
-  const roleDoc: RoleItemDoc = role.doc;
+  const roleDoc: SiteRoleDoc = role.doc;
   const siteDoc: SiteDoc = site.doc;
   if (!roleDoc?.items) {
     throw new Error('Invalid item permissions');
@@ -61,7 +61,7 @@ export async function updateRoleCache(
   }
   const newItemStore = await createRoleItemsCache(siteDoc, roleDoc, context);
 
-  const cacheDoc: RoleCacheDoc = {
+  const cacheDoc: SiteRoleCacheDoc = {
     ...role.cacheDoc,
     // roleHash: role.docHash,
     siteHash: site.docHash,
@@ -69,7 +69,7 @@ export async function updateRoleCache(
   };
   const core = getSystemFromContext(context);
   role.cacheDoc = await core.execute(
-    ItemEvent.ProcessRoleCacheDoc,
+    ItemEvent.ProcessSiteRoleCacheDoc,
     cacheDoc,
     role,
     site,

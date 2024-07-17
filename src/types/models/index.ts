@@ -1,32 +1,36 @@
 import Sequelize, { Model, ModelStatic } from "sequelize";
 
-import type {Config} from "./models/config";
-import type {Role} from "./models/role";
-import type {Site} from "./models/site";
-import type {User} from "./models/user";
-import type {UserAuth} from "./models/user-auth";
+import {Config} from "./models/config";
+import {Role} from "./models/role";
+import {Site} from "./models/site";
+import {SiteRole} from "./models/site-role";
+import {User} from "./models/user";
+import {UserAuth} from "./models/user-auth";
 
 
 export enum ModelNames {
   Config = "Config",
   Role = "Role",
   Site = "Site",
+  SiteRole = "SiteRole",
   User = "User",
   UserAuth = "UserAuth",
 
 }
 
 
-export interface Models {
+interface SConfig {
   [key: string]: ModelStatic<Model<any, any>>; 
-  Config: typeof Config;
-  Role: typeof Role;
-  Site: typeof Site;
-  User: typeof User;
-  UserAuth: typeof UserAuth;
+  [ModelNames.Config]: typeof Config;
+  [ModelNames.Role]: typeof Role;
+  [ModelNames.Site]: typeof Site;
+  [ModelNames.SiteRole]: typeof SiteRole;
+  [ModelNames.User]: typeof User;
+  [ModelNames.UserAuth]: typeof UserAuth;
+
 }
 
 
 export default class DatabaseContext extends Sequelize.Sequelize {
-  declare models: Models
+  declare models: SConfig
 }

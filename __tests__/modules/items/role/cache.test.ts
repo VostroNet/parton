@@ -1,8 +1,6 @@
 import { describe, expect, test } from '@jest/globals';
 
 import coreModule from '../../../../src/modules/core';
-import { fieldHashModule } from '../../../../src/modules/utils/field-hash';
-import { roleUpsertModule } from '../../../../src/modules/utils/role-upsert';
 import { CoreConfig } from '../../../../src/modules/core/types';
 import dataModule, {
   createOptions,
@@ -10,6 +8,8 @@ import dataModule, {
 } from '../../../../src/modules/data';
 import itemModule from '../../../../src/modules/items';
 import { ItemType, RoleItemDoc } from '../../../../src/modules/items/types';
+import { fieldHashModule } from '../../../../src/modules/utils/field-hash';
+import { roleUpsertModule } from '../../../../src/modules/utils/role-upsert';
 import { createContext, System } from '../../../../src/system';
 import { createSiteSetupModule } from '../utils';
 
@@ -38,6 +38,7 @@ describe('modules:items:role:cache', () => {
           name: 'test',
           displayName: 'Test',
           default: true,
+          sitePath: "/localhost",
           items: [
             {
               name: 'localhost',
@@ -90,7 +91,7 @@ describe('modules:items:role:cache', () => {
     }
     const db = await getDatabase(core);
 
-    const context = await createContext(core, undefined, "system", true);
+    const context = await createContext(core, undefined, undefined, true);
     const { Role } = db.models;
     const role = await Role.findOne(
       createOptions(context, { where: { name: 'test' } }),
@@ -134,6 +135,7 @@ describe('modules:items:role:cache', () => {
           name: 'test',
           displayName: 'Test',
           default: true,
+          sitePath: "/",
           items: [
             {
               name: 'localhost',
@@ -187,7 +189,7 @@ describe('modules:items:role:cache', () => {
     }
     const db = await getDatabase(core);
 
-    const context = await createContext(core, undefined, "system", true);
+    const context = await createContext(core, undefined, undefined, true);
     const { Role } = db.models;
     const role = await Role.findOne(
       createOptions(context, { where: { name: 'test' } }),

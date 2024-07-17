@@ -82,7 +82,7 @@ describe('modules:data', () => {
       await core.initialize();
       await core.ready();
       const db = await getDatabase(core);
-      const context = await createContext(core, undefined, "system", true);
+      const context = await createContext(core, undefined, undefined, true);
       const roles = await db.models.Role.findAll(createOptions(context));
       expect(roles.length).toBe(2);
       await core.shutdown();

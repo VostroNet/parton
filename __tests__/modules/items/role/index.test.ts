@@ -3,12 +3,12 @@
 import { describe, expect, test } from '@jest/globals';
 
 import coreModule from '../../../../src/modules/core';
-import { fieldHashModule } from '../../../../src/modules/utils/field-hash';
-import { roleUpsertModule } from '../../../../src/modules/utils/role-upsert';
 import { CoreConfig } from '../../../../src/modules/core/types';
 import dataModule, { createOptions, getDatabase } from '../../../../src/modules/data';
 import itemModule from '../../../../src/modules/items';
 import { ItemType, RoleItemDoc } from '../../../../src/modules/items/types';
+import { fieldHashModule } from '../../../../src/modules/utils/field-hash';
+import { roleUpsertModule } from '../../../../src/modules/utils/role-upsert';
 import { createContext, System } from '../../../../src/system';
 import { createSiteSetupModule } from '../utils';
 
@@ -81,7 +81,7 @@ describe("modules:items:role", () => {
       expect(err).toBeUndefined();
     }
 
-    const context = await createContext(core, undefined, "system", true);
+    const context = await createContext(core, undefined, undefined, true);
     const db = await getDatabase(core);
     const {Role, Site} = db.models;
     const initSite = await Site.create({
@@ -145,6 +145,7 @@ describe("modules:items:role", () => {
         name: 'test',
         displayName: 'Test',
         default: true,
+        sitePath: "",
         items: [],
       })],
       clone: true,
@@ -172,7 +173,7 @@ describe("modules:items:role", () => {
     }
     const db = await getDatabase(core);
 
-    const context = await createContext(core, undefined, "system", true);
+    const context = await createContext(core, undefined, undefined, true);
     const {Role} = db.models;
     const role = await Role.findOne(createOptions(context, {where: {name: 'admin'}}));
     expect(role).toBeDefined();
@@ -220,6 +221,7 @@ describe("modules:items:role", () => {
         name: 'test',
         displayName: 'Test',
         default: true,
+        sitePath: "/",
         items: [{
           name: 'allowed',
           type: ItemType.Folder
@@ -253,7 +255,7 @@ describe("modules:items:role", () => {
     }
     const db = await getDatabase(core);
 
-    const context = await createContext(core, undefined, "system", true);
+    const context = await createContext(core, undefined, undefined, true);
     const {Site, Role} = db.models;
     const role = await Role.findOne(createOptions(context, {where: {name: 'test'}}));
     expect(role).toBeDefined();
@@ -302,6 +304,7 @@ describe("modules:items:role", () => {
         name: 'test',
         displayName: 'Test',
         default: true,
+        sitePath: "/",
         items: [{
           name: 'allowed',
           type: ItemType.Folder,
@@ -343,7 +346,7 @@ describe("modules:items:role", () => {
     }
     const db = await getDatabase(core);
 
-    const context = await createContext(core, undefined, "system", true);
+    const context = await createContext(core, undefined, undefined, true);
     const {Role} = db.models;
     const role = await Role.findOne(createOptions(context, {where: {name: 'test'}}));
     expect(role).toBeDefined();

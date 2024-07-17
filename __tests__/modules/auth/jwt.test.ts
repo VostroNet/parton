@@ -92,7 +92,7 @@ describe('modules:auth:jwks', () => {
     await core.initialize();
     await core.ready();
 
-    const context = await createContext(core, undefined, "system", true);
+    const context = await createContext(core, undefined, undefined, true);
 
     const db = await getDatabase(core);
     const {User, Role} = db.models;
@@ -209,7 +209,7 @@ describe('modules:auth:jwks', () => {
     await core.initialize();
     await core.ready();
 
-    const context = await createContext(core, undefined, "system", true);
+    const context = await createContext(core, undefined, undefined, true);
 
     const db = await getDatabase(core);
     const {User, Role} = db.models;
@@ -427,7 +427,7 @@ describe('modules:auth:jwks', () => {
     await core.initialize();
     await core.ready();
 
-    // const context = await createContext(core, undefined, "system", true);
+    // const context = await createContext(core, undefined, undefined, true);
 
     // const db = await getDatabase(core);
     // const {User, Role} = db.models;
