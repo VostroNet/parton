@@ -12,3 +12,4 @@ package-lock.json
 .results/
 lib/
 .devcontainer/persistence
+.pnpm-store
