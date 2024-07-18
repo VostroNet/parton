@@ -27,16 +27,16 @@ const roleModel: IHashDefinition = {
     //   defaultValue: false,
     //   comment: 'This is the default role.',
     // },
-    // docHash: {
-    //   type: DataTypes.STRING,
-    //   allowNull: false,
-    //   comment: 'This is the hash of the role.',
-    // },
-    // doc: {
-    //   type: DataTypes.JSONB,
-    //   allowNull: false,
-    //   defaultValue: {},
-    // },
+    docHash: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      comment: 'This is the hash of the role.',
+    },
+    doc: {
+      type: DataTypes.JSONB,
+      allowNull: false,
+      defaultValue: {},
+    },
     enabled: {
       type: DataTypes.BOOLEAN,
       allowNull: false,

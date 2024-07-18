@@ -30,7 +30,7 @@ export const roleUpsertModule: DataEvents & IModule = {
           {
             name: roleName,
             doc: roleSchema,
-            default: roleSchema.default,
+            // default: roleSchema.default,
           },
           createOptions(context),
         );
@@ -39,7 +39,7 @@ export const roleUpsertModule: DataEvents & IModule = {
         await role.update(
           {
             doc: roleSchema,
-            default: roleSchema.default,
+            // default: roleSchema.default,
           },
           createOptions(context),
         );

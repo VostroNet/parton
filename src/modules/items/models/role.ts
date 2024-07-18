@@ -1,9 +1,9 @@
 import { DataTypes } from 'sequelize';
 
 import { Role } from '../../../types/models/models/role';
-import { createOptions } from '../../data';
+// import { createOptions } from '../../data';
 import { IHashDefinition } from '../../utils/field-hash';
-import { beforeRoleValidate, updateRoleCache } from '../logic/role';
+// import { beforeRoleValidate, updateRoleCache } from '../logic/role';
 
 const roleModel: IHashDefinition = {
   define: {
@@ -14,7 +14,7 @@ const roleModel: IHashDefinition = {
     cacheDoc: 'cacheDocHash',
   },
   hooks: {
-    beforeValidate: [beforeRoleValidate],
+    // beforeValidate: [beforeRoleValidate],
   },
   expose: {
     instanceMethods: {
@@ -30,11 +30,11 @@ const roleModel: IHashDefinition = {
       updateCache: async function updateCache(
         this: Role,
         _: any,
-        context: any,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        _context: any,
       ) {
-        const site = await this.getSite(createOptions(context));
-        await updateRoleCache(this, site, context);
-        return this.save(createOptions(context));
+        // await updateRoleCache(this, context);
+        // return this.save(createOptions(context));
       },
     },
   },

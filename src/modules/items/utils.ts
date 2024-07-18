@@ -17,9 +17,9 @@ import {
   ItemPermissions,
   ItemTemplateData,
   ItemType,
+  SiteDoc,
   SiteRoleDoc,
   SiteRoleItemStore,
-  SiteDoc,
 } from './types';
 
 import { ItemEvent } from '.';

@@ -1,82 +1,80 @@
-import { ItemEvent } from '..';
-import { Role } from '../../../types/models/models/role';
-import { Site } from '../../../types/models/models/site';
-import {
-  createOptions,
-  getContextFromOptions,
-  getDatabaseFromOptions,
-  getSystemFromContext,
-} from '../../data';
-import { DataContext, FindOptions } from '../../data/types';
-import { SiteRoleCacheDoc, SiteRoleDoc, SiteDoc } from '../types';
-import { createRoleItemsCache } from '../utils';
+// import { ItemEvent } from '..';
+// import { Role } from '../../../types/models/models/role';
+// import { Site } from '../../../types/models/models/site';
+// import {
+//   createOptions,
+//   getContextFromOptions,
+//   getDatabaseFromOptions,
+//   getSystemFromContext,
+// } from '../../data';
+// import { DataContext, FindOptions } from '../../data/types';
 
-export async function beforeRoleValidate(role: Role, options: FindOptions) {
-  const db = await getDatabaseFromOptions(options);
-  const context = getContextFromOptions(options);
+// export async function beforeRoleValidate(role: Role, options: FindOptions) {
+//   const db = await getDatabaseFromOptions(options);
+//   const context = getContextFromOptions(options);
 
-  const { Site } = db.models;
-  let site;
-  if (!role.siteId) {
-    site = await Site.findOne(
-      createOptions(context, {
-        where: {
-          default: true,
-        },
-      }),
-    );
-    if (!site) {
-      const core = getSystemFromContext(context);
-      core.logger.warn(
-        'No default site found for role - will not create cache',
-        role.name,
-      );
-      return role;
-    }
-    role.siteId = site.id;
-  } else {
-    site = await Site.findOne(
-      createOptions(context, {
-        where: {
-          id: role.siteId,
-        },
-      }),
-    );
-  }
-  return updateRoleCache(role, site, context);
-}
+//   const { Site } = db.models;
+//   let site;
+//   if (!role.siteId) {
+//     site = await Site.findOne(
+//       createOptions(context, {
+//         where: {
+//           default: true,
+//         },
+//       }),
+//     );
+//     if (!site) {
+//       const core = getSystemFromContext(context);
+//       core.logger.warn(
+//         'No default site found for role - will not create cache',
+//         role.name,
+//       );
+//       return role;
+//     }
+//     role.siteId = site.id;
+//   } else {
+//     site = await Site.findOne(
+//       createOptions(context, {
+//         where: {
+//           id: role.siteId,
+//         },
+//       }),
+//     );
+//   }
+//   return updateRoleCache(role, site, context);
+// }
 
-export async function updateRoleCache(
-  role: Role,
-  site: Site,
-  context: DataContext,
-) {
-  const roleDoc: SiteRoleDoc = role.doc;
-  const siteDoc: SiteDoc = site.doc;
-  if (!roleDoc?.items) {
-    throw new Error('Invalid item permissions');
-  }
-  if (!siteDoc?.data) {
-    throw new Error('Invalid site item data');
-  }
-  const newItemStore = await createRoleItemsCache(siteDoc, roleDoc, context);
+// //TODO: store jtd schema for role?
+// export async function updateRoleCache(
+//   role: Role,
+//   _context: DataContext,
+// ) {
+//   // const roleDoc: SiteRoleDoc = role.doc;
+//   // const siteDoc: SiteDoc = site.doc;
+//   // if (!roleDoc?.items) {
+//   //   throw new Error('Invalid item permissions');
+//   // }
+//   // if (!siteDoc?.data) {
+//   //   throw new Error('Invalid site item data');
+//   // }
+//   // const newItemStore = await createRoleItemsCache(siteDoc, roleDoc, context);
 
-  const cacheDoc: SiteRoleCacheDoc = {
-    ...role.cacheDoc,
-    // roleHash: role.docHash,
-    siteHash: site.docHash,
-    data: newItemStore,
-  };
-  const core = getSystemFromContext(context);
-  role.cacheDoc = await core.execute(
-    ItemEvent.ProcessSiteRoleCacheDoc,
-    cacheDoc,
-    role,
-    site,
-    context,
-  );
-  return role;
-}
+//   // const cacheDoc: SiteRoleCacheDoc = {
+//   //   ...role.cacheDoc,
+//   //   // roleHash: role.docHash,
+//   //   siteHash: site.docHash,
+//   //   data: newItemStore,
+//   // };
+//   // const core = getSystemFromContext(context);
+//   // role.cacheDoc = await core.execute(
+//   //   ItemEvent.ProcessSiteRoleCacheDoc,
+//   //   cacheDoc,
+//   //   role,
+//   //   site,
+//   //   context,
+//   // );
+//   return role;
+// }
 
 // export async function afterRoleCreate(role: Role, options: FindOptions) {
 //   const db = await getDatabaseFromOptions(options);

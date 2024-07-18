@@ -1,5 +1,5 @@
 # https://github.com/docker-library/postgres/blob/master/13/alpine/Dockerfile
-FROM postgres:13.4-alpine
+FROM postgres:15-alpine
 
 MAINTAINER Ivan Muratov, binakot@gmail.com
 
@@ -25,6 +25,7 @@ RUN set -ex \
         gcc \
         g++ \
         perl \
+        clang15 \
         clang-dev \
         llvm-dev \
         libxml2-dev \

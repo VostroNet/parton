@@ -16,6 +16,7 @@ import { DataConfig } from '../data';
 import { MigrationConfig } from '../data/types';
 import { ExpressConfig } from '../express';
 import { HttpConfig } from '../http';
+import { SiteRoleDoc } from '../items/types';
 
 // export enum PermissionLevel {
 //   Read = 1,
@@ -70,14 +71,26 @@ export interface RoleDoc {
   schema?: RoleSchema;
 }
 
+export interface SiteConfig {
+  displayName?: string;
+  hostnames: string[];
+  default: boolean;
+  roles: {
+    [roleName: string]: SiteRoleDoc;
+  };
+}
+
 export interface CoreConfig
   extends Config,
     DataConfig,
     HttpConfig,
     ExpressConfig {
-  roles?: {
-    [key: string]: RoleDoc;
-  };
+    // sites?: {
+    //   [siteName: string]: SiteConfig;
+    // }
+    roles?: {
+      [roleName: string]: RoleDoc;
+    };
   migrations?: MigrationConfig;
 }
 //TODO: add

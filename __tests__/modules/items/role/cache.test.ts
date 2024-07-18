@@ -1,13 +1,13 @@
 import { describe, expect, test } from '@jest/globals';
 
 import coreModule from '../../../../src/modules/core';
-import { CoreConfig } from '../../../../src/modules/core/types';
+import { CoreConfig, RoleDoc } from '../../../../src/modules/core/types';
 import dataModule, {
   createOptions,
   getDatabase,
 } from '../../../../src/modules/data';
 import itemModule from '../../../../src/modules/items';
-import { ItemType, RoleItemDoc } from '../../../../src/modules/items/types';
+import { ItemType, SiteRoleDoc } from '../../../../src/modules/items/types';
 import { fieldHashModule } from '../../../../src/modules/utils/field-hash';
 import { roleUpsertModule } from '../../../../src/modules/utils/role-upsert';
 import { createContext, System } from '../../../../src/system';
@@ -15,12 +15,14 @@ import { createSiteSetupModule } from '../utils';
 
 describe('modules:items:role:cache', () => {
   test('web paths - basic test', async () => {
-    const testRole: RoleItemDoc = {
+    const testRole: RoleDoc = {
       default: true,
       schema: {
         w: true,
         d: true,
       },
+    };
+    const testSiteRoleDoc: SiteRoleDoc = {
       items: {
         r: true,
         sets: [],
@@ -39,6 +41,9 @@ describe('modules:items:role:cache', () => {
           displayName: 'Test',
           default: true,
           sitePath: "/localhost",
+          roles: {
+            test: testSiteRoleDoc,
+          },
           items: [
             {
               name: 'localhost',
@@ -112,12 +117,14 @@ describe('modules:items:role:cache', () => {
     await core.shutdown();
   });
   test('web paths - dynamic test', async () => {
-    const testRole: RoleItemDoc = {
+    const testRole: RoleDoc = {
       default: true,
       schema: {
         w: true,
         d: true,
       },
+    };
+    const testSiteRoleDoc: SiteRoleDoc = {
       items: {
         r: true,
         sets: [],
@@ -136,6 +143,9 @@ describe('modules:items:role:cache', () => {
           displayName: 'Test',
           default: true,
           sitePath: "/",
+          roles: {
+            test: testSiteRoleDoc,
+          },
           items: [
             {
               name: 'localhost',

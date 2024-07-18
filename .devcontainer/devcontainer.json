@@ -1,40 +1,40 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
 {
-	"name": "Node.js & TypeScript",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"dockerComposeFile": "docker-compose.yml",
-	"service": "devcontainer",
-	"workspaceFolder": "/workspace",
-	"shutdownAction": "stopCompose",
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [],
-	"initializeCommand": "./.devcontainer/setup.sh",
-	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "pnpm install",
-	// Configure tool-specific properties.
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"eamodio.gitlens",
-				"mikestead.dotenv",
-				"dbaeumer.vscode-eslint",
-				"rvest.vs-code-prettier-eslint",
-				"orta.vscode-jest",
-				"adamhartford.vscode-base64",
-				"GitHub.copilot",
-				"streetsidesoftware.code-spell-checker",
-				"esbenp.prettier-vscode"
-			]
-		}
-	},
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "root"
-	"remoteEnv": {
-		// the original host directory which is needed for volume 
-		// mount commands from inside the container (Docker in Docker)
-		"HOST_PROJECT_PATH": "${localWorkspaceFolder}"
-	}
+  "name": "Node.js & TypeScript",
+  // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "devcontainer",
+  "workspaceFolder": "/workspace",
+  "shutdownAction": "stopCompose",
+  // Features to add to the dev container. More info: https://containers.dev/features.
+  // "features": {},
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": [],
+  "initializeCommand": "./.devcontainer/setup.sh",
+  // Use 'postCreateCommand' to run commands after the container is created.
+  "postCreateCommand": "pnpm install",
+  // Configure tool-specific properties.
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "eamodio.gitlens",
+        "mikestead.dotenv",
+        "dbaeumer.vscode-eslint",
+        "rvest.vs-code-prettier-eslint",
+        "orta.vscode-jest",
+        "adamhartford.vscode-base64",
+        "GitHub.copilot",
+        "streetsidesoftware.code-spell-checker",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  },
+  // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+  // "remoteUser": "root"
+  "remoteEnv": {
+    // the original host directory which is needed for volume
+    // mount commands from inside the container (Docker in Docker)
+    "HOST_PROJECT_PATH": "${localWorkspaceFolder}"
+  }
 }
