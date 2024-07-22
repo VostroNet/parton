@@ -4,27 +4,18 @@ import coreModule from '../../../src/modules/core';
 import { CoreConfig } from '../../../src/modules/core/types';
 import dataModule, { createOptions, getDatabase } from '../../../src/modules/data';
 import itemModule from '../../../src/modules/items';
-import { getPageFromRoleWebCache, getPagePathFromUri, getPageResolver } from '../../../src/modules/items/logic/web';
-import { ItemType, Page, RoleItemDoc } from '../../../src/modules/items/types';
+import { getPageFromRoleWebCache, getPageResolver } from '../../../src/modules/items/logic/web';
+import { ItemType, Page } from '../../../src/modules/items/types';
 import { fieldHashModule } from '../../../src/modules/utils/field-hash';
 import { roleUpsertModule } from '../../../src/modules/utils/role-upsert';
 import { createContext, System } from '../../../src/system';
 
-import { createSiteSetupModule } from './utils';
+import { createSiteSetupModule, createTestSite } from './utils';
+import { databaseConfig } from '../../utils/config';
 
 describe("modules:items:page", () => {
   test("getPageFromRoleWebCache", async() => {
-    const testRole: RoleItemDoc = {
-      default: true,
-      schema: {
-        w: true,
-        d: true,
-      },
-      items: {
-        r: true,
-        sets: [],
-      },
-    };
+    const {siteModule, testRoleDoc} = await createTestSite();
     const config: CoreConfig = {
       name: 'data-test',
       slices: [
@@ -33,97 +24,16 @@ describe("modules:items:page", () => {
         itemModule,
         fieldHashModule,
         roleUpsertModule,
-        createSiteSetupModule({
-          name: 'test',
-          displayName: 'Test',
-          default: true,
-          sitePath: "/localhost",
-          items: [{
-            name: "layouts",
-            type: ItemType.Folder,
-            children: [
-              {
-                name: "main",
-                type: ItemType.Folder,
-                templatePath: "/templates/layout",
-                data: {
-                  path: "/layouts/main"
-                }
-              }
-            ]
-          }, {
-            name: "sublayouts",
-            type: ItemType.Folder,
-            children: [
-              {
-                name: "sub1",
-                type: ItemType.Folder,
-                templatePath: "/templates/sublayout",
-                data: {
-                  path: "/sublayouts/sub1"
-                }
-              }, 
-              {
-                name: "sub2",
-                type: ItemType.Folder,
-                templatePath: "/templates/sublayout",
-                data: {
-                  path: "/sublayouts/sub2"
-                }
-              }
-            ]
-          }, {
-            name: 'localhost',
-            type: ItemType.Folder,
-            data: {
-              hostnames: ['localhost.com']
-            },
-            children: [
-              {
-                name: 'sub',
-                displayName: 'Sub',
-                type: ItemType.Folder,
-                data: {
-                  props: {
-                    "title": "Page"
-                  },
-                  layout: {
-                    path: "/layouts/main",
-                    props: {
-                      title: "Test"
-                    }
-                  },
-                  sublayouts: [{
-                    placeholder: "main",
-                    path: "/sublayouts/sub1",
-                  }, {
-                    placeholder: "main",
-                    path: "/sublayouts/sub2"
-                  }], 
-                },
-                children: [
-                  {
-                    name: 'sub',
-                    type: ItemType.Folder,
-                  },
-                ],
-              },
-            ],
-          }],
-        })
+        siteModule,
       ],
       clone: true,
       roles: {
-        test: testRole,
+        test: testRoleDoc,
       },
       data: {
         reset: true,
         sync: true,
-        sequelize: {
-          dialect: 'sqlite',
-          storage: ':memory:',
-          logging: false,
-        },
+        sequelize: databaseConfig
       },
     };
 
@@ -144,8 +54,20 @@ describe("modules:items:page", () => {
     );
     expect(role).toBeDefined();
     expect(role).not.toBeNull();
-    const pagePath = getPagePathFromUri('https://localhost.com:788/sub');
-    const page: Page | undefined = await getPageFromRoleWebCache(role?.cacheDoc, pagePath);
+
+    const siteRoles = await role.getSiteRoles(createOptions(context, {
+      where: {
+        doc: {
+          default: true,
+        },
+      }
+    }));
+    expect(siteRoles).toBeDefined();
+    expect(siteRoles).toHaveLength(1);
+    const siteRole = siteRoles[0];
+
+    // const pagePath = getPagePathFromUri('https://localhost.com:788/sub');
+    const page: Page | undefined = await getPageFromRoleWebCache(siteRole?.cacheDoc, "/sub");
     expect(page).toBeDefined();
     expect(page?.layout).toBeDefined();
     expect(page?.layout?.path).toBe('/layouts/main');
@@ -183,17 +105,8 @@ describe("modules:items:page", () => {
     await core.shutdown();
   });
   test("getPageFromRoleWebCache - multi level - level 1", async() => {
-    const testRole: RoleItemDoc = {
-      default: true,
-      schema: {
-        w: true,
-        d: true,
-      },
-      items: {
-        r: true,
-        sets: [],
-      },
-    };
+
+    const {siteModule, testRoleDoc} = await createTestSite();
     const config: CoreConfig = {
       name: 'data-test',
       slices: [
@@ -202,120 +115,16 @@ describe("modules:items:page", () => {
         itemModule,
         fieldHashModule,
         roleUpsertModule,
-        createSiteSetupModule({
-          name: 'test',
-          displayName: 'Test',
-          default: true,
-          sitePath: "/",
-          items: [{
-            name: "layouts",
-            type: ItemType.Folder,
-            children: [
-              {
-                name: "main",
-                type: ItemType.Folder,
-                templatePath: "/templates/layout",
-                data: {
-                  path: "/layouts/main"
-                }
-              }
-            ]
-          }, {
-            name: "sublayouts",
-            type: ItemType.Folder,
-            children: [
-              {
-                name: "sub1",
-                type: ItemType.Folder,
-                templatePath: "/templates/sublayout",
-                data: {
-                  path: "/sublayouts/sub1"
-                }
-              }, 
-              {
-                name: "sub2",
-                type: ItemType.Folder,
-                templatePath: "/templates/sublayout",
-                data: {
-                  path: "/sublayouts/sub2"
-                }
-              }
-            ]
-          }, {
-            name: 'localhost',
-            type: ItemType.Folder,
-            data: {
-              hostnames: ['localhost.com']
-            },
-            children: [
-              {
-                name: 'sub',
-                displayName: 'Sub',
-                type: ItemType.Folder,
-                data: {
-                  props: {
-                    "title": "Page"
-                  },
-                  layout: {
-                    path: "/layouts/main",
-                    props: {
-                      title: "Test"
-                    }
-                  },
-                  sublayouts: [{
-                    placeholder: "main",
-                    path: "/sublayouts/sub1",
-                  }, {
-                    placeholder: "main",
-                    path: "/sublayouts/sub2"
-                  }], 
-                },
-                children: [{
-                  name: 'sub',
-                  displayName: 'Sub',
-                  type: ItemType.Folder,
-                  data: {
-                    props: {
-                      "title": "Page"
-                    },
-                    layout: {
-                      path: "/layouts/main",
-                      props: {
-                        title: "Test"
-                      }
-                    },
-                    sublayouts: [{
-                      placeholder: "main",
-                      path: "/sublayouts/sub1",
-                    }, {
-                      placeholder: "main",
-                      path: "/sublayouts/sub2"
-                    }], 
-                  },
-                  children: [
-                    {
-                      name: 'sub',
-                      type: ItemType.Folder,
-                    },
-                  ],
-                }],
-              },
-            ],
-          }],
-        })
+        siteModule,
       ],
       clone: true,
       roles: {
-        test: testRole,
+        test: testRoleDoc,
       },
       data: {
         reset: true,
         sync: true,
-        sequelize: {
-          dialect: 'sqlite',
-          storage: ':memory:',
-          logging: false,
-        },
+        sequelize: databaseConfig,
       },
     };
 
@@ -336,8 +145,8 @@ describe("modules:items:page", () => {
     );
     expect(role).toBeDefined();
     expect(role).not.toBeNull();
-    const pagePath = getPagePathFromUri('https://localhost.com:788/sub');
-    const page = await getPageFromRoleWebCache(role?.cacheDoc, pagePath, 1);
+    // const pagePath = getPagePathFromUri('https://localhost.com:788/sub');
+    const page = await getPageFromRoleWebCache(role?.cacheDoc, "/sub", 1);
     expect(page).toBeDefined();
     expect(page?.layout).toBeDefined();
     expect(page?.layout?.path).toBe('/layouts/main');
@@ -367,17 +176,8 @@ describe("modules:items:page", () => {
     await core.shutdown();
   });
   test("getPageResolver", async() => {
-    const testRole: RoleItemDoc = {
-      default: true,
-      schema: {
-        w: true,
-        d: true,
-      },
-      items: {
-        r: true,
-        sets: [],
-      },
-    };
+    
+    const {siteModule, testRoleDoc} = await createTestSite();
     const config: CoreConfig = {
       name: 'data-test',
       slices: [
@@ -386,97 +186,16 @@ describe("modules:items:page", () => {
         itemModule,
         fieldHashModule,
         roleUpsertModule,
-        createSiteSetupModule({
-          name: 'test',
-          displayName: 'Test',
-          default: true,
-          sitePath: "/",
-          items: [{
-            name: "layouts",
-            type: ItemType.Folder,
-            children: [
-              {
-                name: "main",
-                type: ItemType.Folder,
-                templatePath: "/templates/layout",
-                data: {
-                  path: "/layouts/main"
-                }
-              }
-            ]
-          }, {
-            name: "sublayouts",
-            type: ItemType.Folder,
-            children: [
-              {
-                name: "sub1",
-                type: ItemType.Folder,
-                templatePath: "/templates/sublayout",
-                data: {
-                  path: "/sublayouts/sub1"
-                }
-              }, 
-              {
-                name: "sub2",
-                type: ItemType.Folder,
-                templatePath: "/templates/sublayout",
-                data: {
-                  path: "/sublayouts/sub2"
-                }
-              }
-            ]
-          }, {
-            name: 'localhost',
-            type: ItemType.Folder,
-            data: {
-              hostnames: ['localhost.com']
-            },
-            children: [
-              {
-                name: 'sub',
-                displayName: 'Sub',
-                type: ItemType.Folder,
-                data: {
-                  props: {
-                    "title": "Page"
-                  },
-                  layout: {
-                    path: "/layouts/main",
-                    props: {
-                      title: "Test"
-                    }
-                  },
-                  sublayouts: [{
-                    placeholder: "main",
-                    path: "/sublayouts/sub1",
-                  }, {
-                    placeholder: "main",
-                    path: "/sublayouts/sub2"
-                  }], 
-                },
-                children: [
-                  {
-                    name: 'sub',
-                    type: ItemType.Folder,
-                  },
-                ],
-              },
-            ],
-          }],
-        })
+        siteModule,
       ],
       clone: true,
       roles: {
-        test: testRole,
+        test: testRoleDoc,
       },
       data: {
         reset: true,
         sync: true,
-        sequelize: {
-          dialect: 'sqlite',
-          storage: ':memory:',
-          logging: false,
-        },
+        sequelize: databaseConfig,
       },
     };
 
@@ -499,7 +218,7 @@ describe("modules:items:page", () => {
     expect(role).not.toBeNull();
 
     const roleContext = await createContext(core, undefined, role, false);
-    const page = await getPageResolver({}, {uri: 'https://localhost.com:788/sub', levels: 0}, roleContext);
+    const page = await getPageResolver({}, {path: '/sub', levels: 0}, roleContext);
     expect(page).toBeDefined();
     expect(page?.layout).toBeDefined();
     expect(page?.layout?.path).toBe('/layouts/main');
@@ -509,7 +228,7 @@ describe("modules:items:page", () => {
     expect(page?.props).toBeDefined();
     expect(page?.props?.title).toBe('Page');
 
-    const pageItemId = role?.cacheDoc?.web?.paths['localhost.com/sub'];
+    const pageItemId = role?.cacheDoc?.web?.paths['/sub'];
     // const pageItem = role?.cacheDoc.data?.items[pageItemId];
     expect(page?.id).toBeDefined();
     expect(page?.id).toBe(pageItemId);

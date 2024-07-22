@@ -1,7 +1,6 @@
 import { RoleDoc } from "../../../../src/modules/core/types";
 
 const adminRole: RoleDoc = {
-  default: true,
   schema: {
     w: true,
     d: true,

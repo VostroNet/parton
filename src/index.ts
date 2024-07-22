@@ -29,4 +29,15 @@ export const Modules = {
 export default {
   System: system,
   modules: Modules,
+  defaultModules: [
+    coreModule,
+    fieldHashModule,
+    roleUpsertModule,
+    dataModule,
+    itemModule,
+    httpModule,
+    expressModule,
+    gqljdtModule,
+    yogaModule,
+  ]
 };

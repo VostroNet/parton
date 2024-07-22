@@ -58,6 +58,7 @@
     "@vostro/object-visit": "^1.0.1",
     "@vostro/sandwich": "^0.2.0",
     "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
     "debug": "^4.3.5",
     "deepmerge": "^4.3.1",
     "express": "^4.19.2",

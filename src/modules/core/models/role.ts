@@ -12,9 +12,9 @@ const roleModel: IHashDefinition = {
       user: 'role hasMany user',
     },
   },
-  // hashFields: {
-  //   doc: 'docHash',
-  // },
+  hashFields: {
+    doc: 'docHash',
+  },
   define: {
     name: {
       type: DataTypes.STRING,

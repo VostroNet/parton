@@ -46,7 +46,7 @@ describe('modules:event-log', () => {
       await core.initialize();
       await core.ready();
       const db = await getDatabase(core);
-      const context = await createContext(core, undefined, "system", false);
+      const context = await createContext(core, undefined, undefined, false);
       await db.models.Role.findAll(createOptions(context));
       throw new Error('should not get here');
     } catch(err: any) {

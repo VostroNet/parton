@@ -97,6 +97,7 @@ export interface ItemPermissions extends ItemPermission {
 
 export interface SiteRoleDoc {
   items: ItemPermissions;
+  default?: boolean;
 }
 
 export interface SiteDoc {
@@ -117,6 +118,7 @@ export interface ImportSite<T> {
 
 export interface SiteRoleCacheDoc {
   // roleHash: string;
+  rootPath: string;
   siteHash: string;
   data: SiteRoleItemStore
 }
@@ -126,9 +128,9 @@ export interface SiteRoleCacheDoc {
 //   webPath: string;
 // };
 export interface WebData {
-  hostnames: {
-    [key: string]: ItemId;
-  };
+  // hostnames: {
+  //   [key: string]: ItemId;
+  // };
   paths: {
     [key: string]: ItemId;
   };

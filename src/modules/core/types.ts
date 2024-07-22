@@ -67,7 +67,6 @@ export interface RoleSchema extends Permission {
   };
 }
 export interface RoleDoc {
-  default?: boolean;
   schema?: RoleSchema;
 }
 

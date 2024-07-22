@@ -17,6 +17,8 @@ import waterfall from '../utils/waterfall';
 
 import { createOptions, getDatabase } from './data';
 import { HttpEventType, HttpModule } from './http';
+import { Op } from 'sequelize';
+import { hostname } from 'os';
 
 export enum ExpressEvent {
   Initialize = 'express:initialize',
@@ -235,7 +237,7 @@ export async function getDefaultRoleFromUri(
 
   let site = await Site.findOne(
     createOptions(context, {
-      where: db.literal(`("hostnames" @> '['${db.escape(url.hostname)}']')`), // TODO: check if this works as intended
+      where: db.literal(`"doc"->'hostnames' ?& ARRAY['${url.hostname}']`),
     }),
   );
   if(!site) {
@@ -252,7 +254,9 @@ export async function getDefaultRoleFromUri(
   }
   const siteRoles = await site.getSiteRoles(createOptions(context, {
     where: {
-      default: true,
+      doc: {
+        default: true,
+      }
     },
     include: [{
       model: Role,
@@ -274,7 +278,7 @@ export async function createContextFromRequest(
   transaction?: any,
 ) {
   let role: Role | undefined;
-  if(!req.user) {
+  if(!override && !req.user) {
     role = await getDefaultRoleFromUri(req.url, system);
   }
   const context = await createContext(

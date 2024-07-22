@@ -19,6 +19,8 @@ import { createContext, System } from '../../../src/system';
 import { IModule } from '../../../src/types/system';
 
 import "../../../__mocks__/http";
+import { databaseConfig } from '../../utils/config';
+import { createTestSite } from '../items/utils';
 
 jest.mock('node-fetch', ()=>jest.fn())
 
@@ -38,16 +40,17 @@ describe('modules:auth:jwks', () => {
         // return httpServer;
       },
     };
-    const defTestRole: RoleDoc = {
-      default: true,
-      schema: {
-        w: true,
-        d: true,
-      },
-    };
+    // const defTestRole: RoleDoc = {
+    //   default: true,
+    //   schema: {
+    //     w: true,
+    //     d: true,
+    //   },
+    // };
     const {publicKey, privateKey} = await generateKeyPair("ES256", {
       
     });
+    const {testRoleDoc, siteModule} = await createTestSite();
     const config: CoreConfig & JwtConfig = {
       name: 'express-bearer-test',
       slices: [
@@ -60,6 +63,7 @@ describe('modules:auth:jwks', () => {
         fieldHashModule,
         roleUpsertModule,
         module,
+        siteModule,
       ],
       clone: true,
       session: {
@@ -70,14 +74,10 @@ describe('modules:auth:jwks', () => {
       data: {
         reset: true,
         sync: true,
-        sequelize: {
-          dialect: 'sqlite',
-          storage: ':memory:',
-          logging: false,
-        },
+        sequelize: databaseConfig,
       },
       roles: {
-        test: defTestRole,
+        test: testRoleDoc,
       },
       auth: {
         jwt: {
@@ -116,7 +116,7 @@ describe('modules:auth:jwks', () => {
 
     const req = mockRequest({
       method: 'GET',
-      url: `/user`,
+      url: `http://localhost/user`,
       headers: {
         'authorization': `Bearer ${jwtToken}`
       },
@@ -155,13 +155,15 @@ describe('modules:auth:jwks', () => {
         // return httpServer;
       },
     };
-    const defTestRole: RoleDoc = {
-      default: true,
-      schema: {
-        w: true,
-        d: true,
-      },
-    };
+    
+    const {testRoleDoc, siteModule} = await createTestSite();
+    // const defTestRole: RoleDoc = {
+    //   default: true,
+    //   schema: {
+    //     w: true,
+    //     d: true,
+    //   },
+    // };
     const {publicKey, privateKey} = await generateKeyPair("ES256", {
       
     });
@@ -176,6 +178,7 @@ describe('modules:auth:jwks', () => {
         jwtAuthModule,
         fieldHashModule,
         roleUpsertModule,
+        siteModule,
         module,
       ],
       clone: true,
@@ -194,7 +197,7 @@ describe('modules:auth:jwks', () => {
         },
       },
       roles: {
-        test: defTestRole,
+        test: testRoleDoc,
       },
       auth: {
         jwt: {
@@ -233,7 +236,7 @@ describe('modules:auth:jwks', () => {
 
     const req = mockRequest({
       method: 'GET',
-      url: `/user`,
+      url: `https://localhost/user`,
       query: {
         jwt: jwtToken
       }
@@ -273,13 +276,15 @@ describe('modules:auth:jwks', () => {
         // return httpServer;
       },
     };
-    const defTestRole: RoleDoc = {
-      default: true,
-      schema: {
-        w: true,
-        d: true,
-      },
-    };
+    
+    const {testRoleDoc, siteModule} = await createTestSite();
+    // const defTestRole: RoleDoc = {
+    //   default: true,
+    //   schema: {
+    //     w: true,
+    //     d: true,
+    //   },
+    // };
     const {publicKey, privateKey} = await generateKeyPair("ES256", {
       // 
     });
@@ -294,6 +299,7 @@ describe('modules:auth:jwks', () => {
         jwtAuthModule,
         fieldHashModule,
         roleUpsertModule,
+        siteModule,
         module,
       ],
       clone: true,
@@ -305,14 +311,10 @@ describe('modules:auth:jwks', () => {
       data: {
         reset: true,
         sync: true,
-        sequelize: {
-          dialect: 'sqlite',
-          storage: ':memory:',
-          logging: false,
-        },
+        sequelize: databaseConfig,
       },
       roles: {
-        test: defTestRole,
+        test: testRoleDoc,
       },
       auth: {
         jwt: {
@@ -373,13 +375,8 @@ describe('modules:auth:jwks', () => {
         // return httpServer;
       },
     };
-    const defTestRole: RoleDoc = {
-      default: true,
-      schema: {
-        w: true,
-        d: true,
-      },
-    };
+    
+    const {testRoleDoc, siteModule} = await createTestSite();
     const {publicKey, privateKey} = await generateKeyPair("ES256", {
       
     });
@@ -394,6 +391,7 @@ describe('modules:auth:jwks', () => {
         jwtAuthModule,
         fieldHashModule,
         roleUpsertModule,
+        siteModule,
         module,
       ],
       clone: true,
@@ -405,14 +403,10 @@ describe('modules:auth:jwks', () => {
       data: {
         reset: true,
         sync: true,
-        sequelize: {
-          dialect: 'sqlite',
-          storage: ':memory:',
-          logging: false,
-        },
+        sequelize: databaseConfig,
       },
       roles: {
-        test: defTestRole,
+        test: testRoleDoc,
       },
       auth: {
         jwks: {
@@ -473,7 +467,7 @@ describe('modules:auth:jwks', () => {
 
     const req = mockRequest({
       method: 'GET',
-      url: `/user`,
+      url: `https://localhost/user`,
       query: {
         jwt: jwt
       }
