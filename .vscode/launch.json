@@ -5,7 +5,7 @@
       "type": "node",
       "name": "vscode-jest-tests.v2",
       "request": "launch",
-      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
       "args": [
         "--runInBand",
         "--watchAll=false",
@@ -26,10 +26,8 @@
       "type": "node",
       "name": "vscode-jest-tests run all",
       "request": "launch",
-      "program": "${workspaceFolder}/node_modules/.bin/jest",
-      "args": [
-        "--detectOpenHandles"
-      ],
+      "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
+      "args": ["--detectOpenHandles"],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
@@ -44,9 +42,7 @@
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/tsx",
-      "args": [
-        "${relativeFile}"
-      ],
+      "args": ["${relativeFile}"],
       "cwd": "${workspaceRoot}",
       "protocol": "inspector",
       "internalConsoleOptions": "openOnSessionStart",
@@ -66,7 +62,7 @@
         "--project",
         "./parton.ts",
         "--output",
-        "./src/types/models",
+        "./src/types/models"
       ],
       "cwd": "${workspaceRoot}",
       "protocol": "inspector",
@@ -74,7 +70,8 @@
       "envFile": "${workspaceFolder}/.env",
       "console": "internalConsole",
       "outputCapture": "std"
-    }, {
+    },
+    {
       "name": "[server] Start Server",
       "type": "node",
       "request": "launch",
@@ -85,7 +82,7 @@
         "--cwd",
         "./src/apps/server/",
         "--project",
-        "./parton.ts",
+        "./parton.ts"
       ],
       "cwd": "${workspaceRoot}",
       "protocol": "inspector",
@@ -93,7 +90,6 @@
       "envFile": "${workspaceFolder}/.env",
       "console": "internalConsole",
       "outputCapture": "std"
-    },
-
+    }
   ]
 }

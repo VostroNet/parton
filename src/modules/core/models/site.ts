@@ -1,15 +1,19 @@
 import { RelationshipType } from '@vostro/gqlize/lib/types';
 
 import DataTypes from '../../../types/data-types';
-import { IDefinition } from '../types';
+import { IHashDefinition } from '../../utils/field-hash';
 
-const siteDefinition: IDefinition = {
+const siteDefinition: IHashDefinition = {
   name: 'Site',
   define: {
     name: { type: DataTypes.STRING, allowNull: false },
     displayName: { type: DataTypes.STRING },
     default: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
-    hostnames: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] },
+    doc: { type: DataTypes.JSONB, allowNull: false, defaultValue: {} },
+    docHash: { type: DataTypes.STRING, allowNull: false },
+  },
+  hashFields: {
+    doc: 'docHash',
   },
   relationships: [
     // {

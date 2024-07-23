@@ -8,27 +8,29 @@ import expressModule from '../../src/modules/express';
 import gqljdtModule, { IGqlJdtModule } from '../../src/modules/gqljdt';
 import httpModule, { HttpEventType } from '../../src/modules/http';
 import itemModule from '../../src/modules/items';
-import { RoleItemDoc } from '../../src/modules/items/types';
 import { fieldHashModule } from '../../src/modules/utils/field-hash';
 import { roleUpsertModule } from '../../src/modules/utils/role-upsert';
 import { System } from '../../src/system';
 import "../../__mocks__/http";
 import { createHexString } from '../../src/utils/string';
+import { createTestSite } from './items/utils';
+import { databaseConfig } from '../utils/config';
 
 
 describe("modules:services:gqljdt", () => {
   test("schema creation test", async() => {
-    const testRole: RoleItemDoc = {
-      default: true,
-      schema: {
-        w: true,
-        d: true,
-      },
-      items: {
-        r: true,
-        sets: [],
-      },
-    };
+    // const testRole: RoleItemDoc = {
+    //   default: true,
+    //   schema: {
+    //     w: true,
+    //     d: true,
+    //   },
+    //   items: {
+    //     r: true,
+    //     sets: [],
+    //   },
+    // };
+    const {siteModule, testRoleDoc} = await createTestSite();
     // const schemas: {
     //   [key: string]: GraphQLSchema
     // } = {};
@@ -49,19 +51,16 @@ describe("modules:services:gqljdt", () => {
         gqljdtModule,
         httpModule,
         expressModule,
+        siteModule,
       ],
       clone: true,
       roles: {
-        test: testRole,
+        test: testRoleDoc,
       },
       data: {
-        reset: true,
+        // reset: true,
         sync: true,
-        sequelize: {
-          dialect: 'sqlite',
-          storage: ':memory:',
-          logging: false,
-        },
+        sequelize: databaseConfig,
       },
       session: {
         secret: "Hello",
@@ -92,17 +91,8 @@ describe("modules:services:gqljdt", () => {
   });
 
   test("express endpoint - /gqljdt.api/:id", async() => {
-    const testRole: RoleItemDoc = {
-      default: true,
-      schema: {
-        w: true,
-        d: true,
-      },
-      items: {
-        r: true,
-        sets: [],
-      },
-    };
+
+    const {siteModule, testRoleDoc} = await createTestSite();
     const config: CoreConfig = {
       name: 'gqljdt-test',
       slices: [
@@ -114,19 +104,16 @@ describe("modules:services:gqljdt", () => {
         gqljdtModule,
         httpModule,
         expressModule,
+        siteModule,
       ],
       clone: true,
       roles: {
-        test: testRole,
+        test: testRoleDoc,
       },
       data: {
-        reset: true,
+        // reset: true,
         sync: true,
-        sequelize: {
-          dialect: 'sqlite',
-          storage: ':memory:',
-          logging: false,
-        },
+        sequelize: databaseConfig,
       },
       session: {
         secret: "Hello",
