@@ -1,5 +1,5 @@
 import { createContext, System } from "../../system";
-import {  IModule } from "../../types/system";
+import { IModule } from "../../types/system";
 import waterfall from "../../utils/waterfall";
 import { CoreConfig } from "../core/types";
 import { createOptions, DataEvent, DataEvents, getDatabase } from "../data";
@@ -11,9 +11,9 @@ export const roleUpsertModule: DataEvents & IModule = {
     const cfg = system.getConfig<CoreConfig>();
     const roles = cfg?.roles || {};
 
-    const context = await createContext(system, undefined,  undefined, true);
+    const context = await createContext(system, undefined, undefined, undefined, true);
     await waterfall(Object.keys(roles || {}), async (roleName: string) => {
-      
+
       const roleSchema = roles[roleName];
 
       const db = await getDatabase(system);

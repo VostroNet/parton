@@ -22,14 +22,14 @@ export const bearerAuthModule: BearerAuthModule = {
         try {
           const db = await getDatabase(system);
           const { UserAuth, Role } = db.models;
-          const context = await createContext(system, undefined,  undefined, true);
+          const context = await createContext(system, undefined, undefined, undefined, true);
 
           const userAuths = await UserAuth.findAll(
             createOptions(context, {
-                where: {
-                  type: 'bearer',
-                },
+              where: {
+                type: 'bearer',
               },
+            },
             ),
           );
           if (!userAuths) {

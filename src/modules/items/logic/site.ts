@@ -65,6 +65,7 @@ export async function upsertSiteFromImportSite(
         ...importSite,
         doc: {
           data: itemsData,
+          hostnames: importSite.hostnames,
         },
       },
       createOptions(context),
@@ -76,6 +77,7 @@ export async function upsertSiteFromImportSite(
         doc: {
           ...site.doc,
           data: itemsData,
+          hostnames: importSite.hostnames,
         },
       },
       createOptions(context),
@@ -99,7 +101,7 @@ export async function upsertSiteFromImportSite(
           roleId: role.id,
         }
       }));
-      if(!siteRole) {
+      if (!siteRole) {
         await SiteRole.create({
           siteId: site.id,
           roleId: role.id,

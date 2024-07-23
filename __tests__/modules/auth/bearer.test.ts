@@ -5,23 +5,19 @@ import type Express from 'express';
 import { mockRequest, mockResponse } from 'jest-mock-req-res';
 
 import bearerAuthModule from '../../../src/modules/auth/bearer';
-import coreModule from '../../../src/modules/core';
-import { CoreConfig, RoleDoc } from '../../../src/modules/core/types';
-import dataModule, { createOptions, getDatabase } from '../../../src/modules/data';
+import { createOptions, getDatabase } from '../../../src/modules/data';
 import expressModule, { ExpressEvent, ExpressModuleEvents } from '../../../src/modules/express';
 import httpModule, { HttpEventType, HttpModuleEvents } from '../../../src/modules/http';
-import { fieldHashModule } from '../../../src/modules/utils/field-hash';
-import { roleUpsertModule } from '../../../src/modules/utils/role-upsert';
 import { createContext, System } from '../../../src/system';
 import { IModule } from '../../../src/types/system';
 
 import "../../../__mocks__/http";
+import { createBasicConfig } from '../items/utils';
 
 
 describe('modules:auth:bearer', () => {
   test('basic auth', async () => {
     const arr: string[] = [];
-
     const module: IModule & ExpressModuleEvents & HttpModuleEvents = {
       name: 'test1',
       [ExpressEvent.Initialize]: async (express: Express.Application) => {
@@ -33,54 +29,19 @@ describe('modules:auth:bearer', () => {
         // return httpServer;
       },
     };
-    const defTestRole: RoleDoc = {
-      default: true,
-      schema: {
-        w: true,
-        d: true,
-      },
-    };
-    const config: CoreConfig = {
-      name: 'express-bearer-test',
-      slices: [
-        httpModule, 
-        expressModule,
-        dataModule,
-        coreModule,
-        bearerAuthModule,
-        fieldHashModule,
-        roleUpsertModule,
-        module,
-      ],
-      session: {
-        secret: "asd",
-        resave: false,
-        saveUninitialized: true,
-      },
-      data: {
-        reset: true,
-        sync: true,
-        sequelize: {
-          dialect: 'sqlite',
-          storage: ':memory:',
-          logging: false,
-        },
-      },
-      roles: {
-        test: defTestRole,
-      }
-    }
-    
+    const config = await createBasicConfig("express-bearer-test", [httpModule, expressModule, module, bearerAuthModule])
+
+
     const core = new System(config);
     await core.load();
     await core.initialize();
     await core.ready();
 
-    const context = await createContext(core, undefined, undefined, true);
+    const context = await createContext(core, undefined, undefined, undefined, true);
 
     const db = await getDatabase(core);
-    const {User, UserAuth, Role} = db.models;
-    const testRole = await Role.findOne(createOptions(context, {where: {name: 'test'}}));
+    const { User, UserAuth, Role } = db.models;
+    const testRole = await Role.findOne(createOptions(context, { where: { name: 'public' } }));
     expect(testRole).toBeDefined();
     const user = await User.create({
       userName: 'test',
@@ -109,7 +70,7 @@ describe('modules:auth:bearer', () => {
         return undefined;
       },
 
-      send: function() {
+      send: function () {
         this.end();
       }
     });

@@ -115,10 +115,10 @@ export async function validateMutation<T>(
   denyOnSelf = false,
 ) {
   if (options.enforceInvalid && !options.valid) {
-    return options;
+    return model;
   }
   if (getOverrideFromOptions(options)) {
-    return options;
+    return model;
   }
   const context = getContextFromOptions(options);
   const role = getRoleFromOptions(options);
@@ -134,9 +134,9 @@ export async function validateMutation<T>(
   const tablePerms = (schema.models || {})[tableName];
   let mutationKey:
     | {
-        doc?: boolean | RoleModelPermissionLevel;
-        table?: boolean | RoleModelPermissionLevel;
-      }
+      doc?: boolean | RoleModelPermissionLevel;
+      table?: boolean | RoleModelPermissionLevel;
+    }
     | undefined = undefined;
   switch (mutationType) {
     case MutationType.create:

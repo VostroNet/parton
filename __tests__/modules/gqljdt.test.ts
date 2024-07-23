@@ -18,7 +18,7 @@ import { databaseConfig } from '../utils/config';
 
 
 describe("modules:services:gqljdt", () => {
-  test("schema creation test", async() => {
+  test("schema creation test", async () => {
     // const testRole: RoleItemDoc = {
     //   default: true,
     //   schema: {
@@ -30,7 +30,7 @@ describe("modules:services:gqljdt", () => {
     //     sets: [],
     //   },
     // };
-    const {siteModule, testRoleDoc} = await createTestSite();
+    const { siteModule, roles } = await createTestSite();
     // const schemas: {
     //   [key: string]: GraphQLSchema
     // } = {};
@@ -54,11 +54,9 @@ describe("modules:services:gqljdt", () => {
         siteModule,
       ],
       clone: true,
-      roles: {
-        test: testRoleDoc,
-      },
+      roles: roles,
       data: {
-        // reset: true,
+        reset: true,
         sync: true,
         sequelize: databaseConfig,
       },
@@ -79,8 +77,8 @@ describe("modules:services:gqljdt", () => {
     }
     const db = await getDatabase(core);
     expect(db).toBeDefined();
-    const {Role} = db.models;
-    const role = await Role.findOne(createOptions({override: true}, {where: {name: "test"}}));
+    const { Role } = db.models;
+    const role = await Role.findOne(createOptions({ override: true }, { where: { name: "public" } }));
     const gqlJdtSlice = core.get<IGqlJdtModule>("gqljdt");
     expect(gqlJdtSlice).toBeDefined();
     expect(gqlJdtSlice.jdtCache).toBeDefined();
@@ -90,9 +88,9 @@ describe("modules:services:gqljdt", () => {
     await core.shutdown();
   });
 
-  test("express endpoint - /gqljdt.api/:id", async() => {
+  test("express endpoint - /gqljdt.api/:id", async () => {
 
-    const {siteModule, testRoleDoc} = await createTestSite();
+    const { siteModule, roles } = await createTestSite();
     const config: CoreConfig = {
       name: 'gqljdt-test',
       slices: [
@@ -107,11 +105,9 @@ describe("modules:services:gqljdt", () => {
         siteModule,
       ],
       clone: true,
-      roles: {
-        test: testRoleDoc,
-      },
+      roles,
       data: {
-        // reset: true,
+        reset: true,
         sync: true,
         sequelize: databaseConfig,
       },
@@ -132,8 +128,8 @@ describe("modules:services:gqljdt", () => {
     }
     const db = await getDatabase(core);
     expect(db).toBeDefined();
-    const {Role, User} = db.models;
-    const role = await Role.findOne(createOptions({override: true}, {where: {name: "test"}}));
+    const { Role, User } = db.models;
+    const role = await Role.findOne(createOptions({ override: true }, { where: { name: "public" } }));
     const user = await User.create({
       firstName: "test",
       lastName: "test",
@@ -141,7 +137,7 @@ describe("modules:services:gqljdt", () => {
       disabled: false,
       userName: "test",
       roleId: role?.id,
-    }, createOptions({override: true}));
+    }, createOptions({ override: true }));
     expect(user).toBeDefined();
 
     const gqlJdtSlice = core.get<IGqlJdtModule>("gqljdt");
@@ -182,7 +178,7 @@ describe("modules:services:gqljdt", () => {
     })
     try {
       await core.shutdown();
-    } catch (err: any) { 
+    } catch (err: any) {
       console.error(err.stack)
       expect(err).toBeUndefined();
     }

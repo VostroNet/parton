@@ -18,7 +18,6 @@ import { createSiteSetupModule } from '../utils';
 
 
 const adminRole: RoleDoc = {
-  default: true,
   "schema": {
     "w": true,
     "d": true,
@@ -42,6 +41,7 @@ const adminRole: RoleDoc = {
   },
 }
 const adminDefaultItemPermissions: SiteRoleDoc = {
+  default: true,
   "items": {
     "r": false,
     "sets": [{
@@ -119,7 +119,7 @@ describe("modules:items:role", () => {
   //     docHash: "asd",
   //   }, createOptions(context));
   //   expect(initRole).toBeDefined();
-    
+
   //   const initRoleSite: SiteRole = await SiteRole.create({
   //     roleId: initRole.id,
   //     siteId: initSite.id,
@@ -157,11 +157,11 @@ describe("modules:items:role", () => {
   //   // expect(q).toBeDefined();
   //   await core.shutdown();
   // });
-  test("import basic test site - no items - ensure role-site gets created properly", async() => {
-   
+  test("import basic test site - no items - ensure role-site gets created properly", async () => {
+
     const config: CoreConfig = {
       name: 'data-test',
-      slices: [dataModule, coreModule, itemModule, fieldHashModule, roleUpsertModule, createSiteSetupModule({
+      slices: [dataModule, coreModule, itemModule, fieldHashModule, roleUpsertModule, createSiteSetupModule([{
         name: 'test',
         displayName: 'Test',
         default: true,
@@ -171,7 +171,7 @@ describe("modules:items:role", () => {
           admin: adminDefaultItemPermissions
         },
         items: [],
-      })],
+      }])],
       clone: true,
       // sites: {
       //   default: {
@@ -195,20 +195,20 @@ describe("modules:items:role", () => {
         },
       }
     };
-    
+
     const core = new System(config);
     try {
       await core.load();
       await core.initialize();
       await core.ready();
-    } catch(err: any) {
+    } catch (err: any) {
       expect(err).toBeUndefined();
     }
     const db = await getDatabase(core);
 
-    const context = await createContext(core, undefined, undefined, true);
-    const {Role} = db.models;
-    const role = await Role.findOne(createOptions(context, {where: {name: 'admin'}}));
+    const context = await createContext(core, undefined, undefined, undefined, true);
+    const { Role } = db.models;
+    const role = await Role.findOne(createOptions(context, { where: { name: 'admin' } }));
     expect(role).toBeDefined();
     expect(role).not.toBeNull();
     const siteRoles = await role.getSiteRoles(createOptions(context, {}));
@@ -223,11 +223,11 @@ describe("modules:items:role", () => {
     const site = await siteRole.getSite(createOptions(context));
     expect(siteRole?.cacheDoc?.siteHash).toEqual(site?.docHash);
 
-    
+
     await core.shutdown();
   });
 
-  test("basic item permissions test", async() => {
+  test("basic item permissions test", async () => {
 
     const testRole: RoleDoc = {
       "schema": {
@@ -251,23 +251,23 @@ describe("modules:items:role", () => {
 
     const config: CoreConfig = {
       name: 'data-test',
-      slices: [dataModule, coreModule, itemModule, fieldHashModule, roleUpsertModule, 
-        createSiteSetupModule({
-        name: 'test',
-        displayName: 'Test',
-        default: true,
-        sitePath: "/",
-        roles: {
-          test: siteRole,
-        },
-        items: [{
-          name: 'allowed',
-          type: ItemType.Folder
-        }, {
-          name: "denied",
-          type: ItemType.Folder
-        }],
-      })],
+      slices: [dataModule, coreModule, itemModule, fieldHashModule, roleUpsertModule,
+        createSiteSetupModule([{
+          name: 'test',
+          displayName: 'Test',
+          default: true,
+          sitePath: "/",
+          roles: {
+            test: siteRole,
+          },
+          items: [{
+            name: 'allowed',
+            type: ItemType.Folder
+          }, {
+            name: "denied",
+            type: ItemType.Folder
+          }],
+        }])],
       clone: true,
       roles: {
         test: testRole
@@ -282,23 +282,23 @@ describe("modules:items:role", () => {
         },
       }
     };
-    
+
     const core = new System(config);
     try {
       await core.load();
       await core.initialize();
       await core.ready();
-    } catch(err: any) {
+    } catch (err: any) {
       expect(err).toBeUndefined();
     }
     const db = await getDatabase(core);
 
-    const context = await createContext(core, undefined, undefined, true);
-    const {Site, Role} = db.models;
-    const role = await Role.findOne(createOptions(context, {where: {name: 'test'}}));
+    const context = await createContext(core, undefined, undefined, undefined, true);
+    const { Site, Role } = db.models;
+    const role = await Role.findOne(createOptions(context, { where: { name: 'test' } }));
     expect(role).toBeDefined();
     expect(role).not.toBeNull();
-    const site = await Site.findOne(createOptions(context, {where: {default: true}}));
+    const site = await Site.findOne(createOptions(context, { where: { default: true } }));
     expect(site).toBeDefined();
     expect(site).not.toBeNull();
     // const rs = await RoleSite.findOne(createOptions(context, {where: {roleId: role?.id}}));
@@ -314,16 +314,16 @@ describe("modules:items:role", () => {
   });
 
 
-  test("glob permissions test", async() => {
+  test("glob permissions test", async () => {
 
     const testRoleDoc: RoleDoc = {
-      default: true,
       "schema": {
         "w": true,
         "d": true,
       },
     };
     const testSiteRoleDoc: SiteRoleDoc = {
+      default: true,
       "items": {
         "r": false,
         "sets": [{
@@ -339,11 +339,11 @@ describe("modules:items:role", () => {
 
     const config: CoreConfig = {
       name: 'data-test',
-      slices: [dataModule, coreModule, itemModule, fieldHashModule, roleUpsertModule, createSiteSetupModule({
+      slices: [dataModule, coreModule, itemModule, fieldHashModule, roleUpsertModule, createSiteSetupModule([{
         name: 'test',
         displayName: 'Test',
         default: true,
-        sitePath: "/",
+        sitePath: "/allowed",
         roles: {
           test: testSiteRoleDoc,
         },
@@ -362,7 +362,7 @@ describe("modules:items:role", () => {
           name: "denied",
           type: ItemType.Folder
         }],
-      })],
+      }])],
       clone: true,
       roles: {
         test: testRoleDoc
@@ -377,20 +377,20 @@ describe("modules:items:role", () => {
         },
       }
     };
-    
+
     const core = new System(config);
     try {
       await core.load();
       await core.initialize();
       await core.ready();
-    } catch(err: any) {
+    } catch (err: any) {
       expect(err).toBeUndefined();
     }
     const db = await getDatabase(core);
 
-    const context = await createContext(core, undefined, undefined, true);
-    const {Role, Site} = db.models;
-    const role = await Role.findOne(createOptions(context, {where: {name: 'test'}}));
+    const context = await createContext(core, undefined, undefined, undefined, true);
+    const { Role, Site } = db.models;
+    const role = await Role.findOne(createOptions(context, { where: { name: 'test' } }));
     expect(role).toBeDefined();
     expect(role).not.toBeNull();
     const siteRoles = await role.getSiteRoles(createOptions(context, {

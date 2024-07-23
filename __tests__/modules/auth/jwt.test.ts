@@ -7,7 +7,7 @@ import { mockRequest, mockResponse } from 'jest-mock-req-res';
 import { exportJWK, generateKeyPair, SignJWT } from 'jose';
 import fetch from 'node-fetch'
 
-import jwtAuthModule, {JwtConfig} from "../../../src/modules/auth/jwt";
+import jwtAuthModule, { JwtConfig } from "../../../src/modules/auth/jwt";
 import coreModule from '../../../src/modules/core';
 import { CoreConfig, RoleDoc } from '../../../src/modules/core/types';
 import dataModule, { createOptions, getDatabase } from '../../../src/modules/data';
@@ -19,10 +19,9 @@ import { createContext, System } from '../../../src/system';
 import { IModule } from '../../../src/types/system';
 
 import "../../../__mocks__/http";
-import { databaseConfig } from '../../utils/config';
 import { createTestSite } from '../items/utils';
 
-jest.mock('node-fetch', ()=>jest.fn())
+jest.mock('node-fetch', () => jest.fn())
 
 
 
@@ -47,14 +46,14 @@ describe('modules:auth:jwks', () => {
     //     d: true,
     //   },
     // };
-    const {publicKey, privateKey} = await generateKeyPair("ES256", {
-      
+    const { publicKey, privateKey } = await generateKeyPair("ES256", {
+
     });
-    const {testRoleDoc, siteModule} = await createTestSite();
+    const { roles, siteModule } = await createTestSite();
     const config: CoreConfig & JwtConfig = {
       name: 'express-bearer-test',
       slices: [
-        httpModule, 
+        httpModule,
         expressModule,
         dataModule,
         coreModule,
@@ -74,29 +73,31 @@ describe('modules:auth:jwks', () => {
       data: {
         reset: true,
         sync: true,
-        sequelize: databaseConfig,
+        sequelize: {
+          dialect: 'sqlite',
+          storage: ':memory:',
+          logging: false,
+        },
       },
-      roles: {
-        test: testRoleDoc,
-      },
+      roles: roles,
       auth: {
         jwt: {
           privateKey,
-          publicKey 
+          publicKey
         }
       }
     }
-    
+
     const core = new System(config);
     await core.load();
     await core.initialize();
     await core.ready();
 
-    const context = await createContext(core, undefined, undefined, true);
+    const context = await createContext(core, undefined, undefined, undefined, true);
 
     const db = await getDatabase(core);
-    const {User, Role} = db.models;
-    const testRole = await Role.findOne(createOptions(context, {where: {name: 'test'}}));
+    const { User, Role } = db.models;
+    const testRole = await Role.findOne(createOptions(context, { where: { name: 'public' } }));
     expect(testRole).toBeDefined();
     const user = await User.create({
       userName: 'test',
@@ -127,7 +128,7 @@ describe('modules:auth:jwks', () => {
         return undefined;
       },
 
-      send: function() {
+      send: function () {
         this.end();
       }
     });
@@ -155,26 +156,18 @@ describe('modules:auth:jwks', () => {
         // return httpServer;
       },
     };
-    
-    const {testRoleDoc, siteModule} = await createTestSite();
-    // const defTestRole: RoleDoc = {
-    //   default: true,
-    //   schema: {
-    //     w: true,
-    //     d: true,
-    //   },
-    // };
-    const {publicKey, privateKey} = await generateKeyPair("ES256", {
-      
+
+    const { roles, siteModule } = await createTestSite();
+    const { publicKey, privateKey } = await generateKeyPair("ES256", {
+
     });
     const config: CoreConfig & JwtConfig = {
       name: 'express-bearer-test',
       slices: [
-        httpModule, 
+        httpModule,
         expressModule,
         dataModule,
         coreModule,
-        // bearerAuthModule,
         jwtAuthModule,
         fieldHashModule,
         roleUpsertModule,
@@ -196,27 +189,25 @@ describe('modules:auth:jwks', () => {
           logging: false,
         },
       },
-      roles: {
-        test: testRoleDoc,
-      },
+      roles,
       auth: {
         jwt: {
           privateKey,
-          publicKey 
+          publicKey
         }
       }
     }
-    
+
     const core = new System(config);
     await core.load();
     await core.initialize();
     await core.ready();
 
-    const context = await createContext(core, undefined, undefined, true);
+    const context = await createContext(core, undefined, undefined, undefined, true);
 
     const db = await getDatabase(core);
-    const {User, Role} = db.models;
-    const testRole = await Role.findOne(createOptions(context, {where: {name: 'test'}}));
+    const { User, Role } = db.models;
+    const testRole = await Role.findOne(createOptions(context, { where: { name: 'public' } }));
     expect(testRole).toBeDefined();
     const user = await User.create({
       userName: 'test',
@@ -247,7 +238,7 @@ describe('modules:auth:jwks', () => {
         return undefined;
       },
 
-      send: function() {
+      send: function () {
         this.end();
       }
     });
@@ -276,8 +267,8 @@ describe('modules:auth:jwks', () => {
         // return httpServer;
       },
     };
-    
-    const {testRoleDoc, siteModule} = await createTestSite();
+
+    const { roles, siteModule } = await createTestSite();
     // const defTestRole: RoleDoc = {
     //   default: true,
     //   schema: {
@@ -285,13 +276,13 @@ describe('modules:auth:jwks', () => {
     //     d: true,
     //   },
     // };
-    const {publicKey, privateKey} = await generateKeyPair("ES256", {
+    const { publicKey, privateKey } = await generateKeyPair("ES256", {
       // 
     });
     const config: CoreConfig & JwtConfig = {
       name: 'express-bearer-test',
       slices: [
-        httpModule, 
+        httpModule,
         expressModule,
         dataModule,
         coreModule,
@@ -311,19 +302,21 @@ describe('modules:auth:jwks', () => {
       data: {
         reset: true,
         sync: true,
-        sequelize: databaseConfig,
+        sequelize: {
+          dialect: 'sqlite',
+          storage: ':memory:',
+          logging: false,
+        },
       },
-      roles: {
-        test: testRoleDoc,
-      },
+      roles,
       auth: {
         jwt: {
           privateKey,
-          publicKey 
+          publicKey
         }
       }
     }
-    
+
     const core = new System(config);
     await core.load();
     await core.initialize();
@@ -340,10 +333,10 @@ describe('modules:auth:jwks', () => {
         return undefined;
       },
 
-      send: function() {
+      send: function () {
         this.end();
       },
-      json: function(obj: any) {
+      json: function (obj: any) {
         out = JSON.stringify(obj);
         this.end();
       }
@@ -375,19 +368,18 @@ describe('modules:auth:jwks', () => {
         // return httpServer;
       },
     };
-    
-    const {testRoleDoc, siteModule} = await createTestSite();
-    const {publicKey, privateKey} = await generateKeyPair("ES256", {
-      
+
+    const { roles, siteModule } = await createTestSite();
+    const { publicKey, privateKey } = await generateKeyPair("ES256", {
+
     });
     const config: CoreConfig & JwtConfig = {
       name: 'express-bearer-test',
       slices: [
-        httpModule, 
+        httpModule,
         expressModule,
         dataModule,
         coreModule,
-        // bearerAuthModule,
         jwtAuthModule,
         fieldHashModule,
         roleUpsertModule,
@@ -403,11 +395,13 @@ describe('modules:auth:jwks', () => {
       data: {
         reset: true,
         sync: true,
-        sequelize: databaseConfig,
+        sequelize: {
+          dialect: 'sqlite',
+          storage: ':memory:',
+          logging: false,
+        },
       },
-      roles: {
-        test: testRoleDoc,
-      },
+      roles,
       auth: {
         jwks: {
           url: "http://localhost/.well-known/jwks.json",
@@ -415,7 +409,7 @@ describe('modules:auth:jwks', () => {
         }
       }
     }
-    
+
     const core = new System(config);
     await core.load();
     await core.initialize();
@@ -447,23 +441,23 @@ describe('modules:auth:jwks', () => {
       ok: true,
       status: 200,
       json: () => {
-         // return returnBody ? returnBody : {};
-         return {
-            keys: [exportedKey]
-         }
+        // return returnBody ? returnBody : {};
+        return {
+          keys: [exportedKey]
+        }
       },
-     });
-     const jwt = await new SignJWT({
+    });
+    const jwt = await new SignJWT({
       "userId": toGlobalId("User", "1337"),
       "source": "Hello",
       "userName": "userName",
       "email": "email",
-      "role": "test",
+      "role": "admin",
     })
-      .setProtectedHeader({alg: "ES256"})
+      .setProtectedHeader({ alg: "ES256" })
       .setIssuedAt()
       .sign(privateKey);
-    (fetch as any).mockImplementation(()=> response)
+    (fetch as any).mockImplementation(() => response)
 
     const req = mockRequest({
       method: 'GET',
@@ -478,7 +472,7 @@ describe('modules:auth:jwks', () => {
         return undefined;
       },
 
-      send: function() {
+      send: function () {
         this.end();
       }
     });

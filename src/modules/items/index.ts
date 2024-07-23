@@ -62,11 +62,11 @@ export type ItemEvents = {
 };
 export interface ItemModule
   extends IModule,
-    SystemEvents,
-    DataModulesModels,
-    DataEvents,
-    ItemEvents,
-    CoreModuleEvents {}
+  SystemEvents,
+  DataModulesModels,
+  DataEvents,
+  ItemEvents,
+  CoreModuleEvents { }
 
 function createPathFromItem(
   item: Item<any>,
@@ -104,13 +104,15 @@ export const itemModule: ItemModule = {
   dependencies: ['data'],
   [ItemEvent.ProcessSiteRoleCacheDoc]: async (doc: SiteRoleWebCacheDoc) => {
     const store = doc.data;
-    let rootItem: Item<ItemHostData> = undefined;
-    Object.keys(store.items).map(async (itemId) => {
-      const item = store.items[itemId] as Item<ItemHostData>;
-      if(store.paths[item.id] === doc.rootPath) {
-        rootItem = item as Item<ItemHostData>;
-      }
-    });
+    const itemId = store.paths[doc.rootPath];
+    if (!itemId) {
+      throw new Error(`Root item path not found - ${doc.rootPath}`);
+    }
+    const rootItem: Item<ItemHostData> = store.items[itemId] as Item<ItemHostData>;
+    if (!rootItem) {
+      throw new Error('Root item not found');
+    }
+
     doc.web = { paths: {} };
 
     let newPath = ``;

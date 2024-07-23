@@ -12,8 +12,8 @@ import { createTestSite } from './utils';
 
 
 describe("modules:items", () => {
-  test("template value processing", async() => {
-    const {testRoleDoc, siteModule} = await createTestSite();
+  test("template value processing", async () => {
+    const { roles, siteModule } = await createTestSite();
     const config: CoreConfig = {
       name: 'data-test',
       slices: [
@@ -25,9 +25,7 @@ describe("modules:items", () => {
         siteModule,
       ],
       // clone: true,
-      roles: {
-        test: testRoleDoc,
-      },
+      roles,
       data: {
         reset: true,
         sync: true,
@@ -49,10 +47,10 @@ describe("modules:items", () => {
     }
     const db = await getDatabase(core);
 
-    const context = await createContext(core, undefined, undefined, true);
+    const context = await createContext(core, undefined, undefined, undefined, true);
     const { Role, SiteRole } = db.models;
     const role = await Role.findOne(
-      createOptions(context, { where: { name: 'test' } }),
+      createOptions(context, { where: { name: 'public' } }),
     );
 
     expect(role).toBeDefined();
@@ -63,7 +61,7 @@ describe("modules:items", () => {
     );
 
     const store = siteRole?.cacheDoc.data;
-    const item = await getItemByPath<any>('/localhost/sub', store);
+    const item = await getItemByPath<any>('/website/sub', store);
 
     expect(item).toBeDefined();
     expect(item).not.toBeNull();

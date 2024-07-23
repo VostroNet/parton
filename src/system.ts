@@ -6,6 +6,8 @@ import { SystemEvent } from './types/events';
 import { Role } from './types/models/models/role';
 import { User } from './types/models/models/user';
 import { Context } from './types/system';
+import type { Site } from './types/models/models/site';
+import type { SiteRole } from './types/models/models/site-role';
 
 function createHookProxy(sys: System) {
   return {
@@ -43,44 +45,84 @@ export class System extends Loaf {
     return this.config as T;
   };
 }
+export interface SystemContext extends Context {
+  system: System;
+  role: Role;
+  override: boolean;
+  user?: User | undefined;
+  site: Site;
+  siteRole: SiteRole;
+}
 
 export async function createContext(
   system: System,
   user?: User,
+  site?: Site,
   role?: Role,
   override = false,
   transaction?: any,
 ): Promise<Context> {
-  // const db = await getDatabase(system);
-  // const { Role } = db.models;
+  const db = await getDatabase(system);
+  const { Site, Role, SiteRole } = db.models;
+
+  if (!site) {
+    site = await Site.findOne(createOptions({ override: true }, {
+      where: {
+        default: true
+      }
+    }));
+  }
+
   if (user?.role) {
     role = user.role;
   } else if (user) {
     role = await user.getRole(createOptions({ override: true }));
-  } 
-  // else if (roleName) {
-    // role = await Role.findOne(
-    //   createOptions({
-    //     override: true,
-    //     where: { name: roleName, enabled: true },
-    //   }),
-    // );
-  // }
-
-  if (!role && override) {
-    const db = await getDatabase(system);
-    const { Role } = db.models;
-    role = await Role.findOne(
-      createOptions({
-        override: true,
-        where: { name: "system", enabled: true },
-      }),
+  }
+  let siteRole: SiteRole | undefined;
+  if (!role && site) {
+    siteRole = await SiteRole.findOne(
+      createOptions({ override: true }, {
+        where: {
+          siteId: site.id,
+          doc: {
+            default: true,
+          },
+        },
+        include: [{
+          model: Role,
+          as: 'role',
+          required: true,
+        }]
+      })
     );
-    if(!role) {
-      role = {
-        name: 'system',
-      } as any;
+    if (siteRole) {
+      role = siteRole.role;
     }
+  }
+  if (site && role && !siteRole) {
+    siteRole = await SiteRole.findOne(
+      createOptions({ override: true }, {
+        where: {
+          siteId: site.id,
+          roleId: role.id,
+        },
+      })
+    );
+  }
+  if (!siteRole && site) {
+    siteRole = await SiteRole.findOne(createOptions({ override: true }, {
+      where: {
+        siteId: site.id,
+        doc: {
+          default: true,
+        }
+      }
+    }));
+  }
+  if (!role && override) {
+    role = {
+      name: 'system',
+    } as any;
   }
 
   const context: Context = {
@@ -89,6 +131,8 @@ export async function createContext(
     override,
     transaction,
     user,
+    site,
+    siteRole,
   };
   return system.execute(
     SystemEvent.ContextCreate,

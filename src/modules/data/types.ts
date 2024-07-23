@@ -1,9 +1,10 @@
-import {Sequelize, FindOptions as SFindOptions, Transaction, WhereOptions } from 'sequelize';
+import { Sequelize, FindOptions as SFindOptions, Transaction, WhereOptions } from 'sequelize';
 
 
 import { System } from "../../system";
 import { Role } from "../../types/models/models/role";
 import { User } from "../../types/models/models/user";
+import { Site } from '../../types/models/models/site';
 
 export interface MigrationConfig {
   path: string,
@@ -40,6 +41,7 @@ export interface MigratorArgs {
 export interface DataContext {
   system?: System;
   role?: Role | undefined;
+  site?: Site | undefined;
   override?: boolean;
   getUser?: () => Promise<User | undefined>;
   // getRequest?: () => {req: Request , res: Response};/
@@ -48,6 +50,7 @@ export interface DataContext {
   // permissions?: Permissions
   getGraphQLArgs?: () => { args: any; context: any };
   disableEventLog?: boolean;
+  transaction?: Transaction;
 }
 
 export interface FindOptions extends SFindOptions {

@@ -15,6 +15,9 @@ import {
   SiteRoleWebCacheDoc,
 } from '../types';
 import { getItemByPath } from '../utils';
+import { getDatabase, getSystemFromContext } from '../../data';
+import { createContextFromRequest } from '../../express';
+import { SystemContext } from '../../../system';
 
 // export function getTopItemFromUri(store: RoleWebCacheDoc, uri: Url.URL) {
 //   const hostname = uri
@@ -38,7 +41,7 @@ import { getItemByPath } from '../utils';
 //   };
 // }
 
-export async function getPageFromRoleWebCache(
+export async function getPageFromSiteRoleWebCache(
   rwcd: SiteRoleWebCacheDoc,
   webPath: string,
   levels: number = 0,
@@ -84,6 +87,17 @@ export async function getPageFromItem(
 
   // TODO: look at getting values maybe have this preprocessed already
   // get layout and sublayout data
+  const children = await Promise.all(
+    item.children.map((c) => {
+      if (levels > 0) {
+        const item: Item<ItemPageData> = rwcd.data.items[c];
+        const childPath = `${webPath}/${item.name}`;
+        return getPageFromItem(rwcd, item, childPath, levels - 1);
+      } else {
+        return { id: c } as ItemIdRef;
+      }
+    }),
+  );
   const page: Page = {
     id: item.id,
     props: item.data?.props,
@@ -101,39 +115,32 @@ export async function getPageFromItem(
     values: item.values,
     name: item.name,
     displayName: item.displayName,
-    children: (
-      await Promise.all(
-        item.children.map((c) => {
-          if (levels > 0) {
-            const item: Item<ItemPageData> = rwcd.data.items[c];
-            return getPageFromItem(rwcd, item, `${webPath}/${item.name}`, levels - 1);
-          } else {
-            return { id: c } as ItemIdRef;
-          }
-        }),
-      )
-    ).filter((c) => c !== undefined) as Page[],
+    children: children.filter((c) => c !== undefined) as Page[],
   };
   return page;
 }
 
-export async function getPageFromRole(role: Role, path: string, levels = 0) {
-  // const pagePath = getPagePathFromUri(uri);
-  return getPageFromRoleWebCache(role.cacheDoc, path, levels);
-}
+// export async function getPageFromRole(role: Role, path: string, levels = 0) {
+//   // const pagePath = getPagePathFromUri(uri);
+//   const db = await getDatabase()
+//   const siteRoles = await role.getSiteRoles({
+//     include
+//   return getPageFromSiteRoleWebCache(role.cacheDoc, path, levels);
+// }
 
 export async function getPageResolver(
   _root: any,
-  args: { path: string; levels: number },
+  args: { uri: string; levels: number },
   context: DataContext,
 ) {
-  const { path, levels } = args;
-  if (!context.role) {
-    throw new GraphQLError('Role not found');
+  const { uri, levels } = args;
+  const url = new URL(uri);
+
+  const system = getSystemFromContext(context);
+  const reqContext = await createContextFromRequest({ hostname: url.hostname } as any, system, context.override, context.transaction) as SystemContext;
+
+  if (!reqContext.siteRole?.cacheDoc) {
+    throw new GraphQLError('Cache doc is corrupt, unable to retrieve page');
   }
-  const { role } = context;
-
-
-  const page = await getPageFromRole(role, path, levels);
-  return page;
+  return getPageFromSiteRoleWebCache(reqContext.siteRole.cacheDoc, url.pathname, levels);
 }

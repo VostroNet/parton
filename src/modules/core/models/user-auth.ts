@@ -72,7 +72,7 @@ const userAuthModel: IDefinition = {
             undefined,
             false,
           );
-          if (instance.type === 'local') {
+          if (instance.type === 'local' || instance.type === 'bearer') {
             instance._token = instance.token;
             const salt = await bcrypt.genSalt(5);
             instance.token = await bcrypt.hash(instance.token, salt);
@@ -91,7 +91,7 @@ const userAuthModel: IDefinition = {
             false,
           );
 
-          if (instance.type === 'local') {
+          if (instance.type === 'local' || instance.type === 'bearer') {
             instance._token = instance.token;
             const salt = await bcrypt.genSalt(5);
             instance.token = await bcrypt.hash(instance.token, salt);

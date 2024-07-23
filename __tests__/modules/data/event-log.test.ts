@@ -1,5 +1,6 @@
-import { describe, expect, test } from '@jest/globals';
+import { describe, expect } from '@jest/globals';
 
+import { testIf } from '../../utils/test-if';
 import coreModule from '../../../src/modules/core';
 import { CoreConfig } from '../../../src/modules/core/types';
 import dataModule, { createOptions, getDatabase } from '../../../src/modules/data';
@@ -9,11 +10,6 @@ import { createContext, System } from '../../../src/system';
 
 import adminRole from './roles/admin';
 import publicRole from './roles/public';
-
-const testIf = (condition, ...args: any) => 
-  // eslint-disable-next-line prefer-spread
-  condition ? test.apply(undefined, args) : test.skip.apply(undefined, args);
-
 
 describe('modules:event-log', () => {
   testIf(process.env.DB_TYPE === "postgres", 'postgres - event log creation', async () => {
@@ -46,10 +42,10 @@ describe('modules:event-log', () => {
       await core.initialize();
       await core.ready();
       const db = await getDatabase(core);
-      const context = await createContext(core, undefined, undefined, false);
+      const context = await createContext(core, undefined, undefined, undefined, false);
       await db.models.Role.findAll(createOptions(context));
       throw new Error('should not get here');
-    } catch(err: any) {
+    } catch (err: any) {
       expect(err.message).toBe('no role provided to validate find options');
     }
     await core.shutdown();

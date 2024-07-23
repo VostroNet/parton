@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-empty-interface */
 
 import {DbOptions, Model} from "../data";
 
@@ -9,7 +10,6 @@ export interface SiteCreationAttributes {
   displayName?: string;
   doc?: any;
   docHash?: string;
-  hostnames?: any;
   name?: string;
   sitePath?: string;
 
@@ -20,7 +20,6 @@ export interface SiteAttributes {
   displayName: string;
   doc: any;
   docHash: string;
-  hostnames: any;
   id: number;
   name: string;
   sitePath: string;
@@ -34,7 +33,6 @@ export class Site extends Model<SiteAttributes, SiteCreationAttributes> {
   displayName: string;
   doc: any;
   docHash: string;
-  hostnames: any;
   id: number;
   name: string;
   sitePath: string;
@@ -50,5 +48,7 @@ export class Site extends Model<SiteAttributes, SiteCreationAttributes> {
   removeSiteRole(item: SiteRole, options: DbOptions): Promise<void>;
   removeSiteRoles(items: SiteRole[], options: DbOptions): Promise<void>;
   setSiteRoles(items: SiteRole[], options: DbOptions): Promise<void>;
+  static getSiteByHostname(args: SiteGetSiteByHostnameArgs, context: DataContext): Promise<any>;
 
 }
+export interface SiteGetSiteByHostnameArgs { }

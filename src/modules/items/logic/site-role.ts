@@ -34,6 +34,7 @@ export async function updateSiteRoleCache(
     // roleHash: role.docHash,
     siteHash: site.docHash,
     data: newItemStore,
+    rootPath: site.sitePath,
   };
   const core = getSystemFromContext(context);
   siteRole.set("cacheDoc", await core.execute(

@@ -8,7 +8,7 @@ import type Express from 'express';
 import express from 'express';
 import expressSession, { SessionOptions } from 'express-session';
 
-import { createContext, System } from '../system';
+import { createContext, System, SystemContext } from '../system';
 import { Config } from '../types/config';
 import { SystemEvent } from '../types/events';
 import { Role } from '../types/models/models/role';
@@ -224,52 +224,40 @@ export const expressModule: IExpressModule = {
 export default expressModule;
 
 
-export async function getDefaultRoleFromUri(
-  uri: string,
-  system: System,
-) : Promise<Role> {
-  const context = await createContext(system, undefined, undefined, true);
-  const db = await getDatabase(system);
-  const { Site, Role } = db.models;
-  const url = new URL(uri);
 
-  //TODO: check cache?
+// export async function getDefaultRoleFromUri(
+//   uri: string,
+//   system: System,
+// ): Promise<Role> {
+//   const context: SystemContext = await createContext(system, undefined, undefined, undefined, true);
+//   const db = await getDatabase(system);
+//   const { Site, Role } = db.models;
+//   const url = new URL(uri);
 
-  let site = await Site.findOne(
-    createOptions(context, {
-      where: db.literal(`"doc"->'hostnames' ?& ARRAY['${url.hostname}']`),
-    }),
-  );
-  if(!site) {
-    site = await Site.findOne(
-      createOptions(context, {
-        where: {
-          default: true,
-        },
-      }),
-    );
-  }
-  if(!site) {
-    throw new Error('No default site found');
-  }
-  const siteRoles = await site.getSiteRoles(createOptions(context, {
-    where: {
-      doc: {
-        default: true,
-      }
-    },
-    include: [{
-      model: Role,
-      as: "role",
-      required: true,
-    }]
-  }));
-  if(siteRoles.length === 0) {
-    throw new Error('No default role found');
-  }
+//   //TODO: check cache?
 
-  return siteRoles[0].role;
-}
+//   const site = await Site.getSiteByHostname(url.hostname, context);
+//   if (!site) {
+//     throw new Error('No default site found');
+//   }
+//   const siteRoles = await site.getSiteRoles(createOptions(context, {
+//     where: {
+//       doc: {
+//         default: true,
+//       }
+//     },
+//     include: [{
+//       model: Role,
+//       as: "role",
+//       required: true,
+//     }]
+//   }));
+//   if (siteRoles.length === 0) {
+//     throw new Error('No default role found');
+//   }
+
+//   return siteRoles[0].role;
+// }
 
 export async function createContextFromRequest(
   req: Express.Request,
@@ -277,14 +265,17 @@ export async function createContextFromRequest(
   override = false,
   transaction?: any,
 ) {
-  let role: Role | undefined;
-  if(!override && !req.user) {
-    role = await getDefaultRoleFromUri(req.url, system);
+  const db = await getDatabase(system);
+  const { Site } = db.models;
+  const site = await Site.getSiteByHostname(req.hostname, { system, override: true, role: { name: "system" } });
+  if (!site) {
+    throw new Error('No default site found');
   }
   const context = await createContext(
     system,
     req.user as User,
-    role,
+    site,
+    undefined,
     override,
     transaction,
   );

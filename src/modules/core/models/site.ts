@@ -2,6 +2,9 @@ import { RelationshipType } from '@vostro/gqlize/lib/types';
 
 import DataTypes from '../../../types/data-types';
 import { IHashDefinition } from '../../utils/field-hash';
+import { Context } from '../../../types/system';
+import { createOptions, DataConfig, getDatabase, getSystemFromContext } from '../../data';
+import { Op } from 'sequelize';
 
 const siteDefinition: IHashDefinition = {
   name: 'Site',
@@ -39,6 +42,38 @@ const siteDefinition: IHashDefinition = {
   ],
   options: {
     tableName: 'sites',
+    classMethods: {
+      async getSiteByHostname(hostname: string, context: Context) {
+        try {
+          const system = getSystemFromContext(context);
+          const dialect = system.getConfig<DataConfig>().data.sequelize.dialect;
+          const db = await getDatabase(system);
+          let hostfilter = db.literal(`"doc"->'hostnames' ? ${db.escape(hostname)}`);
+          if (dialect === "sqlite") {
+            hostfilter = db.literal(`"doc"->'hostnames' LIKE ${db.escape(`%${hostname}%`)}`);
+          }
+          const { Site } = db.models;
+          let site = await Site.findOne(
+            createOptions(context, {
+              where: hostfilter
+            }),
+          );
+          if (!site) {
+            site = await Site.findOne(
+              createOptions(context, {
+                where: {
+                  default: true,
+                },
+              }),
+            );
+          }
+          return site;
+        } catch (e: any) {
+          console.error(e);
+          throw e;
+        }
+      },
+    }
   },
 };
 export default siteDefinition;
