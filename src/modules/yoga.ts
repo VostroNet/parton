@@ -1,13 +1,13 @@
 import { GraphQLSchema } from 'graphql';
 import { createYoga, YogaServerInstance } from 'graphql-yoga';
 
-import { System } from '../system';
+import { System, SystemContext } from '../system';
 import { Role } from '../types/models/models/role';
 import { IModule } from '../types/system';
 import { createHexString } from '../utils/string';
 
 import { CoreModuleEvent as CoreModuleEvent, CoreModuleEvents } from './core';
-import { ExpressEvent, ExpressModuleEvents } from './express';
+import { createContextFromRequest, ExpressEvent, ExpressModuleEvents } from './express';
 
 // export enum YogaEventType {
 //   Initialize = 'yoga:initialize',
@@ -19,8 +19,8 @@ import { ExpressEvent, ExpressModuleEvents } from './express';
 
 export interface IYogaModule
   extends IModule,
-    CoreModuleEvents,
-    ExpressModuleEvents {
+  CoreModuleEvents,
+  ExpressModuleEvents {
   servers: { [key in string]: YogaServerInstance<any, any> };
   defaultId?: number;
 }
@@ -46,17 +46,16 @@ export const yogaModule: IYogaModule = {
       graphqlEndpoint: `/graphql.api/${hexId}`,
     });
     system.get<IYogaModule>('yoga').servers[hexId] = yoga;
-    if (role.default) {
-      system.get<IYogaModule>('yoga').defaultId = role.id;
-    }
   },
   [ExpressEvent.Initialize]: async (express, system) => {
     express.use(async (req, res, next) => {
       try {
         if (req.url.startsWith('/graphql.api')) {
-          let roleId = (req as any).session?.roleId;
+          const context = await createContextFromRequest(req, system) as SystemContext;
+          const roleId = context.role?.id;
           if (!roleId) {
-            roleId = system.get<IYogaModule>('yoga').defaultId;
+            system.logger.error('yoga', 'No role id found for request');
+            return next();
           }
           const hexId = createHexString(roleId);
           if (!system.get<IYogaModule>('yoga').servers[hexId]) {

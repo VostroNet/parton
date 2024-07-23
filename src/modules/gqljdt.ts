@@ -14,18 +14,10 @@ import {
   ExpressModuleEvents,
 } from './express';
 
-// export enum YogaEventType {
-//   Initialize = 'yoga:initialize',
-// }
-
-// export type RedisModuleEvents = {
-//   [key in RedisEventType]?: (redis: Redis, core: System) => Promise<void>;
-// };
-
 export interface IGqlJdtModule
   extends IModule,
-    CoreModuleEvents,
-    ExpressModuleEvents {
+  CoreModuleEvents,
+  ExpressModuleEvents {
   jdtCache: { [key in string]: IJtdMinRoot };
 }
 
