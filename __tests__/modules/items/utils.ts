@@ -11,7 +11,7 @@ import { roleUpsertModule } from "../../../src/modules/utils/role-upsert";
 import { createContext, System } from "../../../src/system";
 import { IModule } from "../../../src/types/system";
 import waterfall from "../../../src/utils/waterfall";
-import { databaseConfig } from "../../utils/config";
+import { postgresConfig } from "../../utils/config";
 
 export function createSiteSetupModule(importSites: ImportSite<any>[]) {
   const moduleTest: IModule & DataEvents = {

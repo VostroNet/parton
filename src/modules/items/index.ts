@@ -123,10 +123,11 @@ export const itemModule: ItemModule = {
     //   // eslint-disable-next-line functional/no-throw-statements
     //   throw new Error("Invalid item id");
     // }
-    doc.web.paths["/"] = rootItem.id;
     if (rootItem.data?.dynamic) {
-      return;
+      doc.web.paths["/**/*"] = rootItem.id;
+      return doc as SiteRoleCacheDoc;
     }
+    doc.web.paths["/"] = rootItem.id;
     if (rootItem.children?.length > 0) {
       rootItem.children.forEach((childId) => {
         const child = store.items[childId];

@@ -14,7 +14,7 @@ import { Role } from '../../../src/types/models/models/role';
 import { IDependencies } from '../../../src/types/system';
 
 import { createTestSite } from './utils';
-import { databaseConfig } from '../../utils/config';
+import { sqliteConfig } from '../../utils/config';
 
 
 describe("modules:items:graphql", () => {
@@ -47,7 +47,7 @@ describe("modules:items:graphql", () => {
       data: {
         reset: true,
         sync: true,
-        sequelize: databaseConfig,
+        sequelize: sqliteConfig,
       },
     };
 
@@ -147,11 +147,7 @@ describe("modules:items:graphql", () => {
       data: {
         reset: true,
         sync: true,
-        sequelize: {
-          dialect: 'sqlite',
-          storage: ':memory:',
-          logging: false,
-        },
+        sequelize: sqliteConfig,
       },
     };
 

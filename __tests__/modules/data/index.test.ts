@@ -49,10 +49,10 @@ describe('modules:data', () => {
       await core.initialize();
       await core.ready();
       const db = await getDatabase(core);
-      const context = await createContext(core, undefined, undefined, false);
+      const context = await createContext(core, undefined, undefined, undefined, false);
       await db.models.Role.findAll(createOptions(context));
       throw new Error('should not get here');
-    } catch(err: any) {
+    } catch (err: any) {
       expect(err.message).toBe('no role provided to validate find options');
     }
     await core.shutdown();
@@ -82,11 +82,11 @@ describe('modules:data', () => {
       await core.initialize();
       await core.ready();
       const db = await getDatabase(core);
-      const context = await createContext(core, undefined, undefined, true);
+      const context = await createContext(core, undefined, undefined, undefined, true);
       const roles = await db.models.Role.findAll(createOptions(context));
       expect(roles.length).toBe(2);
       await core.shutdown();
-    } catch(err: any) {
+    } catch (err: any) {
       console.log("err", err);
       expect(err).toBe(null)
     }

@@ -14,7 +14,7 @@ import { System } from '../../src/system';
 import "../../__mocks__/http";
 import { createHexString } from '../../src/utils/string';
 import { createTestSite } from './items/utils';
-import { databaseConfig } from '../utils/config';
+import { postgresConfig, sqliteConfig } from '../utils/config';
 
 
 describe("modules:services:gqljdt", () => {
@@ -58,7 +58,7 @@ describe("modules:services:gqljdt", () => {
       data: {
         reset: true,
         sync: true,
-        sequelize: databaseConfig,
+        sequelize: sqliteConfig,
       },
       session: {
         secret: "Hello",
@@ -109,7 +109,7 @@ describe("modules:services:gqljdt", () => {
       data: {
         reset: true,
         sync: true,
-        sequelize: databaseConfig,
+        sequelize: sqliteConfig,
       },
       session: {
         secret: "Hello",

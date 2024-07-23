@@ -13,7 +13,7 @@ import { createContext, System } from '../../../../src/system';
 // import { Role } from '../../../../src/types/models/models/role';
 // import { Site } from '../../../../src/types/models/models/site';
 // import { SiteRole } from '../../../../src/types/models/models/site-role';
-import { createSiteSetupModule } from '../utils';
+import { createBasicConfig, createSiteSetupModule } from '../utils';
 
 
 
@@ -158,43 +158,7 @@ describe("modules:items:role", () => {
   //   await core.shutdown();
   // });
   test("import basic test site - no items - ensure role-site gets created properly", async () => {
-
-    const config: CoreConfig = {
-      name: 'data-test',
-      slices: [dataModule, coreModule, itemModule, fieldHashModule, roleUpsertModule, createSiteSetupModule([{
-        name: 'test',
-        displayName: 'Test',
-        default: true,
-        sitePath: "",
-        hostnames: ['localhost'],
-        roles: {
-          admin: adminDefaultItemPermissions
-        },
-        items: [],
-      }])],
-      clone: true,
-      // sites: {
-      //   default: {
-      //     hostnames: ['localhost'],
-      //     default: true,
-      //     roles: {
-      //       admin: adminDefaultItemPermissions,
-      //     },
-      //   },
-      // },
-      roles: {
-        admin: adminRole,
-      },
-      data: {
-        reset: true,
-        sync: true,
-        sequelize: {
-          dialect: 'sqlite',
-          storage: ':memory:',
-          logging: false,
-        },
-      }
-    };
+    const config = await createBasicConfig("data-test");
 
     const core = new System(config);
     try {
@@ -211,7 +175,16 @@ describe("modules:items:role", () => {
     const role = await Role.findOne(createOptions(context, { where: { name: 'admin' } }));
     expect(role).toBeDefined();
     expect(role).not.toBeNull();
-    const siteRoles = await role.getSiteRoles(createOptions(context, {}));
+    const siteRoles = await role.getSiteRoles(createOptions(context, {
+      include: [{
+        model: db.models.Site,
+        as: 'site',
+        required: true,
+        where: {
+          name: "test"
+        }
+      }]
+    }));
     expect(siteRoles).toBeDefined();
     expect(siteRoles).toHaveLength(1);
     const siteRole = siteRoles[0];
@@ -229,13 +202,13 @@ describe("modules:items:role", () => {
 
   test("basic item permissions test", async () => {
 
-    const testRole: RoleDoc = {
+    const testRoleDoc: RoleDoc = {
       "schema": {
         "w": true,
         "d": true,
       },
     }
-    const siteRole: SiteRoleDoc = {
+    const siteRoleDoc: SiteRoleDoc = {
       "items": {
         "r": false,
         "sets": [{
@@ -256,9 +229,9 @@ describe("modules:items:role", () => {
           name: 'test',
           displayName: 'Test',
           default: true,
-          sitePath: "/",
+          sitePath: "/allowed",
           roles: {
-            test: siteRole,
+            test: siteRoleDoc,
           },
           items: [{
             name: 'allowed',
@@ -270,7 +243,7 @@ describe("modules:items:role", () => {
         }])],
       clone: true,
       roles: {
-        test: testRole
+        test: testRoleDoc
       },
       data: {
         reset: true,
@@ -294,22 +267,24 @@ describe("modules:items:role", () => {
     const db = await getDatabase(core);
 
     const context = await createContext(core, undefined, undefined, undefined, true);
-    const { Site, Role } = db.models;
+    // const { siteRole } = context;
+    const { Site, Role, SiteRole } = db.models;
     const role = await Role.findOne(createOptions(context, { where: { name: 'test' } }));
     expect(role).toBeDefined();
     expect(role).not.toBeNull();
     const site = await Site.findOne(createOptions(context, { where: { default: true } }));
     expect(site).toBeDefined();
     expect(site).not.toBeNull();
+    const siteRole = await SiteRole.findOne(createOptions(context, { where: { roleId: role?.id, siteId: site?.id } }));
     // const rs = await RoleSite.findOne(createOptions(context, {where: {roleId: role?.id}}));
     // expect(rs).toBeDefined();
     // expect(rs).not.toBeNull();
 
-    expect(role?.cacheDoc).toBeDefined();
-    expect(role?.cacheDoc?.data).toBeDefined();
-    expect(role?.cacheDoc?.data?.paths["/allowed"]).toBeDefined();
-    expect(role?.cacheDoc?.data?.paths["/denied"]).toBeUndefined();
-    expect(Object.keys(role?.cacheDoc?.data?.items)).toHaveLength(1);
+    expect(siteRole?.cacheDoc).toBeDefined();
+    expect(siteRole?.cacheDoc?.data).toBeDefined();
+    expect(siteRole?.cacheDoc?.data?.paths["/allowed"]).toBeDefined();
+    expect(siteRole?.cacheDoc?.data?.paths["/denied"]).toBeUndefined();
+    expect(Object.keys(siteRole?.cacheDoc?.data?.items)).toHaveLength(1);
     await core.shutdown();
   });
 
@@ -331,6 +306,7 @@ describe("modules:items:role", () => {
             "r": true
           },
           "paths": [
+            "/allowed",
             "/allowed/**/*"
           ]
         }]
@@ -410,7 +386,7 @@ describe("modules:items:role", () => {
     expect(siteRole?.cacheDoc?.data?.paths["/allowed/sub"]).toBeDefined();
     expect(siteRole?.cacheDoc?.data?.paths["/allowed/sub/sub"]).toBeDefined();
     expect(siteRole?.cacheDoc?.data?.paths["/denied"]).toBeUndefined();
-    expect(Object.keys(siteRole?.cacheDoc?.data?.items)).toHaveLength(2);
+    expect(Object.keys(siteRole?.cacheDoc?.data?.items)).toHaveLength(3);
     await core.shutdown();
   });
   // add glob test for permissions

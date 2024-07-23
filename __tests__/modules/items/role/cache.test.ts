@@ -12,17 +12,18 @@ import { fieldHashModule } from '../../../../src/modules/utils/field-hash';
 import { roleUpsertModule } from '../../../../src/modules/utils/role-upsert';
 import { createContext, System } from '../../../../src/system';
 import { createSiteSetupModule } from '../utils';
+import { sqliteConfig } from '../../../utils/config';
 
 describe('modules:items:role:cache', () => {
   test('web paths - basic test', async () => {
     const testRole: RoleDoc = {
-      default: true,
       schema: {
         w: true,
         d: true,
       },
     };
     const testSiteRoleDoc: SiteRoleDoc = {
+      default: true,
       items: {
         r: true,
         sets: [],
@@ -36,7 +37,7 @@ describe('modules:items:role:cache', () => {
         itemModule,
         fieldHashModule,
         roleUpsertModule,
-        createSiteSetupModule({
+        createSiteSetupModule([{
           name: 'test',
           displayName: 'Test',
           default: true,
@@ -69,7 +70,7 @@ describe('modules:items:role:cache', () => {
               type: ItemType.Folder,
             },
           ],
-        })
+        }])
       ],
       clone: true,
       roles: {
@@ -96,35 +97,44 @@ describe('modules:items:role:cache', () => {
     }
     const db = await getDatabase(core);
 
-    const context = await createContext(core, undefined, undefined, true);
+    const context = await createContext(core, undefined, undefined, undefined, true);
     const { Role } = db.models;
     const role = await Role.findOne(
       createOptions(context, { where: { name: 'test' } }),
     );
     expect(role).toBeDefined();
     expect(role).not.toBeNull();
+    const siteRoles = await role.getSiteRoles(createOptions(context, {
+      where: {
+        doc: {
+          default: true,
+        },
+      }
+    }));
+    expect(siteRoles).toBeDefined();
+    expect(siteRoles).toHaveLength(1);
+    const siteRole = siteRoles[0]
 
-    expect(role?.cacheDoc).toBeDefined();
-    expect(role?.cacheDoc?.web).toBeDefined();
-    expect(role?.cacheDoc?.web?.hostnames).toBeDefined();
-    expect(role?.cacheDoc?.web?.hostnames["localhost.com"]).toBeDefined();
-    expect(role?.cacheDoc?.web?.paths).toBeDefined();
-
-    expect(role?.cacheDoc?.web?.paths['localhost.com']).toBeDefined();
-    expect(role?.cacheDoc?.web?.paths['localhost.com/sub']).toBeDefined();
-    expect(role?.cacheDoc?.web?.paths['localhost.com/sub/sub']).toBeDefined();
+    expect(siteRole?.cacheDoc).toBeDefined();
+    expect(siteRole?.cacheDoc?.web).toBeDefined();
+    // expect(siteRole?.cacheDoc?.web?.hostnames).toBeDefined();
+    // expect(siteRole?.cacheDoc?.web?.hostnames["localhost.com"]).toBeDefined();
+    expect(siteRole?.cacheDoc?.web?.paths).toBeDefined();
+    expect(siteRole?.cacheDoc?.web?.paths['/']).toBeDefined();
+    expect(siteRole?.cacheDoc?.web?.paths['/sub']).toBeDefined();
+    expect(siteRole?.cacheDoc?.web?.paths['/sub/sub']).toBeDefined();
     // expect(Object.keys(rs?.doc?.data?.items)).toHaveLength(4);
     await core.shutdown();
   });
   test('web paths - dynamic test', async () => {
     const testRole: RoleDoc = {
-      default: true,
       schema: {
         w: true,
         d: true,
       },
     };
     const testSiteRoleDoc: SiteRoleDoc = {
+      default: true,
       items: {
         r: true,
         sets: [],
@@ -138,11 +148,11 @@ describe('modules:items:role:cache', () => {
         itemModule,
         fieldHashModule,
         roleUpsertModule,
-        createSiteSetupModule({
+        createSiteSetupModule([{
           name: 'test',
           displayName: 'Test',
           default: true,
-          sitePath: "/",
+          sitePath: "/localhost", // ??
           roles: {
             test: testSiteRoleDoc,
           },
@@ -151,7 +161,6 @@ describe('modules:items:role:cache', () => {
               name: 'localhost',
               type: ItemType.Folder,
               data: {
-                hostnames: ['localhost.com'],
                 dynamic: true
               },
               children: [
@@ -172,7 +181,7 @@ describe('modules:items:role:cache', () => {
               type: ItemType.Folder,
             },
           ],
-        })
+        }])
       ],
       clone: true,
       roles: {
@@ -181,11 +190,7 @@ describe('modules:items:role:cache', () => {
       data: {
         reset: true,
         sync: true,
-        sequelize: {
-          dialect: 'sqlite',
-          storage: ':memory:',
-          logging: false,
-        },
+        sequelize: sqliteConfig
       },
     };
 
@@ -199,24 +204,33 @@ describe('modules:items:role:cache', () => {
     }
     const db = await getDatabase(core);
 
-    const context = await createContext(core, undefined, undefined, true);
+    const context = await createContext(core, undefined, undefined, undefined, true);
     const { Role } = db.models;
     const role = await Role.findOne(
       createOptions(context, { where: { name: 'test' } }),
     );
     expect(role).toBeDefined();
     expect(role).not.toBeNull();
+    const siteRoles = await role.getSiteRoles(createOptions(context, {
+      where: {
+        doc: {
+          default: true,
+        },
+      }
+    }));
+    expect(siteRoles).toBeDefined();
+    expect(siteRoles).toHaveLength(1);
+    const siteRole = siteRoles[0]
+    expect(siteRole?.cacheDoc).toBeDefined();
+    expect(siteRole?.cacheDoc?.web).toBeDefined();
+    // expect(role?.cacheDoc?.web?.hostnames).toBeDefined();
+    // expect(role?.cacheDoc?.web?.hostnames["localhost.com"]).toBeDefined();
+    expect(siteRole?.cacheDoc?.web?.paths).toBeDefined();
 
-    expect(role?.cacheDoc).toBeDefined();
-    expect(role?.cacheDoc?.web).toBeDefined();
-    expect(role?.cacheDoc?.web?.hostnames).toBeDefined();
-    expect(role?.cacheDoc?.web?.hostnames["localhost.com"]).toBeDefined();
-    expect(role?.cacheDoc?.web?.paths).toBeDefined();
-
-    expect(role?.cacheDoc?.web?.paths['localhost.com/**/*']).toBeDefined();
-    expect(role?.cacheDoc?.web?.paths['localhost.com']).toBeUndefined()
-    expect(role?.cacheDoc?.web?.paths['localhost.com/sub']).toBeUndefined();
-    expect(role?.cacheDoc?.web?.paths['localhost.com/sub/sub']).toBeUndefined();
+    expect(siteRole?.cacheDoc?.web?.paths['/**/*']).toBeDefined();
+    expect(siteRole?.cacheDoc?.web?.paths['/']).toBeUndefined()
+    expect(siteRole?.cacheDoc?.web?.paths['/sub']).toBeUndefined();
+    expect(siteRole?.cacheDoc?.web?.paths['/sub/sub']).toBeUndefined();
     // expect(Object.keys(rs?.doc?.data?.items)).toHaveLength(4);
     await core.shutdown();
   });

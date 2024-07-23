@@ -7,7 +7,7 @@ import {
 } from '../../data';
 import { DataContext, FindOptions } from '../../data/types';
 import { SiteDoc, SiteRoleCacheDoc, SiteRoleDoc } from '../types';
-import { createRoleItemsCache } from '../utils';
+import { createRoleItemsCache as createSiteRoleCache } from '../utils';
 
 export async function beforeSiteRoleValidate(siteRole: SiteRole, options: FindOptions) {
   const context = getContextFromOptions(options);
@@ -27,7 +27,7 @@ export async function updateSiteRoleCache(
   if (!siteDoc?.data) {
     throw new Error('Invalid site item data');
   }
-  const newItemStore = await createRoleItemsCache(siteDoc, siteRoleDoc, context);
+  const newItemStore = await createSiteRoleCache(siteDoc, siteRoleDoc, context);
 
   const cacheDoc: SiteRoleCacheDoc = {
     ...siteRole.cacheDoc,

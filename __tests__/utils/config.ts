@@ -1,6 +1,6 @@
 
 import { Options as SequelizeOptions } from 'sequelize';
-export  const databaseConfig: SequelizeOptions = {
+export const postgresConfig: SequelizeOptions = {
   dialect: 'postgres',
   host: 'postgres.local',
   port: 5432,
@@ -8,5 +8,11 @@ export  const databaseConfig: SequelizeOptions = {
   password: 'postgres',
   database: 'local',
   // schema: 'evntlog1',
+  logging: false,
+}
+
+export const sqliteConfig: SequelizeOptions = {
+  dialect: 'sqlite',
+  storage: ':memory:',
   logging: false,
 }

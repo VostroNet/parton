@@ -11,8 +11,8 @@ import { roleUpsertModule } from '../../../src/modules/utils/role-upsert';
 import { createContext, System } from '../../../src/system';
 
 import { createTestSite } from './utils';
-import { databaseConfig } from '../../utils/config';
 import { createContextFromRequest } from '../../../src/modules/express';
+import { sqliteConfig } from '../../utils/config';
 
 describe("modules:items:page", () => {
   test("getPageFromSiteRoleWebCache", async () => {
@@ -32,7 +32,7 @@ describe("modules:items:page", () => {
       data: {
         reset: true,
         sync: true,
-        sequelize: databaseConfig
+        sequelize: sqliteConfig
       },
     };
 
@@ -121,7 +121,7 @@ describe("modules:items:page", () => {
       data: {
         reset: true,
         sync: true,
-        sequelize: databaseConfig,
+        sequelize: sqliteConfig,
       },
     };
 
@@ -203,7 +203,7 @@ describe("modules:items:page", () => {
       data: {
         reset: true,
         sync: true,
-        sequelize: databaseConfig,
+        sequelize: sqliteConfig,
       },
     };
 
