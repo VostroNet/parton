@@ -25,19 +25,16 @@ export const Modules = {
   Yoga: yogaModule,
   Cli: cliModule
 }
+export const defaultModules = [
+  coreModule,
+  fieldHashModule,
+  roleUpsertModule,
+  dataModule,
+  itemModule,
+  httpModule,
+  expressModule,
+  gqljdtModule,
+  yogaModule
+];
 
-export default {
-  System: system,
-  modules: Modules,
-  defaultModules: [
-    coreModule,
-    fieldHashModule,
-    roleUpsertModule,
-    dataModule,
-    itemModule,
-    httpModule,
-    expressModule,
-    gqljdtModule,
-    yogaModule,
-  ]
-};
+export default system;

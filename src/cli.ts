@@ -49,7 +49,7 @@ export default async (args: minimist.ParsedArgs) => {
   await system.initialize();
   logger.debug('firing cli:configure');
 
-  const context = await createContext(system, undefined, 'system', true);
+  const context = await createContext(system, undefined, undefined, undefined, true);
   logger.debug('firing cli:execute');
   await system.execute(CliEvent.Configure, args, context, system);
   logger.debug('finished - shutting down');

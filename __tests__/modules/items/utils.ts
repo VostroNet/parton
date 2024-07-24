@@ -1,36 +1,11 @@
 import coreModule from "../../../src/modules/core";
 import { CoreConfig, RoleDoc } from "../../../src/modules/core/types";
-import dataModule, { DataEvent, DataEvents } from "../../../src/modules/data";
-import expressModule from "../../../src/modules/express";
-import httpModule from "../../../src/modules/http";
+import dataModule from "../../../src/modules/data";
 import itemModule from "../../../src/modules/items";
-import { upsertSiteFromImportSite } from "../../../src/modules/items/logic/site";
 import { ImportSite, ItemTemplateDataType, ItemType, SiteRoleDoc } from "../../../src/modules/items/types";
 import { fieldHashModule } from "../../../src/modules/utils/field-hash";
 import { roleUpsertModule } from "../../../src/modules/utils/role-upsert";
-import { createContext, System } from "../../../src/system";
-import { IModule } from "../../../src/types/system";
-import waterfall from "../../../src/utils/waterfall";
-import { postgresConfig } from "../../utils/config";
-
-export function createSiteSetupModule(importSites: ImportSite<any>[]) {
-  const moduleTest: IModule & DataEvents = {
-    name: 'import-site',
-    dependencies: [{
-      event: DataEvent.Setup,
-      required: {
-        before: ["core-role-upsert", "core-field-hash"]
-      }
-    }],
-    [DataEvent.Setup]: async (core: System) => {
-      const context = await createContext(core, undefined, undefined, undefined, true);
-      await waterfall(importSites, async (importSite) => {
-        return upsertSiteFromImportSite(importSite, context);
-      });
-    }
-  };
-  return moduleTest;
-}
+import { createSiteSetupModule } from "../../../src/modules/items/setup";
 
 
 export async function createTestSite() {
