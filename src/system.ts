@@ -9,8 +9,9 @@ import { Context } from './types/system';
 import type { Site } from './types/models/models/site';
 import type { SiteRole } from './types/models/models/site-role';
 
-function createHookProxy(sys: System) {
+function createHookProxy(sys: System) : ISlice {
   return {
+    name: "proxy",
     [LoafEvent.Initialize]: async (core: Loaf, slice: ISlice) => {
       await core.execute(SystemEvent.Initialize, sys, slice);
       return core;
@@ -38,8 +39,11 @@ export class System extends Loaf {
   private readonly config: Config;
   constructor(config: Config) {
     super(config);
+    const slices = [].concat([...config.slices, createHookProxy(this)]);
+    
+    this.jam.slices = slices;
     this.config = config;
-    config.slices.push(createHookProxy(this));
+    this.config.slices = slices;
   }
   getConfig = <T extends Config>() => {
     return this.config as T;

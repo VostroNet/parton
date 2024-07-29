@@ -14,6 +14,9 @@ importers:
       '@graphql-tools/stitch':
         specifier: ^9.2.10
         version: 9.2.10(graphql@16.9.0)
+      '@types/finalhandler':
+        specifier: ^1.2.3
+        version: 1.2.3
       '@vostro/gqlize':
         specifier: ^5.3.3
         version: 5.3.3(@vostro/graphql-types@2.0.0(graphql@16.9.0))(graphql-relay@0.10.2(graphql@16.9.0))(graphql@16.9.0)(sequelize@6.37.3(pg@8.12.0)(sqlite3@5.1.7))
@@ -50,6 +53,9 @@ importers:
       express-session:
         specifier: ^1.18.0
         version: 1.18.0
+      finalhandler:
+        specifier: ^1.2.0
+        version: 1.2.0
       glob:
         specifier: ^11.0.0
         version: 11.0.0
@@ -1591,6 +1597,9 @@ packages:
 
   '@types/express@4.17.21':
     resolution: {integrity: sha512-ejlPM315qwLpaQlQDTjPdsUFSc6ZsP4AN6AlWnogPjQ7CVi7PYF3YVz+CY3jE2pwYf7E/7HlDAN0rV2GxTG0HQ==}
+
+  '@types/finalhandler@1.2.3':
+    resolution: {integrity: sha512-I+Ba0JZEiuSr8LLjVmBhvLBEN8KG9GSITNXWwPCLeAvZj/k5pXEdOBEvnEEIgA038eeaauJ3BPxbuxeFBsqqUw==}
 
   '@types/graceful-fs@4.1.9':
     resolution: {integrity: sha512-olP3sd1qOEe5dXTSaFvQG+02VdRXcdytWLAZsAq1PecU8uqQAhkrnbli7DagjtXKW/Bl7YJbUsa8MPcuc8LHEQ==}
@@ -7278,6 +7287,10 @@ snapshots:
       '@types/express-serve-static-core': 4.19.5
       '@types/qs': 6.9.15
       '@types/serve-static': 1.15.7
+
+  '@types/finalhandler@1.2.3':
+    dependencies:
+      '@types/node': 20.14.10
 
   '@types/graceful-fs@4.1.9':
     dependencies:

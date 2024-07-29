@@ -272,7 +272,11 @@ export function isItemReadable(itemPath: string, permissions: ItemPermissions) {
       (set) =>
         set.paths.filter((setPath) => {
           if (setPath !== itemPath) {
-            return minimatch(itemPath, setPath);
+            const result = minimatch(itemPath, setPath, {
+              partial: true,
+              matchBase: true,
+            });
+            return result;
           }
           return true;
         }).length > 0,

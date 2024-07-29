@@ -19,6 +19,7 @@ import { createOptions, getDatabase } from './data';
 import { HttpEventType, HttpModule } from './http';
 import { Op } from 'sequelize';
 import { hostname } from 'os';
+import finalhandler from 'finalhandler';
 
 export enum ExpressEvent {
   Initialize = 'express:initialize',
@@ -39,7 +40,7 @@ const ExpressRequestTypes: { [key: string]: ExpressEvent } = {
   put: ExpressEvent.Put,
   patch: ExpressEvent.Patch,
   delete: ExpressEvent.Delete,
-  use: ExpressEvent.Use,
+  // use: ExpressEvent.Use,
 };
 
 export interface ExpressModuleEvents {
@@ -160,6 +161,7 @@ export const expressModule: IExpressModule = {
       expressApp,
       system,
     );
+    // await system.execute(ExpressEvent.Use, expressApp, system);
     await waterfall(
       Object.keys(ExpressRequestTypes),
       async (element: string) => {
@@ -214,7 +216,16 @@ export const expressModule: IExpressModule = {
           }
           return finish();
         };
-        return express(req, res, finish);
+        return express(req, res, () => {
+          finalhandler(req, res, {
+            env: express.get('env'),
+            onerror(err) {
+              console.error(err.stack || err.toString());
+              return reject(err);
+            }          
+          })
+          return finish();
+        });
       } catch (err) {
         return error(err);
       }

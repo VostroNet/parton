@@ -3,7 +3,7 @@ import path from "path";
 import { describe, expect, test } from '@jest/globals';
 
 import { ItemData } from '../../../src/modules/items/types';
-import {createItemDataFromFile, createItemDataFromImportItems} from '../../../src/modules/items/utils';
+import {createItemDataFromFile, createItemDataFromImportItems, isItemReadable} from '../../../src/modules/items/utils';
 
 
 describe("modules:items:utils", () => {
@@ -93,5 +93,34 @@ describe("modules:items:utils", () => {
     expect(store.paths["/item3/relative-item"]).toBeDefined();
     expect(store.paths["/item3/ref-single-item1"]).toBeDefined();
   });
-
+  test("isItemReadable - test global read allow", async() => {
+    const test = await isItemReadable("/website/test", {r: true, sets: []});
+    expect(test).toBe(true);
+  });
+  test("isItemReadable - test global read deny", async() => {
+    const test = await isItemReadable("/website/test", {r: false, sets: []});
+    expect(test).toBe(false);
+  });
+  test("isItemReadable - test wildcard allow child", async() => {
+    const test = await isItemReadable("/website/test", {r: false, sets: [{
+      permission: {r: true},
+      paths: ["/website/*"]
+    }]});
+    expect(test).toBe(true);
+  });
+  
+  test("isItemReadable - test glonstar allow child", async() => {
+    const test = await isItemReadable("/website/test/hello", {r: false, sets: [{
+      permission: {r: true},
+      paths: ["/website/**/*"]
+    }]});
+    expect(test).toBe(true);
+  });
+  test("isItemReadable - test wildcard allow parent", async() => {
+    const test = await isItemReadable("/website", {r: false, sets: [{
+      permission: {r: true},
+      paths: ["/website/*"]
+    }]});
+    expect(test).toBe(true);
+  });
 });

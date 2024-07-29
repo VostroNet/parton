@@ -9,7 +9,7 @@ import itemModule from '../../../../src/modules/items';
 import { fieldHashModule } from '../../../../src/modules/utils/field-hash';
 import { roleUpsertModule } from '../../../../src/modules/utils/role-upsert';
 import { createContext, System } from '../../../../src/system';
-import { createBasicConfig, createSiteSetupModule } from '../utils';
+import { createBasicConfig } from '../utils';
 // import { SystemEvent } from '../../../src/types/events';
 
 // import { ItemData } from '../../../src/modules/items/types';
