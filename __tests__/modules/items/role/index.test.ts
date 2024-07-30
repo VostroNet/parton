@@ -13,7 +13,8 @@ import { createContext, System } from '../../../../src/system';
 // import { Role } from '../../../../src/types/models/models/role';
 // import { Site } from '../../../../src/types/models/models/site';
 // import { SiteRole } from '../../../../src/types/models/models/site-role';
-import { createBasicConfig, createSiteSetupModule } from '../utils';
+import { createBasicConfig } from '../utils';
+import { createSiteSetupModule } from '../../../../src/modules/items/setup';
 
 
 

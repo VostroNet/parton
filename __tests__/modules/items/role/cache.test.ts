@@ -11,8 +11,8 @@ import { ItemType, SiteRoleDoc } from '../../../../src/modules/items/types';
 import { fieldHashModule } from '../../../../src/modules/utils/field-hash';
 import { roleUpsertModule } from '../../../../src/modules/utils/role-upsert';
 import { createContext, System } from '../../../../src/system';
-import { createSiteSetupModule } from '../utils';
 import { sqliteConfig } from '../../../utils/config';
+import { createSiteSetupModule } from '../../../../src/modules/items/setup';
 
 describe('modules:items:role:cache', () => {
   test('web paths - basic test', async () => {

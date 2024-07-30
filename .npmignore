@@ -1,1 +1,8 @@
 .devcontainer/
+node_modules
+.vscode/
+.results
+.pnpm-store
+.github
+__tests__
+__mocks__

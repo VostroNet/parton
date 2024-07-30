@@ -216,14 +216,14 @@ export const expressModule: IExpressModule = {
           }
           return finish();
         };
-        return express(req, res, () => {
+        return express(req, res, (err) => {
           finalhandler(req, res, {
             env: express.get('env'),
             onerror(err) {
               console.error(err.stack || err.toString());
               return reject(err);
-            }          
-          })
+            }
+          })(err)
           return finish();
         });
       } catch (err) {
