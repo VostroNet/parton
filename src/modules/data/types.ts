@@ -26,7 +26,8 @@ export interface MigratorContext {
 export interface MigratorArgs {
   name: string,
   path?: string,
-  context: MigratorContext
+  context: MigratorContext,
+  dirname: string,
 }
 
 // export interface IMigration {

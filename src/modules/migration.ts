@@ -4,15 +4,16 @@ import path from 'path';
 import { DependencyInfo } from '@vostro/sandwich';
 import { kitchen } from '@vostro/sandwich';
 import { glob } from 'glob';
-import {  SequelizeStorage, Umzug } from 'umzug';
+import { SequelizeStorage, Umzug } from 'umzug';
 
 import { System } from '../system';
 import { SystemEvent, SystemEvents } from '../types/events';
 import { IModule } from '../types/system';
 
 import { CoreConfig } from './core/types';
-import {getDatabase } from './data';
-import { MigratorContext } from './data/types';
+import { getDatabase } from './data';
+import { MigratorArgs, MigratorContext } from './data/types';
+import waterfall from '../utils/waterfall';
 
 export const migrationModule: IModule & SystemEvents = {
   name: 'migrator',
@@ -24,11 +25,11 @@ export const migrationModule: IModule & SystemEvents = {
   }],
   [SystemEvent.Initialize]: async (system: System) => {
     const config = system.getConfig<CoreConfig>();
-    if(!config.migrations) {
+    if (!config.migrations) {
       system.logger.warn('No migration configuration found');
       return system;
     }
-    
+
     const options = config.migrations;
     const db = await getDatabase(system);
 
@@ -52,7 +53,7 @@ export const migrationModule: IModule & SystemEvents = {
         const sql = await readFile(file, { encoding: 'utf-8' });
         try {
           await db.query(sql, options);
-        } catch(err: any) {
+        } catch (err: any) {
           system.logger.error(err);
           throw err;
         }
@@ -64,8 +65,8 @@ export const migrationModule: IModule & SystemEvents = {
     alreadyComplete.forEach((name: any) => {
       migrationObj[name] = {
         name,
-        up() {},
-        down() {},
+        up() { },
+        down() { },
       };
     });
 
@@ -75,50 +76,51 @@ export const migrationModule: IModule & SystemEvents = {
 
     const sliceNames: string[] = [];
     let dependencyInfos: DependencyInfo[] = [];
-    await Promise.all(
-      availableMigrations.map(async (p: string) => {
-        const target = path.resolve(options.path, p);
-        const relative = path.relative(__dirname, target);
-        const dirname = path.dirname(p);
-        const basename = path.basename(p, path.extname(p));
-        const name = path.join(dirname, basename);
-        let m = await import(relative);
-        if (m.default) {
-          m = m.default;
-        }
-        sliceNames.push(name);
-        const toast = await kitchen.buildToast(
-          {
-            name: m.name || name,
-            dependencies: m.dependencies || [],
-            up(...args: any[]) {
-              if (options.fake) {
-                return;
-              }
-              if (m.up) {
-                return m.up(...args);
-              }
-            },
-            upRollback: m.upRollback,
-            down(...args: any[]) {
-              if (options.fake) {
-                return;
-              }
-              if (m.down) {
-                return m.down(...args);
-              }
-            },
-            downRollback: m.downRollback,
+    await waterfall(availableMigrations, async (p: string) => {
+      const target = path.resolve(options.path, p);
+      const relative = path.relative(__dirname, target);
+      const dirname = path.dirname(p);
+      const basename = path.basename(p, path.extname(p));
+      const name = path.join(dirname, basename);
+      let m = await import(relative);
+      if (m.default) {
+        m = m.default;
+      }
+      sliceNames.push(name);
+      const toast = await kitchen.buildToast(
+        {
+          name: m.name || name,
+          dependencies: m.dependencies || [],
+          up(migratorArgs: MigratorArgs) {
+            if (options.fake) {
+              return;
+            }
+            if (m.up) {
+              return m.up({
+                ...migratorArgs,
+                dirname,
+              });
+            }
           },
-          system,
-          process.cwd(),
-          0,
-          false,
-        );
-        migrationObj[name] = toast;
-        dependencyInfos = dependencyInfos.concat(toast.dependencyInfos);
-      }),
-    );
+          upRollback: m.upRollback,
+          down(...args: any[]) {
+            if (options.fake) {
+              return;
+            }
+            if (m.down) {
+              return m.down(...args);
+            }
+          },
+          downRollback: m.downRollback,
+        },
+        system,
+        process.cwd(),
+        0,
+        false,
+      );
+      migrationObj[name] = toast;
+      dependencyInfos = dependencyInfos.concat(toast.dependencyInfos);
+    });
 
     const sortedSliceNames = await kitchen.sortArrayByDependencyInfo(
       sliceNames,
@@ -133,7 +135,7 @@ export const migrationModule: IModule & SystemEvents = {
       },
       getModule,
       moduleExists,
-      runQuery, 
+      runQuery,
       runQueryFile,
     };
     const umzug = new Umzug({
@@ -144,15 +146,15 @@ export const migrationModule: IModule & SystemEvents = {
     });
     try {
       await umzug.up();
-    } catch(err: any) {
-      const {migration} = err;
+    } catch (err: any) {
+      const { migration } = err;
       system.logger.error(`migration failed: ${migration.name}`, err, err.stack, migration);
       try {
         if (migrationObj[migration.name].upRollback) {
           system.logger.info(`Rolling back migration: ${migration.name}`);
-          await migrationObj[migration.name].upRollback({context: migrationContext});
+          await migrationObj[migration.name].upRollback({ context: migrationContext });
         }
-      } catch(er: any) {
+      } catch (er: any) {
         system.logger.error(`rollback failed for migration: ${migration.name}`, er, er.stack, migration);
       }
 

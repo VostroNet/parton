@@ -1,5 +1,3 @@
-// import { promisify } from 'util';
-// import { IncomingMessage, Server, ServerResponse } from 'http';
 
 import { IncomingMessage, ServerResponse } from 'http';
 import { promisify } from 'util';
@@ -8,17 +6,14 @@ import type Express from 'express';
 import express from 'express';
 import expressSession, { SessionOptions } from 'express-session';
 
-import { createContext, System, SystemContext } from '../system';
+import { createContext, System } from '../system';
 import { Config } from '../types/config';
 import { SystemEvent } from '../types/events';
-import { Role } from '../types/models/models/role';
 import { User } from '../types/models/models/user';
 import waterfall from '../utils/waterfall';
 
-import { createOptions, getDatabase } from './data';
+import { getDatabase } from './data';
 import { HttpEventType, HttpModule } from './http';
-import { Op } from 'sequelize';
-import { hostname } from 'os';
 import finalhandler from 'finalhandler';
 
 export enum ExpressEvent {

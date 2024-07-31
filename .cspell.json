@@ -22,6 +22,7 @@
     "esnext",
     "execa",
     "exponentiate",
+    "finalhandler",
     "flushall",
     "globby",
     "gqlize",
