@@ -8,8 +8,9 @@ import { User } from './types/models/models/user';
 import { Context } from './types/system';
 import type { Site } from './types/models/models/site';
 import type { SiteRole } from './types/models/models/site-role';
+import DatabaseContext from './types/models';
 
-function createHookProxy(sys: System) : ISlice {
+function createHookProxy(sys: System): ISlice {
   return {
     name: "proxy",
     [LoafEvent.Initialize]: async (core: Loaf, slice: ISlice) => {
@@ -40,7 +41,7 @@ export class System extends Loaf {
   constructor(config: Config) {
     super(config);
     const slices = [].concat([...config.slices, createHookProxy(this)]);
-    
+
     this.jam.slices = slices;
     this.config = config;
     this.config.slices = slices;
@@ -66,7 +67,7 @@ export async function createContext(
   override = false,
   transaction?: any,
 ): Promise<Context> {
-  const db = await getDatabase(system);
+  const db = await getDatabase<DatabaseContext>(system);
   const { Site, Role, SiteRole } = db.models;
 
   if (!site) {

@@ -13,17 +13,35 @@ export enum HttpEventType {
 }
 
 export type HttpModuleEvents = {
+  [HttpEventType.Initialize]?(
+    httpServer: Server<typeof IncomingMessage, typeof ServerResponse>,
+    module: IModule,
+  ): Promise<void>;
+  [HttpEventType.Ready]?(
+    httpServer: Server<typeof IncomingMessage, typeof ServerResponse>,
+    core: System,
+    module: IModule,
+  ): Promise<void>;
+  [HttpEventType.Request]?(
+    req: IncomingMessage,
+    res: ServerResponse,
+    core: System,
+    module: IModule,
+  ): Promise<void>;
   [HttpEventType.Initialize]?: (
     httpServer: Server<typeof IncomingMessage, typeof ServerResponse>,
+    module: IModule,
   ) => Promise<void>;
   [HttpEventType.Ready]?: (
     httpServer: Server<typeof IncomingMessage, typeof ServerResponse>,
     core: System,
+    module: IModule,
   ) => Promise<void>;
   [HttpEventType.Request]?: (
     req: IncomingMessage,
     res: ServerResponse,
     core: System,
+    module: IModule,
   ) => Promise<void>;
 };
 export interface HttpModule extends IModule, HttpModuleEvents {

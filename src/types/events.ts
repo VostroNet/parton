@@ -1,9 +1,7 @@
-import { ISlice } from '@vostro/sandwich';
-
 import { System } from '../system';
 
 import { Role } from './models/models/role';
-import { Context } from './system';
+import { Context, IModule } from './system';
 
 export enum SystemEvent {
   Initialize = 'system:init',
@@ -15,17 +13,50 @@ export enum SystemEvent {
 }
 
 export type SystemEvents = {
+
+  [SystemEvent.Initialize]?(
+    core: System,
+    module: IModule,
+  ): Promise<System>;
+
+  [SystemEvent.Ready]?(
+    core: System,
+    module: IModule,
+  ): Promise<System>;
+  [SystemEvent.Shutdown]?(
+    core: System,
+    module: IModule,
+  ): Promise<System>;
+  [SystemEvent.ContextCreate]?(
+    context: Context,
+    core: System,
+    role: Role,
+    override: boolean,
+    transaction: any,
+    module: IModule,
+  ): Promise<Context>;
+  [SystemEvent.UncaughtError]?(
+    core: System,
+    error: Error,
+    module: IModule,
+  ): Promise<System>;
+  [SystemEvent.UnhandledRejection]?(
+    core: System,
+    error: Error,
+    module: IModule,
+  ): Promise<System>;
+  // --- 
   readonly [SystemEvent.Initialize]?: (
     core: System,
-    slice: ISlice,
+    module: IModule,
   ) => Promise<System>;
   readonly [SystemEvent.Ready]?: (
     core: System,
-    slice: ISlice,
+    module: IModule,
   ) => Promise<System>;
   readonly [SystemEvent.Shutdown]?: (
     core: System,
-    slice: ISlice,
+    module: IModule,
   ) => Promise<System>;
   readonly [SystemEvent.ContextCreate]?: (
     context: Context,
@@ -33,13 +64,16 @@ export type SystemEvents = {
     role: Role,
     override: boolean,
     transaction: any,
+    module: IModule,
   ) => Promise<Context>;
   readonly [SystemEvent.UncaughtError]?: (
     core: System,
     error: Error,
+    module: IModule,
   ) => Promise<System>;
   readonly [SystemEvent.UnhandledRejection]?: (
     core: System,
     error: Error,
+    module: IModule,
   ) => Promise<System>;
 };

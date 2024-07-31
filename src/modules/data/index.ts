@@ -1,7 +1,7 @@
 import { Database } from '@vostro/gqlize';
 import GQLManager from '@vostro/gqlize/lib/manager';
 import SequelizeAdapter from '@vostro/gqlize-adapter-sequelize';
-import { Model, ModelStatic, Options } from 'sequelize';
+import { Model, ModelStatic, Options, Sequelize } from 'sequelize';
 import { Options as SequelizeOptions } from 'sequelize';
 
 import { System } from '../../system';
@@ -56,9 +56,9 @@ export interface DataModulesModels {
 
 export interface DataModule
   extends IModule,
-    DataEvents,
-    DataModelHookEvents,
-    DataModulesModels {
+  DataEvents,
+  DataModelHookEvents,
+  DataModulesModels {
   gqlManager?: GQLManager;
   getDatabase?: <T extends DatabaseContext>() => Promise<T>;
   getDefinition?: <T extends IDefinition>(name: string) => T | undefined;
@@ -100,13 +100,13 @@ export function createOptions(o: any, options: FindOptions = {}) {
   );
   return opts;
 }
-export function getDatabaseFromOptions<T extends DatabaseContext>(
+export function getDatabaseFromOptions<T extends Sequelize>(
   options: FindOptions,
 ): Promise<T> {
   const context = getContextFromOptions(options);
   return getDatabaseFromContext<T>(context);
 }
-export function getDatabaseFromContext<T extends DatabaseContext>(
+export function getDatabaseFromContext<T extends Sequelize>(
   context: DataContext,
 ): Promise<T> {
   return getDatabase(context.system);
@@ -145,7 +145,7 @@ export function getRoleFromOptions(
   return context.role;
 }
 // let gqlManager: GQLManager;
-export async function getDatabase<T extends DatabaseContext>(
+export async function getDatabase<T extends Sequelize>(
   system: System,
 ): Promise<T> {
   const dataModule = system.get<DataModule>('data');
@@ -204,7 +204,7 @@ function createBindGlobalHook(hook: DataHookEvent, system: System) {
 export function getTableNameFromModel(model: ModelStatic<Model<any, any>>) {
   const schema = (model as any)._schema || "public";
   const tableName = model.getTableName();
-  if(typeof tableName === "string") {
+  if (typeof tableName === "string") {
     return {
       full: `"${schema}"."${tableName}"`,
       schema: schema,
@@ -292,14 +292,14 @@ export const dataModule: DataModule = {
     });
     const db = await getDatabase(core);
     // const dialect = db.getDialect();
-    if(core.getConfig<DataConfig>().data.sequelize.schema) {
+    if (core.getConfig<DataConfig>().data.sequelize.schema) {
       const schemas = await db.getQueryInterface().showAllSchemas() as string[];
-      if(!schemas.includes(core.getConfig<DataConfig>().data.sequelize.schema)) {
+      if (!schemas.includes(core.getConfig<DataConfig>().data.sequelize.schema)) {
         await db.getQueryInterface().createSchema(core.getConfig<DataConfig>().data.sequelize.schema);
       }
-      
+
     }
-    if(core.getConfig<DataConfig>().data.sequelize.dialect === "postgres") {
+    if (core.getConfig<DataConfig>().data.sequelize.dialect === "postgres") {
       // const schema = core.getConfig<DataConfig>().data.sequelize.schema || "public";
       // const tables = await db.getQueryInterface().showAllTables(schema) as string[];
       // const tableNames = Object.keys(models).map((modelName) => {

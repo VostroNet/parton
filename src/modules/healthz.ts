@@ -1,32 +1,35 @@
+import { Server } from 'http';
 import { System } from '../system';
+import { Config } from '../types/config';
+import { SystemEvent } from '../types/events';
 import { IModule } from '../types/system';
-import test from "./express";
+import express from "express";
 
-import {
-  ExpressEvent,
-  ExpressModuleEvents,
-} from './express';
 
-export enum HealthzEventType {
+export type HealthzConfig = Config & {
+  healthzPort?: number;
+}
+
+export enum HealthzEvent {
   Check = 'healthz:check',
 }
 
 export type HealthzEvents = {
-  [key in HealthzEventType]?: (core: System) => Promise<boolean>;
+  [HealthzEvent.Check]?(core: System, module: IModule): Promise<boolean>;
+  [HealthzEvent.Check]?: (core: System, module: IModule) => Promise<boolean>;
 };
-
-// export interface IHealthzModule
-//   extends IModule,
-//     CoreModuleEvents,
-//     ExpressModuleEvents {
-// }
-
-export const healthzModule: IModule & ExpressModuleEvents = {
+export interface HealthzModule extends IModule {
+  expressApp?: express.Express;
+  server?: Server
+}
+//todo: alt attach to express module?
+export const healthzModule: IModule = {
   name: 'healthz',
-  dependencies: ['express'],
-  [ExpressEvent.Initialize]: async (express, system) => {
-    express.get('/healthz', async (req, res) => {
-      const status = await system.condition(HealthzEventType.Check, async (result: boolean) => {
+  dependencies: [],
+  [SystemEvent.Ready]: async (system, module: HealthzModule) => {
+    module.expressApp = express();
+    module.expressApp.get('/healthz', async (req, res) => {
+      const status = await system.condition(HealthzEvent.Check, async (result: boolean) => {
         return result; //we use conditional event to skip remaining handlers if result is false
       }, system);
       if (status) {
@@ -35,7 +38,21 @@ export const healthzModule: IModule & ExpressModuleEvents = {
         return res.status(500).send("Not OK");
       }
     });
-    return express;
+    module.server = module.expressApp.listen(system.getConfig<HealthzConfig>().healthzPort || 9876);
+    return system;
   },
+  [System.Shutdown]: (system, module: HealthzModule) => {
+    return new Promise((resolve, reject) => {
+      module.server?.close((err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(system);
+        }
+      });
+    });
+  }
 };
+
+
 export default healthzModule;

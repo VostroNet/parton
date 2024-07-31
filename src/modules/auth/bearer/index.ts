@@ -7,6 +7,7 @@ import { CoreModuleEvent, CoreModuleEvents } from "../../core";
 import { createOptions, DataModulesModels, getDatabase } from '../../data';
 
 import models from './models';
+import DatabaseContext from '../../../types/models';
 
 export interface BearerAuthModule extends IModule, CoreModuleEvents, DataModulesModels {
 
@@ -20,7 +21,7 @@ export const bearerAuthModule: BearerAuthModule = {
     passport.use(
       new BearerStrategy(async (token, done) => {
         try {
-          const db = await getDatabase(system);
+          const db = await getDatabase<DatabaseContext>(system);
           const { UserAuth, Role } = db.models;
           const context = await createContext(system, undefined, undefined, undefined, true);
 

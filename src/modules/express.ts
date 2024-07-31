@@ -15,6 +15,8 @@ import waterfall from '../utils/waterfall';
 import { getDatabase } from './data';
 import { HttpEventType, HttpModule } from './http';
 import finalhandler from 'finalhandler';
+import DatabaseContext from '../types/models';
+import { IModule } from '../types/system';
 
 export enum ExpressEvent {
   Initialize = 'express:initialize',
@@ -29,7 +31,7 @@ export enum ExpressEvent {
   ExpressSessionConfigure = 'express:session:configure',
 }
 
-const ExpressRequestTypes: { [key: string]: ExpressEvent } = {
+const ExpressEventRequest: { [key: string]: ExpressEvent } = {
   get: ExpressEvent.Get,
   post: ExpressEvent.Post,
   put: ExpressEvent.Put,
@@ -39,6 +41,58 @@ const ExpressRequestTypes: { [key: string]: ExpressEvent } = {
 };
 
 export interface ExpressModuleEvents {
+  [ExpressEvent.Initialize]?(
+    express: Express.Application,
+    core: System,
+    module: IModule,
+  ): Promise<Express.Application>;
+  [ExpressEvent.Ready]?(
+    express: Express.Application,
+    core: System,
+    module: IModule,
+  ): Promise<void>;
+  [ExpressEvent.Request]?(
+    req: Express.Request,
+    res: Express.Response,
+    module: IModule,
+  ): Promise<boolean>;
+  [ExpressEvent.ExpressSessionConfigure]?(
+    session: SessionOptions,
+    core: System,
+    module: IModule,
+  ): Promise<SessionOptions>;
+  [ExpressEvent.Use]?(
+    req: Express.Request,
+    res: Express.Response,
+    system: System,
+    module: IModule,
+  ): Promise<boolean>;
+  [ExpressEvent.Get]?(
+    req: Express.Request,
+    res: Express.Response,
+    module: IModule,
+  ): Promise<boolean>;
+  [ExpressEvent.Post]?(
+    req: Express.Request,
+    res: Express.Response,
+    module: IModule,
+  ): Promise<boolean>;
+  [ExpressEvent.Put]?(
+    req: Express.Request,
+    res: Express.Response,
+    module: IModule,
+  ): Promise<boolean>;
+  [ExpressEvent.Patch]?(
+    req: Express.Request,
+    res: Express.Response,
+    module: IModule,
+  ): Promise<boolean>;
+  [ExpressEvent.Delete]?(
+    req: Express.Request,
+    res: Express.Response,
+    module: IModule,
+  ): Promise<boolean>;
+
   [ExpressEvent.Initialize]?: (
     express: Express.Application,
     core: System,
@@ -158,9 +212,9 @@ export const expressModule: IExpressModule = {
     );
     // await system.execute(ExpressEvent.Use, expressApp, system);
     await waterfall(
-      Object.keys(ExpressRequestTypes),
+      Object.keys(ExpressEventRequest),
       async (element: string) => {
-        const evt = ExpressRequestTypes[element];
+        const evt = ExpressEventRequest[element];
         system.setOptions(evt, {
           ignoreReturn: true,
         });
@@ -271,7 +325,7 @@ export async function createContextFromRequest(
   override = false,
   transaction?: any,
 ) {
-  const db = await getDatabase(system);
+  const db = await getDatabase<DatabaseContext>(system);
   const { Site } = db.models;
   const site = await Site.getSiteByHostname(req.hostname, { system, override: true, role: { name: "system" } });
   if (!site) {

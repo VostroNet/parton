@@ -11,6 +11,7 @@ import {
 import { DataContext, FindOptions } from '../../data/types';
 import { ImportSite } from '../types';
 import { createItemDataFromImportItems } from '../utils';
+import DatabaseContext from '../../../types/models';
 
 // import { updateRoleSiteCache } from "./role-site";
 
@@ -47,7 +48,7 @@ export async function upsertSiteFromImportSite(
   context: DataContext,
   cwd = process.cwd(),
 ): Promise<Site> {
-  const db = await getDatabaseFromContext(context);
+  const db = await getDatabaseFromContext<DatabaseContext>(context);
   const { Site, Role, SiteRole } = db.models;
 
   const itemsData = await createItemDataFromImportItems(importSite.items, cwd);

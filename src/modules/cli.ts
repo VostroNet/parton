@@ -9,15 +9,24 @@ export enum CliEvent {
 }
 
 export type ClIModuleEvents = {
-  [CliEvent.Initialize]?: (core: System) => Promise<void>;
+  [CliEvent.Initialize](core: System): Promise<void>;
+  [CliEvent.Configure](
+    program: minimist.ParsedArgs,
+    context: Context,
+    system: System,
+    module: IModule,
+  ): Promise<void>;
+
+  [CliEvent.Initialize]?: (core: System, module: IModule) => Promise<void>;
   [CliEvent.Configure]?: (
     program: minimist.ParsedArgs,
     context: Context,
     system: System,
+    module: IModule
   ) => Promise<void>;
 };
 
-export interface ClIModule extends IModule, ClIModuleEvents {}
+export interface ClIModule extends IModule, ClIModuleEvents { }
 
 export const clIModule: ClIModule = {
   name: 'cli',

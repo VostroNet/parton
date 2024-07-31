@@ -10,6 +10,7 @@ import { getDefinition } from "../../data/utils";
 import { IJwtFieldsDefinition } from "./models/user";
 
 import { JwtConfig } from ".";
+import DatabaseContext from "../../../types/models";
 
 export interface JwtToken extends JWTPayload {
   userId: string;
@@ -22,11 +23,11 @@ export interface JwtToken extends JWTPayload {
 }
 
 export async function getUserFromToken(token: JwtToken, system: System, context: Context) {
-  const db = await getDatabase(system);
-  const {User, Role, UserAuth} = db.models;
+  const db = await getDatabase<DatabaseContext>(system);
+  const { User, Role, UserAuth } = db.models;
   const where: any = {};
   if (token.userId) {
-    const {id} = fromGlobalId(token.userId);
+    const { id } = fromGlobalId(token.userId);
     where.id = {
       [Op.eq]: id,
     };
@@ -44,7 +45,7 @@ export async function getUserFromToken(token: JwtToken, system: System, context:
   }));
   if (!user) {
     const cfg = await system.getConfig<JwtConfig>();
-    if(cfg?.auth?.jwks?.autoCreateUser) {
+    if (cfg?.auth?.jwks?.autoCreateUser) {
       const role = await Role.findOne(createOptions(context, {
         where: {
           name: token.role,

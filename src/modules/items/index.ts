@@ -38,18 +38,44 @@ export enum ItemEvent {
   ProcessSiteRoleCacheDoc = 'item:process-site-role-cache-doc',
 }
 export type ItemEvents = {
+  [ItemEvent.ProcessItem]?(
+    item: Item<any>,
+    siteDoc: SiteDoc,
+    roleDoc: RoleDoc,
+    store: SiteRoleItemStore,
+    context: DataContext,
+    module: IModule
+  ): Promise<Item<any>>;
+  [ItemEvent.ProcessSiteRoleCacheDoc]?<T extends SiteRoleCacheDoc>(
+    doc: T,
+    siteRole: SiteRole,
+    site: Site,
+    context: DataContext,
+    module: IModule
+  ): Promise<SiteRoleCacheDoc>;
+  [ItemEvent.ProcessItemField]?(
+    fieldValue: any,
+    item: Item<any>,
+    fieldName: string,
+    definition: ItemTemplateFieldDefinition,
+    store: SiteRoleItemStore,
+    context: DataContext,
+    module: IModule
+  ): Promise<any>;
   readonly [ItemEvent.ProcessItem]?: (
     item: Item<any>,
     siteDoc: SiteDoc,
     roleDoc: RoleDoc,
     store: SiteRoleItemStore,
     context: DataContext,
+    module: IModule
   ) => Promise<Item<any>>;
   readonly [ItemEvent.ProcessSiteRoleCacheDoc]?: <T extends SiteRoleCacheDoc>(
     doc: T,
     siteRole: SiteRole,
     site: Site,
     context: DataContext,
+    module: IModule
   ) => Promise<SiteRoleCacheDoc>;
   readonly [ItemEvent.ProcessItemField]?: (
     fieldValue: any,
@@ -58,6 +84,7 @@ export type ItemEvents = {
     definition: ItemTemplateFieldDefinition,
     store: SiteRoleItemStore,
     context: DataContext,
+    module: IModule
   ) => Promise<any>;
 };
 export interface ItemModule
