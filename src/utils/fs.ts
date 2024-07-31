@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
-import yaml from 'yaml';
 
+import { FileMapOptions, objectLoader } from "@azerothian/object-loader";
 
 export async function exists(path: string): Promise<boolean> {
   try {
@@ -14,8 +14,7 @@ export async function exists(path: string): Promise<boolean> {
 
 export async function readYAMLFile<T>(path: string): Promise<T | null> {
   try {
-    const file = await fs.readFile(path, 'utf8');
-    return yaml.parse(file);
+    return objectLoader<T>(path, undefined, fileMapConfig);
   }
   catch (err) {
     console.error(err);
@@ -25,8 +24,7 @@ export async function readYAMLFile<T>(path: string): Promise<T | null> {
 
 export async function readJSONFile<T>(path: string): Promise<T | null> {
   try {
-    const file = await fs.readFile(path, 'utf8');
-    return JSON.parse(file);
+    return objectLoader<T>(path, undefined, fileMapConfig);
   } catch (err) {
     console.error(err);
   }
@@ -37,49 +35,15 @@ export async function importFile<T>(
   targetPath: string,
 ): Promise<T | null> {
   const filePath = path.resolve(cwd, targetPath);
-  let file: any;
-  const ext = path.extname(filePath);
-  switch (ext) {
-    case '.yaml':
-      return readYAMLFile(filePath);
-    case '.json':
-      return readJSONFile(filePath);
-    case '.js':
-    case '.ts':
-      file = await import(filePath);
-      if (file.default) {
-        file = file.default;
-      }
-      break;
-  }
-  return file;
+  return objectLoader<T>(filePath, cwd, fileMapConfig);
 }
 
+const fileMapConfig: FileMapOptions = {
+  fieldKey: "ref",
+  customKeys: {
+    "$env": (node) => {
+      return process.env[node["$env"]] ?? "";
+    }
+  }
+}
 
-
-
-// export interface RefObject {
-//   ref?: string;
-// }
-
-// export async function loadRefObject(ref: string) {
-//   let result: any = {};
-//   // eslint-disable-next-line functional/no-loop-statements
-//   do {
-//     const cwd = path.dirname(ref);
-//     const data = await readJSONFile<any>(ref);
-//     if(!data) {
-//       return undefined;
-//     }
-//     result = merge(result, data);
-//     if (data.ref) {
-//       ref = path.resolve(cwd, data.ref);
-//     } else {
-//       ref = undefined;
-//     }
-//   } while (ref);
-//   if (result.ref) {
-//     delete result.ref;
-//   }
-//   return result;
-// }

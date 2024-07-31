@@ -238,7 +238,7 @@ export const dataModule: DataModule = {
     core.setOptions(DataEvent.Setup, {
       ignoreReturn: true,
     });
-    core.get<DataModule>('data').getDatabase = () => getDatabase(core);
+    core.get<DataModule>('data').getDatabase = <T extends Sequelize>() => getDatabase<T>(core);
     core.get<DataModule>('data').getDefinition = <
       T extends IDefinition | undefined,
     >(
@@ -290,7 +290,7 @@ export const dataModule: DataModule = {
       const model = models[key];
       return core.get<DataModule>('data').gqlManager?.addDefinition(model);
     });
-    const db = await getDatabase(core);
+    const db = await getDatabase<DatabaseContext>(core);
     // const dialect = db.getDialect();
     if (core.getConfig<DataConfig>().data.sequelize.schema) {
       const schemas = await db.getQueryInterface().showAllSchemas() as string[];
@@ -401,7 +401,7 @@ export const dataModule: DataModule = {
   [DataHookEvent.BeforeCount]: beforeQuery,
   [DataHookEvent.BeforeFind]: beforeQuery,
   [SystemEvent.Shutdown]: async (core: System) => {
-    const db = await getDatabase(core);
+    const db = await getDatabase<DatabaseContext>(core);
     if (!db) {
       return core;
     }

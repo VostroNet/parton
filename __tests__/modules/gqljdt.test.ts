@@ -15,6 +15,7 @@ import "../../__mocks__/http";
 import { createHexString } from '../../src/utils/string';
 import { createTestSite } from './items/utils';
 import { postgresConfig, sqliteConfig } from '../utils/config';
+import DatabaseContext from '../../src/types/models';
 
 
 describe("modules:services:gqljdt", () => {
@@ -75,7 +76,7 @@ describe("modules:services:gqljdt", () => {
     } catch (err: any) {
       expect(err).toBeUndefined();
     }
-    const db = await getDatabase(core);
+    const db = await getDatabase<DatabaseContext>(core);
     expect(db).toBeDefined();
     const { Role } = db.models;
     const role = await Role.findOne(createOptions({ override: true }, { where: { name: "public" } }));
@@ -126,7 +127,8 @@ describe("modules:services:gqljdt", () => {
     } catch (err: any) {
       expect(err).toBeUndefined();
     }
-    const db = await getDatabase(core);
+
+    const db = await getDatabase<DatabaseContext>(core);
     expect(db).toBeDefined();
     const { Role, User } = db.models;
     const role = await Role.findOne(createOptions({ override: true }, { where: { name: "public" } }));

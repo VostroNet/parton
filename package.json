@@ -50,6 +50,7 @@
     "string-width": "4.2.3"
   },
   "dependencies": {
+    "@azerothian/object-loader": "^0.0.3",
     "@graphql-tools/stitch": "^9.2.10",
     "@types/finalhandler": "^1.2.3",
     "@vostro/gqlize": "^5.3.3",

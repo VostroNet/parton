@@ -15,6 +15,7 @@ import { createContext, System } from '../../../../src/system';
 // import { SiteRole } from '../../../../src/types/models/models/site-role';
 import { createBasicConfig } from '../utils';
 import { createSiteSetupModule } from '../../../../src/modules/items/setup';
+import DatabaseContext from '../../../../src/types/models';
 
 
 
@@ -97,7 +98,7 @@ describe("modules:items:role", () => {
   //   }
 
   //   const context = await createContext(core, undefined, undefined, true);
-  //   const db = await getDatabase(core);
+  //   const db = await getDatabase<DatabaseContext>(core);
   //   const {Role, Site, SiteRole} = db.models;
   //   const initSite: Site = await Site.create({
   //     name: "Test",
@@ -169,7 +170,7 @@ describe("modules:items:role", () => {
     } catch (err: any) {
       expect(err).toBeUndefined();
     }
-    const db = await getDatabase(core);
+    const db = await getDatabase<DatabaseContext>(core);
 
     const context = await createContext(core, undefined, undefined, undefined, true);
     const { Role } = db.models;
@@ -265,7 +266,7 @@ describe("modules:items:role", () => {
     } catch (err: any) {
       expect(err).toBeUndefined();
     }
-    const db = await getDatabase(core);
+    const db = await getDatabase<DatabaseContext>(core);
 
     const context = await createContext(core, undefined, undefined, undefined, true);
     // const { siteRole } = context;
@@ -363,7 +364,7 @@ describe("modules:items:role", () => {
     } catch (err: any) {
       expect(err).toBeUndefined();
     }
-    const db = await getDatabase(core);
+    const db = await getDatabase<DatabaseContext>(core);
 
     const context = await createContext(core, undefined, undefined, undefined, true);
     const { Role, Site } = db.models;

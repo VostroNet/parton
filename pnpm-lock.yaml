@@ -11,6 +11,9 @@ importers:
 
   .:
     dependencies:
+      '@azerothian/object-loader':
+        specifier: ^0.0.3
+        version: 0.0.3
       '@graphql-tools/stitch':
         specifier: ^9.2.10
         version: 9.2.10(graphql@16.9.0)
@@ -264,6 +267,9 @@ packages:
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
+
+  '@azerothian/object-loader@0.0.3':
+    resolution: {integrity: sha512-ySXaPZxOMYrS5w1hJNetBXMutqaISts+KyF02F8C3k8Ydi/5DGW7/jht5wZdYNa1DoValHIcLG3+Lz0BdpgNuA==}
 
   '@babel/code-frame@7.24.7':
     resolution: {integrity: sha512-BcYH1CVJBO9tvyIZ2jVeXgSIMvGZ2FDRvDdOIVQyuklNKSsx+eppDEBq/g47Ayw+RqNFE+URvOShmf+f/qwAlA==}
@@ -1795,6 +1801,9 @@ packages:
 
   '@vostro/object-visit@1.0.1':
     resolution: {integrity: sha512-0rEtrHXfpdTvDNV2m1G1vEQWIuFoAAb9LleoM1DWOdVkwYb6PKZG8EwwH06jvfWZni7NJqKQp9mhsGIvPOSs/g==}
+
+  '@vostro/object-visit@1.1.0':
+    resolution: {integrity: sha512-PoRnLnokaqADO1mUpGCwTjruJbTW+ameXCOPPylPqGfLIgLGJe33MFWYVnaq4y9vxQuSJVPleA4wuGordmBWIw==}
 
   '@vostro/sandwich@0.3.0':
     resolution: {integrity: sha512-CRb8gHE6+Dy9OqUjDR5lwFRnsd+FnpDUNLoZHwUz7dgUx53DzefwHjE3cSbpbm5dq+Ygu7u34G4ovFGulRmz4w==}
@@ -5662,6 +5671,11 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.5
       '@jridgewell/trace-mapping': 0.3.25
 
+  '@azerothian/object-loader@0.0.3':
+    dependencies:
+      '@vostro/object-visit': 1.1.0
+      yaml: 2.4.5
+
   '@babel/code-frame@7.24.7':
     dependencies:
       '@babel/highlight': 7.24.7
@@ -7538,6 +7552,8 @@ snapshots:
   '@vostro/jtd-types@1.0.2': {}
 
   '@vostro/object-visit@1.0.1': {}
+
+  '@vostro/object-visit@1.1.0': {}
 
   '@vostro/sandwich@0.3.0(typescript@5.5.3)':
     dependencies:

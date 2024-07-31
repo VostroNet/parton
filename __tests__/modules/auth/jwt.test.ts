@@ -20,6 +20,7 @@ import { IModule } from '../../../src/types/system';
 
 import "../../../__mocks__/http";
 import { createTestSite } from '../items/utils';
+import DatabaseContext from '../../../src/types/models';
 
 jest.mock('node-fetch', () => jest.fn())
 
@@ -95,7 +96,7 @@ describe('modules:auth:jwks', () => {
 
     const context = await createContext(core, undefined, undefined, undefined, true);
 
-    const db = await getDatabase(core);
+    const db = await getDatabase<DatabaseContext>(core);
     const { User, Role } = db.models;
     const testRole = await Role.findOne(createOptions(context, { where: { name: 'public' } }));
     expect(testRole).toBeDefined();
@@ -205,7 +206,7 @@ describe('modules:auth:jwks', () => {
 
     const context = await createContext(core, undefined, undefined, undefined, true);
 
-    const db = await getDatabase(core);
+    const db = await getDatabase<DatabaseContext>(core);
     const { User, Role } = db.models;
     const testRole = await Role.findOne(createOptions(context, { where: { name: 'public' } }));
     expect(testRole).toBeDefined();
@@ -417,7 +418,7 @@ describe('modules:auth:jwks', () => {
 
     // const context = await createContext(core, undefined, undefined, true);
 
-    // const db = await getDatabase(core);
+    // const db = await getDatabase<DatabaseContext>(core);
     // const {User, Role} = db.models;
     // const testRole = await Role.findOne(createOptions(context, {where: {name: 'test'}}));
     // expect(testRole).toBeDefined();

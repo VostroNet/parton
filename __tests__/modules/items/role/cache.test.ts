@@ -13,6 +13,7 @@ import { roleUpsertModule } from '../../../../src/modules/utils/role-upsert';
 import { createContext, System } from '../../../../src/system';
 import { sqliteConfig } from '../../../utils/config';
 import { createSiteSetupModule } from '../../../../src/modules/items/setup';
+import DatabaseContext from '../../../../src/types/models';
 
 describe('modules:items:role:cache', () => {
   test('web paths - basic test', async () => {
@@ -95,7 +96,7 @@ describe('modules:items:role:cache', () => {
     } catch (err: any) {
       expect(err).toBeUndefined();
     }
-    const db = await getDatabase(core);
+    const db = await getDatabase<DatabaseContext>(core);
 
     const context = await createContext(core, undefined, undefined, undefined, true);
     const { Role } = db.models;
@@ -202,7 +203,7 @@ describe('modules:items:role:cache', () => {
     } catch (err: any) {
       expect(err).toBeUndefined();
     }
-    const db = await getDatabase(core);
+    const db = await getDatabase<DatabaseContext>(core);
 
     const context = await createContext(core, undefined, undefined, undefined, true);
     const { Role } = db.models;

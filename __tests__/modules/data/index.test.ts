@@ -10,6 +10,7 @@ import { createContext, System } from '../../../src/system';
 
 import adminRole from './roles/admin';
 import publicRole from './roles/public';
+import DatabaseContext from '../../../src/types/models';
 
 describe('modules:data', () => {
   // let profile: any;
@@ -48,7 +49,7 @@ describe('modules:data', () => {
       await core.load();
       await core.initialize();
       await core.ready();
-      const db = await getDatabase(core);
+      const db = await getDatabase<DatabaseContext>(core);
       const context = await createContext(core, undefined, undefined, undefined, false);
       await db.models.Role.findAll(createOptions(context));
       throw new Error('should not get here');
@@ -81,7 +82,7 @@ describe('modules:data', () => {
       await core.load();
       await core.initialize();
       await core.ready();
-      const db = await getDatabase(core);
+      const db = await getDatabase<DatabaseContext>(core);
       const context = await createContext(core, undefined, undefined, undefined, true);
       const roles = await db.models.Role.findAll(createOptions(context));
       expect(roles.length).toBe(2);

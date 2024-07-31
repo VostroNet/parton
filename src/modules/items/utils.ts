@@ -4,7 +4,7 @@ import path from 'path';
 import { minimatch } from 'minimatch';
 import { v4 as uuid } from 'uuid';
 
-import { readJSONFile } from '../../utils/fs';
+// import { readJSONFile } from '../../utils/fs';
 import waterfall from '../../utils/waterfall';
 import { getSystemFromContext } from '../data';
 import { DataContext } from '../data/types';
@@ -23,6 +23,7 @@ import {
 } from './types';
 
 import { ItemEvent } from '.';
+import { readJSONFile } from '../../utils/fs';
 
 export async function createItemData(
   store: ItemData,

@@ -13,6 +13,7 @@ import { IModule } from '../../../src/types/system';
 
 import "../../../__mocks__/http";
 import { createBasicConfig } from '../items/utils';
+import DatabaseContext from '../../../src/types/models';
 
 
 describe('modules:auth:bearer', () => {
@@ -39,7 +40,7 @@ describe('modules:auth:bearer', () => {
 
     const context = await createContext(core, undefined, undefined, undefined, true);
 
-    const db = await getDatabase(core);
+    const db = await getDatabase<DatabaseContext>(core);
     const { User, UserAuth, Role } = db.models;
     const testRole = await Role.findOne(createOptions(context, { where: { name: 'public' } }));
     expect(testRole).toBeDefined();

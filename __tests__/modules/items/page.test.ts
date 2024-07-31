@@ -13,6 +13,7 @@ import { createContext, System } from '../../../src/system';
 import { createTestSite } from './utils';
 import { createContextFromRequest } from '../../../src/modules/express';
 import { sqliteConfig } from '../../utils/config';
+import DatabaseContext from '../../../src/types/models';
 
 describe("modules:items:page", () => {
   test("getPageFromSiteRoleWebCache", async () => {
@@ -44,7 +45,7 @@ describe("modules:items:page", () => {
     } catch (err: any) {
       expect(err).toBeUndefined();
     }
-    const db = await getDatabase(core);
+    const db = await getDatabase<DatabaseContext>(core);
 
     const context = await createContext(core, undefined, undefined, undefined, true);
     const { Role } = db.models;
@@ -133,7 +134,7 @@ describe("modules:items:page", () => {
     } catch (err: any) {
       expect(err).toBeUndefined();
     }
-    const db = await getDatabase(core);
+    const db = await getDatabase<DatabaseContext>(core);
 
     const context = await createContext(core, undefined, undefined, undefined, true);
     const { Role, SiteRole } = db.models;
@@ -215,7 +216,7 @@ describe("modules:items:page", () => {
     } catch (err: any) {
       expect(err).toBeUndefined();
     }
-    const db = await getDatabase(core);
+    const db = await getDatabase<DatabaseContext>(core);
 
     const systemContext = await createContext(core, undefined, undefined, undefined, true);
     const { Role, SiteRole } = db.models;

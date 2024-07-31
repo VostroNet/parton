@@ -9,6 +9,7 @@ import { fieldHashModule } from '../../../src/modules/utils/field-hash';
 import { roleUpsertModule } from '../../../src/modules/utils/role-upsert';
 import { createContext, System } from '../../../src/system';
 import { createTestSite } from './utils';
+import DatabaseContext from '../../../src/types/models';
 
 
 describe("modules:items", () => {
@@ -45,7 +46,7 @@ describe("modules:items", () => {
     } catch (err: any) {
       expect(err).toBeUndefined();
     }
-    const db = await getDatabase(core);
+    const db = await getDatabase<DatabaseContext>(core);
 
     const context = await createContext(core, undefined, undefined, undefined, true);
     const { Role, SiteRole } = db.models;

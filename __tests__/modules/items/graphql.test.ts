@@ -15,6 +15,7 @@ import { IDependencies } from '../../../src/types/system';
 
 import { createTestSite } from './utils';
 import { sqliteConfig } from '../../utils/config';
+import DatabaseContext from '../../../src/types/models';
 
 
 describe("modules:items:graphql", () => {
@@ -59,7 +60,7 @@ describe("modules:items:graphql", () => {
     } catch (err: any) {
       expect(err).toBeUndefined();
     }
-    const db = await getDatabase(core);
+    const db = await getDatabase<DatabaseContext>(core);
 
     const context = await createContext(core, undefined, undefined, undefined, true);
     const { Role } = db.models;
@@ -159,7 +160,7 @@ describe("modules:items:graphql", () => {
     } catch (err: any) {
       expect(err).toBeUndefined();
     }
-    const db = await getDatabase(core);
+    const db = await getDatabase<DatabaseContext>(core);
 
     const context = await createContext(core, undefined, undefined, undefined, true);
     const { Role } = db.models;

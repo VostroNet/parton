@@ -10,6 +10,7 @@ import { fieldHashModule } from '../../../../src/modules/utils/field-hash';
 import { roleUpsertModule } from '../../../../src/modules/utils/role-upsert';
 import { createContext, System } from '../../../../src/system';
 import { createBasicConfig } from '../utils';
+import DatabaseContext from '../../../../src/types/models';
 // import { SystemEvent } from '../../../src/types/events';
 
 // import { ItemData } from '../../../src/modules/items/types';
@@ -64,7 +65,7 @@ describe("modules:core:site", () => {
     } catch (err: any) {
       expect(err).toBeUndefined();
     }
-    const db = await getDatabase(core);
+    const db = await getDatabase<DatabaseContext>(core);
 
     const context = await createContext(core, undefined, undefined, undefined, true);
     const { Site } = db.models;
@@ -133,7 +134,7 @@ describe("modules:core:site", () => {
   //   } catch (err: any) {
   //     expect(err).toBeUndefined();
   //   }
-  //   const db = await getDatabase(core);
+  //   const db = await getDatabase<DatabaseContext>(core);
 
   //   const context = await createContext(core, undefined, undefined, true);
   //   const { Site } = db.models;
