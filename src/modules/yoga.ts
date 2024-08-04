@@ -1,9 +1,9 @@
 import { GraphQLSchema } from 'graphql';
-import { createYoga, YogaServerInstance } from 'graphql-yoga';
+import { createYoga, YogaInitialContext, YogaServerInstance } from 'graphql-yoga';
 
 import { System, SystemContext } from '../system';
 import { Role } from '../types/models/models/role';
-import { IModule } from '../types/system';
+import { Context, IModule } from '../types/system';
 import { createHexString } from '../utils/string';
 
 import { CoreModuleEvent as CoreModuleEvent, CoreModuleEvents } from './core';
@@ -25,6 +25,10 @@ export interface IYogaModule
   defaultId?: number;
 }
 
+export interface GraphQLContext extends YogaInitialContext, Context {
+  system: System;
+}
+
 export const yogaModule: IYogaModule = {
   name: 'yoga',
   dependencies: ['express'],
@@ -41,11 +45,15 @@ export const yogaModule: IYogaModule = {
     const yoga = createYoga({
       schema,
       batching: true,
-      context: {},
+      context: async(initialContext: GraphQLContext) => {
+        const context = await createContextFromRequest(initialContext.request as any, system) as SystemContext;
+        return context;
+      },
       graphiql: true,
       graphqlEndpoint: `/graphql.api/${hexId}`,
     });
     system.get<IYogaModule>('yoga').servers[hexId] = yoga;
+    return schema
   },
   [ExpressEvent.Initialize]: async (express, system) => {
     express.use(async (req, res, next) => {

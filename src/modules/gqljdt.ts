@@ -36,6 +36,7 @@ export const gqljdtModule: IGqlJdtModule = {
       system.get<IGqlJdtModule>('gqljdt').jdtCache = {};
     }
     system.get<IGqlJdtModule>('gqljdt').jdtCache[roleHex] = jtdMin;
+    return schema;
   },
   [ExpressEvent.Initialize]: async (express, system) => {
     express.get('/gqljdt.api', async (req, res) => {

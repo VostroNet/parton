@@ -8,7 +8,7 @@ import { roleUpsertModule } from "../../../src/modules/utils/role-upsert";
 import { createSiteSetupModule } from "../../../src/modules/items/setup";
 
 
-export async function createTestSite() {
+export async function createDynamicSite() {
   const publicItemRoleDoc: SiteRoleDoc = {
     items: {
       r: true,
@@ -61,7 +61,84 @@ export async function createTestSite() {
 }
 
 
-export function createTestSiteDefinition(name: string, hostnames: string[], def: boolean, itemRoles: { [roleName: string]: SiteRoleDoc }): ImportSite<any> {
+export async function createTestSite() {
+  const publicItemRoleDoc: SiteRoleDoc = {
+    items: {
+      r: true,
+      sets: [],
+    },
+    default: true,
+  };
+  const adminItemRoleDoc: SiteRoleDoc = {
+    items: {
+      r: true,
+      d: true,
+      w: true,
+      sets: [],
+    },
+  };
+  const publicRoleDoc: RoleDoc = {
+    schema: {
+      r: true,
+    },
+  };
+
+  const adminRoleDoc: RoleDoc = {
+    schema: {
+      r: true,
+      w: true,
+      d: true,
+    },
+  };
+  const itemRoles = {
+    admin: adminItemRoleDoc,
+    public: publicItemRoleDoc,
+  };
+  const siteModule = await createSiteSetupModule([
+    createTestSiteDefinition("test", ["test.com"], true, itemRoles),
+    createTestSiteDefinition("dynamic", ["dynamic.com"], false, itemRoles,  {
+      name: 'website',
+      type: ItemType.Folder,
+      templatePath: "/templates/page",
+      data: {
+        props: {
+          "title": "Page"
+        },
+        layout: {
+          path: "/layouts/main",
+          props: {
+            title: "Test"
+          }
+        },
+        sublayouts: [{
+          placeholder: "main",
+          path: "/sublayouts/sub1",
+        }, {
+          placeholder: "main",
+          path: "/sublayouts/sub2"
+        }],
+        dynamic: true
+      },
+    }),
+    createTestSiteDefinition("admin-only", ["admin-only.com"], false, {
+      admin: {
+        ...adminItemRoleDoc,
+        default: true
+      },
+    })
+  ]);
+  return {
+    siteModule,
+    roles: {
+      admin: adminRoleDoc,
+      public: publicRoleDoc,
+    },
+    siteRoles: itemRoles,
+  };
+}
+
+
+export function createTestSiteDefinition(name: string, hostnames: string[], def: boolean, itemRoles: { [roleName: string]: SiteRoleDoc }, website?: any): ImportSite<any> {
   return {
     name,
     displayName: name,
@@ -122,10 +199,28 @@ export function createTestSiteDefinition(name: string, hostnames: string[], def:
           }
         }
       ]
-    }, {
+    }, website ?? {
       name: 'website',
       type: ItemType.Folder,
       templatePath: "/templates/page",
+      data: {
+        props: {
+          "title": "Page"
+        },
+        layout: {
+          path: "/layouts/main",
+          props: {
+            title: "Test"
+          }
+        },
+        sublayouts: [{
+          placeholder: "main",
+          path: "/sublayouts/sub1",
+        }, {
+          placeholder: "main",
+          path: "/sublayouts/sub2"
+        }],
+      },
       children: [
         {
           name: 'sub',
@@ -223,6 +318,10 @@ export function createTestSiteDefinition(name: string, hostnames: string[], def:
     }],
   }
 }
+
+
+
+
 
 export async function createBasicConfig(name: string = "basic", defaultModules: any[] = []) {
   const { siteModule, roles } = await createTestSite();

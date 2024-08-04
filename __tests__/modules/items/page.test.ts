@@ -48,7 +48,7 @@ describe("modules:items:page", () => {
     const db = await getDatabase<DatabaseContext>(core);
 
     const context = await createContext(core, undefined, undefined, undefined, true);
-    const { Role } = db.models;
+    const { Role, Site } = db.models;
     const role = await Role.findOne(
       createOptions(context, { where: { name: 'public' } }),
     );
@@ -60,7 +60,15 @@ describe("modules:items:page", () => {
         doc: {
           default: true,
         },
-      }
+      },
+      include:[{
+        model: Site,
+        as: 'site',
+        required: true,
+        where: {
+          name: 'test'
+        }
+      }]
     }));
     expect(siteRoles).toBeDefined();
     expect(siteRoles).toHaveLength(1);
@@ -137,7 +145,7 @@ describe("modules:items:page", () => {
     const db = await getDatabase<DatabaseContext>(core);
 
     const context = await createContext(core, undefined, undefined, undefined, true);
-    const { Role, SiteRole } = db.models;
+    const { Role, Site } = db.models;
     const role = await Role.findOne(
       createOptions(context, { where: { name: 'public' } }),
     );
@@ -151,7 +159,15 @@ describe("modules:items:page", () => {
         doc: {
           default: true,
         },
-      }
+      },
+      include:[{
+        model: Site,
+        as: 'site',
+        required: true,
+        where: {
+          name: 'test'
+        }
+      }]
     }));
     expect(siteRoles).toBeDefined();
     expect(siteRoles).toHaveLength(1);
@@ -219,7 +235,7 @@ describe("modules:items:page", () => {
     const db = await getDatabase<DatabaseContext>(core);
 
     const systemContext = await createContext(core, undefined, undefined, undefined, true);
-    const { Role, SiteRole } = db.models;
+    const { Role, Site } = db.models;
     const role = await Role.findOne(
       createOptions(systemContext, { where: { name: 'public' } }),
     );
@@ -230,7 +246,15 @@ describe("modules:items:page", () => {
         doc: {
           default: true,
         },
-      }
+      },
+      include:[{
+        model: Site,
+        as: 'site',
+        required: true,
+        where: {
+          name: 'test'
+        }
+      }]
     }));
     expect(siteRoles).toBeDefined();
     expect(siteRoles).toHaveLength(1);
@@ -273,6 +297,250 @@ describe("modules:items:page", () => {
     expect(page?.sublayouts[1].props).toBeDefined();
     expect(page?.sublayouts[1].props).toEqual({});
 
+    await core.shutdown();
+  });
+  test("getPageResolver - get root url", async () => {
+
+    const { siteModule, roles } = await createTestSite();
+    const config: CoreConfig = {
+      name: 'data-test',
+      slices: [
+        dataModule,
+        coreModule,
+        itemModule,
+        fieldHashModule,
+        roleUpsertModule,
+        siteModule,
+      ],
+      clone: true,
+      roles,
+      data: {
+        reset: true,
+        sync: true,
+        sequelize: sqliteConfig,
+      },
+    };
+
+    const core = new System(config);
+    try {
+      await core.load();
+      await core.initialize();
+      await core.ready();
+    } catch (err: any) {
+      expect(err).toBeUndefined();
+    }
+    const db = await getDatabase<DatabaseContext>(core);
+
+    const systemContext = await createContext(core, undefined, undefined, undefined, true);
+    const { Role, Site } = db.models;
+    const role = await Role.findOne(
+      createOptions(systemContext, { where: { name: 'public' } }),
+    );
+    expect(role).toBeDefined();
+    expect(role).not.toBeNull();
+    const siteRoles = await role.getSiteRoles(createOptions(systemContext, {
+      where: {
+        doc: {
+          default: true,
+        },
+      },
+      include:[{
+        model: Site,
+        as: 'site',
+        required: true,
+        where: {
+          name: 'test'
+        }
+      }]
+    }));
+    expect(siteRoles).toBeDefined();
+    expect(siteRoles).toHaveLength(1);
+    const siteRole = siteRoles[0]
+
+
+    const context = await createContextFromRequest({ hostname: 'localhost' } as any, core, false);
+
+    const page = await getPageResolver({}, { uri: 'https://localhost:1233/', levels: 0 }, context);
+    expect(page).toBeDefined();
+    expect(page?.layout).toBeDefined();
+    expect(page?.layout?.path).toBe('/layouts/main');
+    expect(page?.layout?.props).toBeDefined();
+    expect(page?.layout?.props?.title).toBe('Test')
+    expect(page?.sublayouts).toBeDefined();
+    expect(page?.props).toBeDefined();
+    expect(page?.props?.title).toBe('Page');
+
+    const pageItemId = siteRole?.cacheDoc?.web?.paths['/'];
+    // const pageItem = role?.cacheDoc.data?.items[pageItemId];
+    expect(page?.id).toBeDefined();
+    expect(page?.id).toBe(pageItemId);
+    expect(page?.values).toBeDefined();
+    expect(page?.name).toBeDefined();
+    expect(page?.name).toBe('website');
+    // expect(page?.displayName).toBeDefined();
+    // expect(page?.displayName).toBe('Sub');
+    expect(page?.webPath).toBeDefined();
+    expect(page?.webPath).toBe('/');
+    await core.shutdown();
+  });
+
+  test("getPageResolver - get root url - dynamic", async () => {
+
+    const { siteModule, roles } = await createTestSite();
+    const config: CoreConfig = {
+      name: 'data-test',
+      slices: [
+        dataModule,
+        coreModule,
+        itemModule,
+        fieldHashModule,
+        roleUpsertModule,
+        siteModule,
+      ],
+      clone: true,
+      roles,
+      data: {
+        reset: true,
+        sync: true,
+        sequelize: sqliteConfig,
+      },
+    };
+
+    const core = new System(config);
+    try {
+      await core.load();
+      await core.initialize();
+      await core.ready();
+    } catch (err: any) {
+      expect(err).toBeUndefined();
+    }
+    const db = await getDatabase<DatabaseContext>(core);
+
+    const systemContext = await createContext(core, undefined, undefined, undefined, true);
+    const { Role, SiteRole, Site } = db.models;
+    const role = await Role.findOne(
+      createOptions(systemContext, { where: { name: 'public' } }),
+    );
+    expect(role).toBeDefined();
+    expect(role).not.toBeNull();
+    const siteRoles = await role.getSiteRoles(createOptions(systemContext, {
+      include:[{
+        model: Site,
+        as: 'site',
+        required: true,
+        where: {
+          name: 'dynamic'
+        }
+      }]
+    }));
+    expect(siteRoles).toBeDefined();
+    expect(siteRoles).toHaveLength(1);
+    const siteRole = siteRoles[0]
+
+
+    const context = await createContextFromRequest({ hostname: 'dynamic.com' } as any, core, false);
+
+    const page = await getPageResolver({}, { uri: 'https://dynamic.com/', levels: 0 }, context);
+    expect(page).toBeDefined();
+    expect(page?.layout).toBeDefined();
+    expect(page?.layout?.path).toBe('/layouts/main');
+    expect(page?.layout?.props).toBeDefined();
+    expect(page?.layout?.props?.title).toBe('Test')
+    expect(page?.sublayouts).toBeDefined();
+    expect(page?.props).toBeDefined();
+    expect(page?.props?.title).toBe('Page');
+
+    const pageItemId = siteRole?.cacheDoc?.web?.paths['/**/*'];
+    // const pageItem = role?.cacheDoc.data?.items[pageItemId];
+    expect(page?.id).toBeDefined();
+    expect(page?.id).toBe(pageItemId);
+    expect(page?.values).toBeDefined();
+    expect(page?.name).toBeDefined();
+    expect(page?.name).toBe('website');
+    // expect(page?.displayName).toBeDefined();
+    // expect(page?.displayName).toBe('Sub');
+    expect(page?.webPath).toBeDefined();
+    expect(page?.webPath).toBe('/');
+    await core.shutdown();
+  });
+  
+  test("getPageResolver - get sub url - dynamic", async () => {
+
+    const { siteModule, roles } = await createTestSite();
+    const config: CoreConfig = {
+      name: 'data-test',
+      slices: [
+        dataModule,
+        coreModule,
+        itemModule,
+        fieldHashModule,
+        roleUpsertModule,
+        siteModule,
+      ],
+      clone: true,
+      roles,
+      data: {
+        reset: true,
+        sync: true,
+        sequelize: sqliteConfig,
+      },
+    };
+
+    const core = new System(config);
+    try {
+      await core.load();
+      await core.initialize();
+      await core.ready();
+    } catch (err: any) {
+      expect(err).toBeUndefined();
+    }
+    const db = await getDatabase<DatabaseContext>(core);
+
+    const systemContext = await createContext(core, undefined, undefined, undefined, true);
+    const { Role, Site } = db.models;
+    const role = await Role.findOne(
+      createOptions(systemContext, { where: { name: 'public' } }),
+    );
+    expect(role).toBeDefined();
+    expect(role).not.toBeNull();
+    const siteRoles = await role.getSiteRoles(createOptions(systemContext, {
+      include:[{
+        model: Site,
+        as: 'site',
+        required: true,
+        where: {
+          name: 'dynamic'
+        }
+      }]
+    }));
+    expect(siteRoles).toBeDefined();
+    expect(siteRoles).toHaveLength(1);
+    const siteRole = siteRoles[0]
+
+
+    const context = await createContextFromRequest({ hostname: 'dynamic.com' } as any, core, false);
+
+    const page = await getPageResolver({}, { uri: 'https://dynamic.com/randoms', levels: 0 }, context);
+    expect(page).toBeDefined();
+    expect(page?.layout).toBeDefined();
+    expect(page?.layout?.path).toBe('/layouts/main');
+    expect(page?.layout?.props).toBeDefined();
+    expect(page?.layout?.props?.title).toBe('Test')
+    expect(page?.sublayouts).toBeDefined();
+    expect(page?.props).toBeDefined();
+    expect(page?.props?.title).toBe('Page');
+
+    const pageItemId = siteRole?.cacheDoc?.web?.paths['/**/*'];
+    // const pageItem = role?.cacheDoc.data?.items[pageItemId];
+    expect(page?.id).toBeDefined();
+    expect(page?.id).toBe(pageItemId);
+    expect(page?.values).toBeDefined();
+    expect(page?.name).toBeDefined();
+    expect(page?.name).toBe('website');
+    // expect(page?.displayName).toBeDefined();
+    // expect(page?.displayName).toBe('Sub');
+    expect(page?.webPath).toBeDefined();
+    expect(page?.webPath).toBe('/randoms');
     await core.shutdown();
   });
 });

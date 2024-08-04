@@ -21,6 +21,7 @@ import { createContextFromRequest, ExpressEvent, ExpressModuleEvents } from '../
 import { generateTypes } from './functions/generate-types';
 import models from './models';
 import { RoleDoc } from './types';
+import { SystemEvent } from '../../types/events';
 
 export enum CoreModuleEvent {
   GraphQLSchemaConfigure = 'core:graphql-schema:configure',
@@ -40,7 +41,7 @@ export interface CoreModuleEvents {
     schema: GraphQLSchema,
     role: Role,
     core: System,
-  ) => Promise<void>;
+  ) => Promise<GraphQLSchema>;
   [CoreModuleEvent.AuthProviderRegister]?: (passport: PassportStatic, system: System) => Promise<IAuthProvider>;
   [CoreModuleEvent.AuthLoginSuccessResponse]?: (loginResponse: any, user: User, context: Context) => Promise<any>
 }
@@ -66,11 +67,21 @@ export const coreModule: ICoreModule = {
   schemas: {},
   models,
   ignore: ['schemas', 'models'],
+  [SystemEvent.Initialize]: async (system: System) => {
+    system.setOptions(CoreModuleEvent.GraphQLSchemaConfigure, {
+      ignoreReturn: true,
+    });
+    return system;
+  },
   // [SystemEvent.ContextCreate]: async (context, system) => {
 
   //   return context;
   // },
   [DataEvent.Loaded]: async (system, gqlManager) => {
+
+    // system.setOptions(CoreModuleEvent.GraphQLSchemaCreate, {
+    //   ignoreReturn: true,
+    // });
     const db = await getDatabase(system);
     const { Role } = db.models;
     const roles = await Role.findAll(
@@ -83,14 +94,25 @@ export const coreModule: ICoreModule = {
     await waterfall(roles, async (role: Role) => {
       const roleDoc: RoleDoc = role.doc;
       const schema = await buildSchemaFromDatabase(system, roleDoc, gqlManager);
+      if (!schema) {
+        system.logger.error(`no schema returned for role ${role.name}`);
+        return;
+      }
       const schemas = await system.all<GraphQLSchema>(
         CoreModuleEvent.GraphQLSchemaConfigure,
         role,
         system,
       );
+      system.logger.info(`stitching schemas for role ${role.name}`, schemas);
       const newSchema = stitchSchemas({
-        subschemas: [schema, ...schemas.filter((s) => s)],
+        subschemas: [
+          schema, ...schemas.filter((s) => s)
+        ],
       });
+      if(!newSchema) {
+        system.logger.error(`no stitched schema returned for role ${role.name}`);
+        return;
+      }
 
       system.get<ICoreModule>('core').schemas[role.name] = newSchema;
       await system.execute(

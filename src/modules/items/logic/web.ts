@@ -18,6 +18,7 @@ import { getItemByPath } from '../utils';
 import { getDatabase, getSystemFromContext } from '../../data';
 import { createContextFromRequest } from '../../express';
 import { SystemContext } from '../../../system';
+import { minimatch } from 'minimatch';
 
 // export function getTopItemFromUri(store: RoleWebCacheDoc, uri: Url.URL) {
 //   const hostname = uri
@@ -46,9 +47,19 @@ export async function getPageFromSiteRoleWebCache(
   webPath: string,
   levels: number = 0,
 ): Promise<Page | undefined> {
-  const itemId = rwcd.web?.paths[webPath];
+  let itemId = rwcd.web?.paths[webPath];
   if (!itemId) {
-    return undefined;
+    for (const path in rwcd.web.paths) {
+      if (minimatch(webPath, path, {
+        // matchBase: true,
+        partial: true,
+      })) {
+        itemId = rwcd.web.paths[path];
+      }
+    }
+    if (!itemId) {
+      return undefined;
+    }
   }
   const item: Item<ItemPageData> = rwcd.data.items[itemId];
   return getPageFromItem(rwcd, item, webPath, levels);
@@ -64,6 +75,7 @@ export async function getPageFromItem(
   const layout = item.data?.layout;
   if (!layout?.path) {
     // if no layout path is defined, we can't render the page
+    console.warn(`No layout path defined for item ${item.id}`);
     return undefined;
   }
   const layoutItem = getItemByPath<ItemLayoutData>(layout.path, store);
