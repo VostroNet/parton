@@ -268,21 +268,24 @@ export function isItemReadable(itemPath: string, permissions: ItemPermissions) {
   if (permissions?.r) {
     return true;
   }
-  return permissions.sets
-    .filter(
-      (set) =>
-        set.paths.filter((setPath) => {
-          if (setPath !== itemPath) {
-            const result = minimatch(itemPath, setPath, {
-              partial: true,
-              matchBase: true,
-            });
-            return result;
-          }
-          return true;
-        }).length > 0,
-    )
-    .reduce((o: boolean, set) => {
-      return o || set.permission.r === true;
-    }, false);
+  if (permissions.sets) {
+    return permissions.sets
+      .filter(
+        (set) =>
+          set.paths?.filter((setPath) => {
+            if (setPath !== itemPath) {
+              const result = minimatch(itemPath, setPath, {
+                partial: true,
+                matchBase: true,
+              });
+              return result;
+            }
+            return true;
+          }).length > 0,
+      )
+      .reduce((o: boolean, set) => {
+        return o || set.permission.r === true;
+      }, false);
+  }
+  return false;
 }

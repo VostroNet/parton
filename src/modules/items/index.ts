@@ -206,8 +206,15 @@ export const itemModule: ItemModule = {
               webPath: String
               props: JSON
               layout: Layout
-              sublayouts: [Layout]
+              sublayouts: [Sublayout]
               children: [Page]
+            }
+            type Sublayout {
+              id: ID!
+              path: String
+              placeholder: String
+              index: Int
+              props: JSON
             }
             type Layout {
               id: ID!
