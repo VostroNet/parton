@@ -1,10 +1,10 @@
-import { SystemEvents, SystemEvent } from "../../types/events";
-import { DataEvents } from "../data";
-import { HealthzEvent, HealthzEvents } from "../healthz";
+import { SystemEvents, SystemEvent } from "../types/events";
+import { DataEvents } from "./data";
+import { HealthzEvent, HealthzEvents } from "./healthz";
 import moment, { Moment } from "moment";
 import schedule from "node-schedule";
 import cronParser from "cron-parser";
-import { System } from "../../system";
+import { System } from "../system";
 
 export interface ICronModule extends SystemEvents, DataEvents, HealthzEvents {
   disableHealthzValidation?: boolean;
@@ -37,15 +37,15 @@ export function createCronModule(options: ICronModuleOptions): ICronModule {
     job: undefined,
     lock: false,
     ...options,
-    async[SystemEvent.Initialize](core: System) {
+    [SystemEvent.Initialize]: async function (core: System) {
       this.healthzInterval = calculateCronInterval(this.schedule);
       return core;
     },
-    async[SystemEvent.Ready](core: System) {
+    [SystemEvent.Ready]: async function (core: System) {
       this.lastPoll = moment();
       this.job = schedule.scheduleJob(this.schedule, async () => {
         if (this.lock) { //TODO: add skip check for healthz
-          console.warn('Cron job already running, skipping this run');
+          core.logger.warn('Cron job already running, skipping this run');
           return;
         }
 
@@ -68,7 +68,7 @@ export function createCronModule(options: ICronModuleOptions): ICronModule {
       core.logger.debug(`cron module loaded: ${this.eventKey} - ${this.schedule}`, this);
       return core;
     },
-    async[SystemEvent.Shutdown](core: System) {
+    [SystemEvent.Shutdown]: async function (core: System) {
       if (this.job) {
         this.job.cancel();
       }
@@ -79,9 +79,9 @@ export function createCronModule(options: ICronModuleOptions): ICronModule {
     cronModule[HealthzEvent.Check] = async function (this: ICronModule, prevResult: boolean, core: System) {
       const lastPoll = Math.abs(moment().diff(this.lastPoll, "seconds"));
       if (!(lastPoll > this.healthzInterval)) {
-        return true;
+        return false;
       }
-      return false;
+      return true;
     }
   }
   return cronModule;

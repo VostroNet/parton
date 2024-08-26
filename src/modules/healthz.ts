@@ -26,11 +26,11 @@ export interface HealthzModule extends IModule {
 export const healthzModule: IModule = {
   name: 'healthz',
   dependencies: [],
-  [SystemEvent.Ready]: async (system, module: HealthzModule) => {
-    module.expressApp = express();
-    module.expressApp.get('/healthz', async (req, res) => {
+  [SystemEvent.Ready]: async function (this: HealthzModule, system) {
+    this.expressApp = express();
+    this.expressApp.get('/healthz', async (req, res) => {
       const status = await system.condition(HealthzEvent.Check, async (result: boolean) => {
-        return !result; //we use conditional event to skip remaining handlers if result is false
+        return result; //we use conditional event to skip remaining handlers if result is false
       }, true, system);
       if (status) {
         return res.status(200).send("OK");
@@ -38,12 +38,12 @@ export const healthzModule: IModule = {
         return res.status(500).send("Not OK");
       }
     });
-    module.server = module.expressApp.listen(system.getConfig<HealthzConfig>().healthzPort || 9876);
+    this.server = this.expressApp.listen(system.getConfig<HealthzConfig>().healthzPort || 9876);
     return system;
   },
-  [System.Shutdown]: (system, module: HealthzModule) => {
+  [System.Shutdown]: async function (this: HealthzModule, system,) {
     return new Promise((resolve, reject) => {
-      module.server?.close((err) => {
+      this.server?.close((err) => {
         if (err) {
           reject(err);
         } else {
