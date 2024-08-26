@@ -2,9 +2,9 @@
   "extends": "@tsconfig/node20/tsconfig.json",
   "compilerOptions": {
     "lib": ["ESNext"],
-    "module": "esnext",
-    "target": "es2022",
-    "moduleResolution": "bundler",
+    "module": "Preserve",
+    "target": "ESNext",
+    "moduleResolution": "Bundler",
     "moduleDetection": "force",
     "allowImportingTsExtensions": false,
     "noEmit": false,
@@ -12,16 +12,19 @@
     "strict": false,
     // "downlevelIteration": true,
     "skipLibCheck": true,
-    // "allowSyntheticDefaultImports": true,
-    // "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
     "types": ["@types/node"],
 
     "outDir": "lib/",
     "sourceMap": true,
-    "declaration": true
+    "declaration": true,
+    // "isolatedModules": true,
+    // "importsNotUsedAsValues": "remove",
+    // "importHelpers": true
   },
-
+  
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts", "lib"],
   "watchOptions": {

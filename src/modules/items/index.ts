@@ -17,7 +17,7 @@ import {
 import { DataContext } from '../data/types';
 
 import { getPageResolver } from './logic/web';
-import models from './models';
+import models from './models/index';
 import {
   Item,
   ItemData,
@@ -125,7 +125,7 @@ function createPathFromItem(
 
 let schema: GraphQLSchema | null = null;
 
-export const itemModule: ItemModule = {
+export const itemsModule: ItemModule = {
   name: 'item',
   models,
   dependencies: ['data'],
@@ -237,4 +237,4 @@ export const itemModule: ItemModule = {
     return schema;
   },
 };
-export default itemModule;
+export default itemsModule;

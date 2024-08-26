@@ -11,5 +11,9 @@ package-lock.json
 *.sqlite
 .results/
 lib/
+cjs/
 .devcontainer/persistence
 .pnpm-store
+.swc
+.yalc/
+yalc.lock

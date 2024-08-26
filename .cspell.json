@@ -4,6 +4,7 @@
   "language": "en",
   "words": [
     "Auths",
+    "azerothian",
     "bitauth",
     "bitjson",
     "cimg",
@@ -36,6 +37,7 @@
     "libauth",
     "Mergeable",
     "mkdir",
+    "ossp",
     "plpgsql",
     "prettierignore",
     "randomblob",

@@ -15,8 +15,8 @@ export enum HealthzEvent {
 }
 
 export type HealthzEvents = {
-  [HealthzEvent.Check]?(core: System, module: IModule): Promise<boolean>;
-  [HealthzEvent.Check]?: (core: System, module: IModule) => Promise<boolean>;
+  [HealthzEvent.Check]?(prevResult: boolean, core: System, module: IModule): Promise<boolean>;
+  [HealthzEvent.Check]?: (prevResult: boolean, core: System, module: IModule) => Promise<boolean>;
 };
 export interface HealthzModule extends IModule {
   expressApp?: express.Express;
@@ -30,8 +30,8 @@ export const healthzModule: IModule = {
     module.expressApp = express();
     module.expressApp.get('/healthz', async (req, res) => {
       const status = await system.condition(HealthzEvent.Check, async (result: boolean) => {
-        return result; //we use conditional event to skip remaining handlers if result is false
-      }, system);
+        return !result; //we use conditional event to skip remaining handlers if result is false
+      }, true, system);
       if (status) {
         return res.status(200).send("OK");
       } else {

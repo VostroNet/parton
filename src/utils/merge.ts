@@ -8,7 +8,7 @@ import {
 } from 'graphql';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const deepmerge = require('deepmerge');
+import deepmerge from 'deepmerge';
 
 function isPrimitive(test: any) {
   return test !== Object(test);

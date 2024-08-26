@@ -321,7 +321,7 @@ export const dataModule: DataModule = {
     }
     await core.get<DataModule>('data').gqlManager?.initialise();
     if (cfg.data.reset) {
-      await core.get<DataModule>('data').gqlManager?.reset();
+      await core.get<DataModule>('data').gqlManager?.reset({});
     }
     if (cfg.data.sync) {
       await core.get<DataModule>('data').gqlManager?.sync();

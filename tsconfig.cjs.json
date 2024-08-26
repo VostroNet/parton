@@ -3,7 +3,7 @@
     "lib": ["ESNext"],
     "module": "CommonJS",
     "target": "ES2020",
-    "outDir": "lib/cjs",
+    "outDir": "cjs",
     "moduleResolution": "Node",
     "moduleDetection": "force",
     "allowImportingTsExtensions": false,
@@ -18,10 +18,10 @@
       "@types/node" // add Bun global
     ],
     "sourceMap": true,
-    "declaration": true,
+    "declaration": false,
     "esModuleInterop": true
   },
 
   "include": ["src/**/*"],
-  "exclude": ["node_modules/**", "src/examples/**", "lib/**"]
+  "exclude": ["node_modules/**", "src/examples/**", "lib/**", "cjs/**", "types/**"]
 }

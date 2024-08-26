@@ -69,4 +69,5 @@ export interface FindOptions extends SFindOptions {
   stripTransaction?: boolean;
   transaction?: Transaction;
   disableEventLog?: boolean;
+  conflictFields?: string[];
 }

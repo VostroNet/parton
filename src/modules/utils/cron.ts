@@ -44,11 +44,12 @@ export function createCronModule(options: ICronModuleOptions): ICronModule {
     async[SystemEvent.Ready](core: System) {
       this.lastPoll = moment();
       this.job = schedule.scheduleJob(this.schedule, async () => {
-        this.lastPoll = moment();
         if (this.lock) { //TODO: add skip check for healthz
           console.warn('Cron job already running, skipping this run');
           return;
         }
+
+        this.lastPoll = moment();
         try {
           this.lock = true;
           await core.execute(this.eventKey, core);
@@ -75,8 +76,9 @@ export function createCronModule(options: ICronModuleOptions): ICronModule {
     }
   };
   if (!options.disableHealthzValidation) {
-    cronModule[HealthzEvent.Check] = async function (this: ICronModule, core: System) {
-      if (!(moment().diff(this.lastPoll, "seconds") > this.healthzInterval)) {
+    cronModule[HealthzEvent.Check] = async function (this: ICronModule, prevResult: boolean, core: System) {
+      const lastPoll = Math.abs(moment().diff(this.lastPoll, "seconds"));
+      if (!(lastPoll > this.healthzInterval)) {
         return true;
       }
       return false;

@@ -26,6 +26,7 @@ describe("modules:items:graphql", () => {
     const schemaCollector: IDependencies & CoreModuleEvents = {
       [CoreModuleEvent.GraphQLSchemaCreate]: async (schema: GraphQLSchema, role: Role) => {
         schemas[role.name] = schema;
+        return schema;
       }
     }
 
@@ -129,6 +130,7 @@ describe("modules:items:graphql", () => {
     const schemaCollector: IDependencies & CoreModuleEvents = {
       [CoreModuleEvent.GraphQLSchemaCreate]: async (schema: GraphQLSchema, role: Role) => {
         schemas[role.name] = schema;
+        return schema;
       }
     }
 

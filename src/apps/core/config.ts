@@ -1,13 +1,13 @@
 import coreModule from '../../modules/core';
 import { CoreConfig } from '../../modules/core/types';
 import dataModule from '../../modules/data';
-import itemModule from '../../modules/items';
+import itemsModule from '../../modules/items';
 
 import adminRole from './roles/admin';
 
 const config: CoreConfig = {
   name: 'core',
-  slices: [coreModule, dataModule, itemModule],
+  slices: [coreModule, dataModule, itemsModule],
   roles: {
     admin: adminRole,
   },

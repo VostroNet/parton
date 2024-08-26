@@ -48,14 +48,14 @@ const siteDefinition: IHashDefinition = {
           const system = getSystemFromContext(context);
           const dialect = system.getConfig<DataConfig>().data.sequelize.dialect;
           const db = await getDatabase(system);
-          let hostfilter = db.literal(`"doc"->'hostnames' ? ${db.escape(hostname)}`);
+          let hostFilter = db.literal(`"doc"->'hostnames' ? ${db.escape(hostname)}`);
           if (dialect === "sqlite") {
-            hostfilter = db.literal(`"doc"->'hostnames' LIKE ${db.escape(`%${hostname}%`)}`);
+            hostFilter = db.literal(`"doc"->'hostnames' LIKE ${db.escape(`%${hostname}%`)}`);
           }
           const { Site } = db.models;
           let site = await Site.findOne(
             createOptions(context, {
-              where: hostfilter
+              where: hostFilter
             }),
           );
           if (!site) {
