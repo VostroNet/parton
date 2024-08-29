@@ -9,6 +9,40 @@ import DatabaseContext from '../../../src/types/models';
 
 
 describe('modules:data:migrations', () => {
+  test('testing with no migrations', async () => {
+    const config: CoreConfig = {
+      name: 'data-test',
+      slices: [dataModule, coreModule, migrationModule],
+      clone: true,
+      data: {
+        reset: true,
+        sync: true,
+        sequelize: {
+          dialect: 'sqlite',
+          storage: ':memory:',
+          logging: false,
+        },
+      },
+      migrations: {
+        fake: false,
+        path: "./__tests__/modules/migration/data/empty"
+      }
+    };
+    const core = new System(config);
+    try {
+      await core.load();
+      await core.initialize();
+      await core.ready();
+
+    } catch (err: any) {
+      expect(err).toBeUndefined();
+      // expect(err.message).toBe('no role provided to validate find options');
+    }
+    const db = await getDatabase<DatabaseContext>(core);
+    const [results] = await db.query('SELECT * FROM "SequelizeMeta";') as { name: string }[][];
+    expect(results).toHaveLength(0);
+    await core.shutdown();
+  });
   test('testing a basic migration', async () => {
     const config: CoreConfig = {
       name: 'data-test',
@@ -25,7 +59,7 @@ describe('modules:data:migrations', () => {
       },
       migrations: {
         fake: false,
-        path: "./__tests__/modules/data/migrations/basic"
+        path: "./__tests__/modules/migration/data/basic"
       }
     };
     const core = new System(config);
@@ -60,7 +94,7 @@ describe('modules:data:migrations', () => {
       },
       migrations: {
         fake: false,
-        path: "./__tests__/modules/data/migrations/complex"
+        path: "./__tests__/modules/migration/data/complex"
       }
     };
     const core = new System(config);
@@ -102,7 +136,7 @@ describe('modules:data:migrations', () => {
       },
       migrations: {
         fake: false,
-        path: "./__tests__/modules/data/migrations/failure"
+        path: "./__tests__/modules/migration/data/failure"
       }
     };
     const core = new System(config);
