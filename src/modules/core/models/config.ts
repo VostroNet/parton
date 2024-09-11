@@ -1,6 +1,7 @@
 import DataTypes from '../../../types/data-types';
+import { IDefinition } from '../types';
 
-export default {
+const Config: IDefinition = {
   name: 'Config',
   comment: 'Configurations',
   define: {
@@ -23,3 +24,5 @@ export default {
     tableName: 'configs',
   },
 };
+
+export default Config;

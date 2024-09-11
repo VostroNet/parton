@@ -1,6 +1,8 @@
 import DataTypes from '../../../types/data-types';
+import { IDefinition } from '../types';
 
-export default {
+
+const EventLog: IDefinition = {
   name: 'EventLog',
   define: {
     action: { type: DataTypes.STRING, allowNull: false },
@@ -15,7 +17,9 @@ export default {
       type: 'belongsTo',
       model: 'User',
       name: 'user',
-      options: { foreignKey: 'userId', target: 'id' },
+      options: { foreignKey: 'userId' },
     },
   ],
 };
+
+export default EventLog;

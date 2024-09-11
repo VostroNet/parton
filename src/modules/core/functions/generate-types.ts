@@ -132,11 +132,11 @@ async function processModel(
                   break;
                 case 'set':
                   accessorLog += ` set`;
-                  instanceMethods += `  ${accessorName}(item${
-                    isMultiple ? 's' : ''
+                  instanceMethods += `  ${accessorName}(item${isMultiple ? 's' : ''
+                    }: ${assoc.target.name
                   }: ${
                     assoc.target.name
-                  }${isMultiple}, options: DbOptions): Promise<void>;\n`;
+                    }${isMultiple}, options: DbOptions): Promise<void>;\n`;
                   break;
                 case 'create':
                   accessorLog += ` create`;
@@ -263,11 +263,11 @@ async function processModel(
     }, '');
   //TODO: add eslint check for DbOptions
   const code = `/* eslint-disable @typescript-eslint/no-unused-vars */
-${
+${eslintHeader
   eslintHeader
-    ? '/* eslint-disable @typescript-eslint/no-empty-interface */\n'
-    : ''
-}
+      ? '/* eslint-disable @typescript-eslint/no-empty-interface */\n'
+      : ''
+    }
 import {DbOptions, Model} from "../data";
 
 ${associatedImports}
@@ -279,9 +279,9 @@ ${fields}
 }
 
 export class ${modelName} extends Model<${modelName}Attributes, ${modelName}CreationAttributes> {
-${fields || '\n'}${associations || '\n'}${
+${fields || '\n'}${associations || '\n'}${instanceMethods || '\n'
     instanceMethods || '\n'
-  }${classMethods}
+    }${classMethods}
 }
 ${after}`;
   // console.log("out", code);

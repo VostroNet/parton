@@ -53,9 +53,9 @@ export interface IAuthProvider {
 
 export interface ICoreModule
   extends DataModule,
-    ClIModule,
-    CoreModuleEvents,
-    ExpressModuleEvents {
+  ClIModule,
+  CoreModuleEvents,
+  ExpressModuleEvents {
   schemas: {
     [key: string]: GraphQLSchema;
   };
@@ -109,7 +109,7 @@ export const coreModule: ICoreModule = {
           schema, ...schemas.filter((s) => s)
         ],
       });
-      if(!newSchema) {
+      if (!newSchema) {
         system.logger.error(`no stitched schema returned for role ${role.name}`);
         return;
       }
@@ -180,7 +180,7 @@ export const coreModule: ICoreModule = {
         return done(err, undefined);
       }
     });
-    
+
     const jsonParser = bodyParser.json();
     express.use(passport.initialize());
     express.use(passport.session());
@@ -190,17 +190,17 @@ export const coreModule: ICoreModule = {
       }
       return next();
     });
-    express.get('/auth.api/logout', async(req, res) => {
+    express.get('/auth.api/logout', async (req, res) => {
       const context = await createContextFromRequest(req, system, true);
       const user = await context.getUser();
-      if(user) {
+      if (user) {
         await system.execute(CoreModuleEvent.AuthLogoutRequest, user, context);
         // this feels unnecessary
         try {
           await (req as any).logoutAsync({
             keepSessionInfo: false,
           });
-        } catch(err: any) {
+        } catch (err: any) {
           system.logger.error(err);
         }
       }
@@ -229,7 +229,7 @@ export const coreModule: ICoreModule = {
       }
     });
     express.use(async (req, res, next) => {
-      for(const bearerProvider of bearerProviders) {
+      for (const bearerProvider of bearerProviders) {
         try {
           const response = (await authenticateAsync(passport,
             bearerProvider,
