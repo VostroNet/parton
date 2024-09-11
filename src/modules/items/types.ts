@@ -92,7 +92,7 @@ export interface ItemPermissionSet {
 }
 
 export interface ItemPermissions extends ItemPermission {
-  sets: ItemPermissionSet[];
+  sets?: ItemPermissionSet[];
 }
 
 export interface SiteRoleDoc {
