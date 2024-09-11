@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-empty-interface */
+  /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import {DbOptions, Model} from "../data";
 
@@ -52,3 +52,4 @@ export class Site extends Model<SiteAttributes, SiteCreationAttributes> {
 
 }
 export interface SiteGetSiteByHostnameArgs { }
+ 

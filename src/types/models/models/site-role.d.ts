@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-empty-interface */
+  /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import {DbOptions, Model} from "../data";
 
@@ -53,3 +53,4 @@ export class SiteRole extends Model<SiteRoleAttributes, SiteRoleCreationAttribut
 
 }
 export interface SiteRoleUpdateCacheArgs { }
+ 

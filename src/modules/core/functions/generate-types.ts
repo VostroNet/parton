@@ -133,10 +133,7 @@ async function processModel(
                 case 'set':
                   accessorLog += ` set`;
                   instanceMethods += `  ${accessorName}(item${isMultiple ? 's' : ''
-                    }: ${assoc.target.name
-                  }: ${
-                    assoc.target.name
-                    }${isMultiple}, options: DbOptions): Promise<void>;\n`;
+                    }: ${assoc.target.name}${isMultiple}, options: DbOptions): Promise<void>;\n`;
                   break;
                 case 'create':
                   accessorLog += ` create`;
@@ -263,8 +260,7 @@ async function processModel(
     }, '');
   //TODO: add eslint check for DbOptions
   const code = `/* eslint-disable @typescript-eslint/no-unused-vars */
-${eslintHeader
-  eslintHeader
+  ${eslintHeader
       ? '/* eslint-disable @typescript-eslint/no-empty-interface */\n'
       : ''
     }
@@ -279,11 +275,9 @@ ${fields}
 }
 
 export class ${modelName} extends Model<${modelName}Attributes, ${modelName}CreationAttributes> {
-${fields || '\n'}${associations || '\n'}${instanceMethods || '\n'
-    instanceMethods || '\n'
-    }${classMethods}
+${fields || '\n'}${associations || '\n'}${instanceMethods || '\n'}${classMethods}
 }
-${after}`;
+${after} `;
   // console.log("out", code);
   const fileName = camelToSnakeCase(uncapitalize(modelName), '-');
   try {

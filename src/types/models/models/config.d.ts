@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-
+  
 import {DbOptions, Model} from "../data";
 
 
@@ -27,3 +27,4 @@ export class Config extends Model<ConfigAttributes, ConfigCreationAttributes> {
 
 
 }
+ 

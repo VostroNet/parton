@@ -1,6 +1,6 @@
 {
   "name": "@parton/core",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "parton",
   "main": "lib/index.js",
   "module": "lib/index.js",

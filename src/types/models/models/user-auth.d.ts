@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-
+  
 import {DbOptions, Model} from "../data";
 
 import {User} from "./user";
@@ -36,3 +36,4 @@ export class UserAuth extends Model<UserAuthAttributes, UserAuthCreationAttribut
   setUser(item: User, options: DbOptions): Promise<void>;
 
 }
+ 

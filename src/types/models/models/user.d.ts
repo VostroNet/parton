@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-
+  
 import {DbOptions, Model} from "../data";
 
 import {Role} from "./role";
@@ -54,3 +54,4 @@ export class User extends Model<UserAttributes, UserCreationAttributes> {
   setRole(item: Role, options: DbOptions): Promise<void>;
 
 }
+ 
