@@ -21,6 +21,7 @@ import { validateFindOptions, validateMutation } from './validation';
 export enum DataEvent {
   Initialize = 'data:initialize',
   Configure = 'data:configure',
+  ConfigureComplete = 'data:configure-complete',
   Setup = 'data:setup',
   Loaded = 'data:loaded',
   ModelHook = 'data:model-hook',
@@ -31,6 +32,10 @@ export type DataEvents = {
     core: System,
   ) => Promise<void>;
   readonly [DataEvent.Configure]?: (
+    models: { [key: string]: any },
+    core: System,
+  ) => Promise<{ [key: string]: any }>;
+  readonly [DataEvent.ConfigureComplete]?: (
     models: { [key: string]: any },
     core: System,
   ) => Promise<{ [key: string]: any }>;
@@ -260,6 +265,7 @@ export const dataModule: DataModule = {
     }, {} as any);
 
     models = await core.execute(DataEvent.Configure, models, core);
+    models = await core.execute(DataEvent.ConfigureComplete, models, core);
 
     const globalHooks = Object.keys(DataHookEvent).reduce((hooks, hookName) => {
       const dataHookCrumbName = (DataHookEvent as any)[hookName];
