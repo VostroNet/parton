@@ -31,14 +31,14 @@ export enum ExpressEvent {
   ExpressSessionConfigure = 'express:session:configure',
 }
 
-const ExpressEventRequest: { [key: string]: ExpressEvent } = {
-  get: ExpressEvent.Get,
-  post: ExpressEvent.Post,
-  put: ExpressEvent.Put,
-  patch: ExpressEvent.Patch,
-  delete: ExpressEvent.Delete,
-  // use: ExpressEvent.Use,
-};
+// const ExpressEventRequest: { [key: string]: ExpressEvent } = {
+//   get: ExpressEvent.Get,
+//   post: ExpressEvent.Post,
+//   put: ExpressEvent.Put,
+//   patch: ExpressEvent.Patch,
+//   delete: ExpressEvent.Delete,
+//   // use: ExpressEvent.Use,
+// };
 
 export interface ExpressModuleEvents {
   [ExpressEvent.Initialize]?(
@@ -211,16 +211,16 @@ export const expressModule: IExpressModule = {
       system,
     );
     // await system.execute(ExpressEvent.Use, expressApp, system);
-    await waterfall(
-      Object.keys(ExpressEventRequest),
-      async (element: string) => {
-        const evt = ExpressEventRequest[element];
-        system.setOptions(evt, {
-          ignoreReturn: true,
-        });
-        (expressApp as any)[element](createExpressFunction(evt, system));
-      },
-    );
+    // await waterfall(
+    //   Object.keys(ExpressEventRequest),
+    //   async (element: string) => {
+    //     const evt = ExpressEventRequest[element];
+    //     system.setOptions(evt, {
+    //       ignoreReturn: true,
+    //     });
+    //     (expressApp as any)[element](createExpressFunction(evt, system));
+    //   },
+    // );
 
     expressApp.use((req, res) => {
       if (system.getConfig().devMode) {
