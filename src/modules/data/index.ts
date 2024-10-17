@@ -116,6 +116,10 @@ export function getDatabaseFromContext<T extends Sequelize>(
 ): Promise<T> {
   return getDatabase(context.system);
 }
+
+/**
+ * @deprecated This function is deprecated. Use `/lib/system:getSystemFromContext` instead.
+ */
 export function getSystemFromContext(context: DataContext): System {
   if (!context.system) {
     // eslint-disable-next-line functional/no-throw-statements
