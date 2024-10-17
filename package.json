@@ -1,6 +1,6 @@
 {
   "name": "@parton/core",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "parton",
   "main": "lib/index.js",
   "module": "lib/index.js",
@@ -53,8 +53,8 @@
     "@graphql-tools/stitch": "^9.2.10",
     "@types/cors": "^2.8.17",
     "@types/finalhandler": "^1.2.3",
-    "@vostro/gqlize": "^5.3.4",
-    "@vostro/gqlize-adapter-sequelize": "^5.3.1",
+    "@vostro/gqlize": "file:.yalc/@vostro/gqlize",
+    "@vostro/gqlize-adapter-sequelize": "file:.yalc/@vostro/gqlize-adapter-sequelize",
     "@vostro/graphql-jtd": "^1.0.4",
     "@vostro/graphql-types": "^2.0.0",
     "@vostro/object-visit": "^1.1.0",
