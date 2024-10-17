@@ -1,9 +1,9 @@
 import { ItemEvent } from '..';
+import { getSystemFromContext } from '../../../system';
 import { SiteRole } from '../../../types/models/models/site-role';
 import {
   createOptions,
   getContextFromOptions,
-  getSystemFromContext,
 } from '../../data';
 import { DataContext, FindOptions } from '../../data/types';
 import { SiteDoc, SiteRoleCacheDoc, SiteRoleDoc } from '../types';

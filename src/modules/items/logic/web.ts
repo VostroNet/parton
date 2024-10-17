@@ -15,9 +15,8 @@ import {
   SiteRoleWebCacheDoc,
 } from '../types';
 import { getItemByPath } from '../utils';
-import { getDatabase, getSystemFromContext } from '../../data';
 import { createContextFromRequest } from '../../express';
-import { SystemContext } from '../../../system';
+import { getSystemFromContext, SystemContext } from '../../../system';
 import { minimatch } from 'minimatch';
 
 // export function getTopItemFromUri(store: RoleWebCacheDoc, uri: Url.URL) {

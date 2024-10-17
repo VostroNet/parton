@@ -1,13 +1,14 @@
 import { GraphQLString } from "graphql";
 import { toGlobalId } from "graphql-relay";
-import { SignJWT} from "jose";
+import { SignJWT } from "jose";
 
 import { JwtConfig } from "..";
 import { User } from "../../../../types/models/models/user";
 import { Context } from "../../../../types/system";
 import { IDefinition } from "../../../core/types";
-import { createOptions, getSystemFromContext } from "../../../data";
+import { createOptions } from "../../../data";
 import { getDefinition } from "../../../data/utils";
+import { getSystemFromContext } from "../../../../system";
 
 export interface IJwtFieldsDefinition extends IDefinition {
   jwtFields?: string[];
@@ -33,7 +34,7 @@ const user: IJwtFieldsDefinition = {
   },
   options: {
     instanceMethods: {
-      async jwtToken(this: User, args: {expiresIn?: string | number | Date}, context: Context) {
+      async jwtToken(this: User, args: { expiresIn?: string | number | Date }, context: Context) {
         const system = await getSystemFromContext(context);
         const authConfig = system.getConfig<JwtConfig>()
         const privateKey = authConfig?.auth?.jwt.privateKey;
@@ -70,7 +71,7 @@ const user: IJwtFieldsDefinition = {
           "userId": toGlobalId("User", this.id),
           "role": role.name,
         })
-          .setProtectedHeader({alg: "ES256"})
+          .setProtectedHeader({ alg: "ES256" })
           .setIssuedAt()
           .setSubject(this.userName);
         if (args.expiresIn) {

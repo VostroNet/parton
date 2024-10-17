@@ -3,8 +3,8 @@ import { RelationshipType } from '@vostro/gqlize/lib/types';
 import DataTypes from '../../../types/data-types';
 import { IHashDefinition } from '../../utils/field-hash';
 import { Context } from '../../../types/system';
-import { createOptions, DataConfig, getDatabase, getSystemFromContext } from '../../data';
-import { Op } from 'sequelize';
+import { createOptions, DataConfig, getDatabase } from '../../data';
+import { getSystemFromContext } from '../../../system';
 
 const siteDefinition: IHashDefinition = {
   name: 'Site',

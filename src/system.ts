@@ -1,4 +1,4 @@
-import { ISlice, Loaf, LoafEvent } from '@vostro/sandwich';
+import { ISlice, Loaf, LoafEvent, Logger } from '@vostro/sandwich';
 
 import { createOptions, getDatabase } from './modules/data';
 import { Config } from './types/config';
@@ -58,6 +58,23 @@ export interface SystemContext extends Context {
   site: Site;
   siteRole: SiteRole;
 }
+// export function getLoggerFromSystem(system: System) : Logger {
+//   return system.logger;
+// }
+
+export function getLoggerFromContext(context: Context): Logger {
+  return getSystemFromContext(context).logger;
+}
+
+
+export function getSystemFromContext(context: Context): System {
+  if (!context.system) {
+    // eslint-disable-next-line functional/no-throw-statements
+    throw new Error('system is not defined');
+  }
+  return context.system;
+}
+
 
 export async function createContext(
   system: System,

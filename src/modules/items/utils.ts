@@ -6,7 +6,6 @@ import { v4 as uuid } from 'uuid';
 
 // import { readJSONFile } from '../../utils/fs';
 import waterfall from '../../utils/waterfall';
-import { getSystemFromContext } from '../data';
 import { DataContext } from '../data/types';
 
 import {
@@ -24,6 +23,7 @@ import {
 
 import { ItemEvent } from '.';
 import { readJSONFile } from '../../utils/fs';
+import { getSystemFromContext } from '../../system';
 
 export async function createItemData(
   store: ItemData,
