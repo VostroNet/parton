@@ -1,5 +1,5 @@
 import { Sequelize, FindOptions as SFindOptions, Transaction, WhereOptions } from 'sequelize';
-
+import { Definition, DefinitionOptions } from '@vostro/gqlize/lib/types';
 
 import { System } from "../../system";
 import { Role } from "../../types/models/models/role";
@@ -70,4 +70,11 @@ export interface FindOptions extends SFindOptions {
   transaction?: Transaction;
   disableEventLog?: boolean;
   conflictFields?: string[];
+}
+
+export interface IDefinition extends Definition {
+  options?: DefinitionOptions & {
+    tableName?: string;
+    indexes?: any[];
+  };
 }

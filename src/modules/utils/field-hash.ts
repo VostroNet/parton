@@ -3,9 +3,9 @@ import { ValidationOptions } from "sequelize/lib/instance-validator";
 
 import { System } from "../../system";
 import { IModule } from "../../types/system";
-import { IDefinition } from "../core/types";
 import { DataModule } from "../data";
 import { DataHookEvent, DataModelHookEvents } from "../data/hooks";
+import { IDefinition } from '../data/types';
 
 export interface IHashField {
   [key: string]: string
@@ -32,7 +32,7 @@ export const fieldHashModule: DataModelHookEvents & IModule = {
         const hashField = hashFields[fieldName];
         if (instance[fieldName]) {
           const hash = objectHash(instance[fieldName]);
-          if(instance[hashField] !== hash) {
+          if (instance[hashField] !== hash) {
             instance[hashField] = hash;
           }
         }

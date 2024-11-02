@@ -9,7 +9,6 @@
 //   }
 // }
 
-import { Definition, DefinitionOptions } from '@vostro/gqlize/lib/types';
 
 import { Config } from '../../types/config';
 import { DataConfig } from '../data';
@@ -81,26 +80,21 @@ export interface SiteConfig {
 
 export interface CoreConfig
   extends Config,
-    DataConfig,
-    HttpConfig,
-    ExpressConfig {
-    // sites?: {
-    //   [siteName: string]: SiteConfig;
-    // }
-    roles?: {
-      [roleName: string]: RoleDoc;
-    };
+  DataConfig,
+  HttpConfig,
+  ExpressConfig {
+  // sites?: {
+  //   [siteName: string]: SiteConfig;
+  // }
+  roles?: {
+    [roleName: string]: RoleDoc;
+  };
   migrations?: MigrationConfig;
 }
 //TODO: add
 // - relationship - options - constraints: boolean
 
-export interface IDefinition extends Definition {
-  options?: DefinitionOptions & {
-    tableName?: string;
-    indexes?: any[];
-  };
-}
+
 
 export enum MutationType {
   create = 'create',

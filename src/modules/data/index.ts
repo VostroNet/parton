@@ -1,7 +1,7 @@
 import { Database } from '@vostro/gqlize';
 import GQLManager from '@vostro/gqlize/lib/manager';
 import SequelizeAdapter from '@vostro/gqlize-adapter-sequelize';
-import { Model, ModelStatic, Options, Sequelize } from 'sequelize';
+import { Model, ModelStatic, Op, Options, Sequelize } from 'sequelize';
 import { Options as SequelizeOptions } from 'sequelize';
 
 import { System } from '../../system';
@@ -12,11 +12,16 @@ import { Role } from '../../types/models/models/role';
 import { IModule } from '../../types/system';
 import merge from '../../utils/merge';
 import waterfall from '../../utils/waterfall';
-import { IDefinition, MutationType } from '../core/types';
+import { MutationType, RoleDoc } from '../core/types';
 
 import { DataHookEvent, DataHookMap, DataModelHookEvents, Hook } from './hooks';
-import { DataContext, FindOptions } from './types';
+import { DataContext, FindOptions, IDefinition } from './types';
 import { validateFindOptions, validateMutation } from './validation';
+import { CoreModuleEvent, CoreModuleEvents, IRole, IUser } from '../core';
+import { User } from '../../types/models/models/user';
+import { buildSchemaFromDatabase } from './utils';
+
+import models from "./models/index";
 
 export enum DataEvent {
   Initialize = 'data:initialize',
@@ -61,6 +66,7 @@ export interface DataModulesModels {
 
 export interface DataModule
   extends IModule,
+  CoreModuleEvents,
   DataEvents,
   DataModelHookEvents,
   DataModulesModels {
@@ -231,12 +237,69 @@ export const dataModule: DataModule = {
   name: 'data',
   gqlManager: undefined,
   ignore: ['gqlManager', 'models', 'getDatabase'],
+  dependencies: ['core'],
+  models: models,
   // getDatabase: async function getDatabase<T extends DatabaseContext>(): Promise<T> {
   //   if (!dataModule.gqlManager) {
   //     throw 'db instance is not populated something went wrong!';
   //   }
   //   return (dataModule.gqlManager.adapters.sequelize as any).sequelize;
   // },
+
+  [CoreModuleEvent.GraphQLSchemaConfigure]: async (role: IRole, system: System) => {
+    //TODO await DataEvent.Loaded to be fired
+    const { gqlManager } = system.get<DataModule>('data');
+
+    const roleDoc: RoleDoc = role.doc;
+    const schema = await buildSchemaFromDatabase(system, roleDoc, gqlManager);
+    if (!schema) {
+      system.logger.error(`no schema returned for role ${role.name}`);
+      return;
+    }
+    return schema;
+  },
+  [CoreModuleEvent.UserSerialize]: async (user: IUser<User>, system: System) => {
+    return `${user.id}`;
+  },
+  [CoreModuleEvent.UserDeserialize]: async (serialized: string, system: System) => {
+    const db = await getDatabase(system);
+    const { Role } = db.models;
+    // const transaction = await db.transaction();
+    const user: IUser<User> = (await db.models.User.findOne(
+      createOptions(
+        {
+          // transaction
+          override: true,
+        },
+        {
+          where: {
+            id: {
+              [Op.eq]: serialized,
+            },
+          },
+          include: [
+            {
+              required: true,
+              model: Role,
+              as: 'role',
+            },
+          ],
+          override: true,
+        },
+      ),
+    )) as any;
+    return user;
+  },
+  [CoreModuleEvent.GetAllRoles]: async (roles: IRole[] | undefined, system: System) => {
+    const db = await getDatabase(system);
+    const { Role } = db.models;
+    roles = (await Role.findAll(
+      createOptions(system, {
+        override: true,
+      }),
+    )) as any;
+    return roles
+  },
   [SystemEvent.Initialize]: async (core: System) => {
     core.setOptions(DataEvent.Initialize, {
       ignoreReturn: true,
