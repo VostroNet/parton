@@ -14,7 +14,6 @@ import { GraphQLSchema } from 'graphql';
 import { System } from '../../system';
 import { Config } from '../../types/config';
 import { DataConfig } from '../data';
-import { MigrationConfig } from '../data/types';
 import { ExpressConfig, ExpressModuleEvents } from '../express';
 import { HttpConfig } from '../http';
 import { SiteRoleDoc } from '../items/types';
@@ -94,7 +93,6 @@ export interface CoreConfig
   roles?: {
     [roleName: string]: RoleDoc;
   };
-  migrations?: MigrationConfig;
 }
 //TODO: add
 // - relationship - options - constraints: boolean
@@ -112,10 +110,15 @@ export type IUser<T> = {
 } & Partial<T>;
 
 export type IRole = {
+  id: any;
   name: string;
   doc: RoleDoc,
 }
-
+export type ISite = {
+  id: any;
+  name: string;
+  doc: SiteConfig;
+}
 
 export enum CoreModuleEvent {
   GraphQLSchemaConfigure = 'core:graphql-schema:configure',

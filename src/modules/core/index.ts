@@ -27,7 +27,7 @@ export const coreModule: ICoreModule = {
       ignoreReturn: true,
     });
 
-    const roles: IRole[] | undefined = await system.execute(CoreModuleEvent.GetAllRoles, undefined, system); // TODO: add hook to return first true vall
+    const roles: IRole[] | undefined = await system.execute(CoreModuleEvent.GetAllRoles, undefined, system); // TODO: add hook to return first true all
     if (!roles) {
       system.logger.error('no roles found');
       return;

@@ -21,6 +21,7 @@ import { User } from '../../types/models/models/user';
 import { buildSchemaFromDatabase } from './utils';
 
 import models from "./models/index";
+import { SiteRole } from '../../types/models/models/site-role';
 
 export enum DataEvent {
   Initialize = 'data:initialize',
@@ -480,6 +481,81 @@ export const dataModule: DataModule = {
     await db.close();
     return core;
   },
+  [SystemEvent.ContextCreate]: async (context, system, ref) => {
+    const db = await getDatabase<DatabaseContext>(system);
+    const { Site, Role, SiteRole } = db.models;
+    let { role, site, user } = context;
+
+    if (!site && ref?.hostname) {
+      site = await Site.getSiteByHostname(ref.hostname, { system, override: true, role: { name: "system" } });
+    }
+    if (!site) {
+      site = await Site.findOne(createOptions({ override: true }, {
+        where: {
+          default: true
+        }
+      }));
+    }
+
+    if (!role && user?.role) {
+      role = user.role;
+    } else if (user) {
+      role = await user.getRole(createOptions({ override: true }));
+    }
+    let siteRole: SiteRole | undefined;
+
+    if (site?.id && role?.id) {
+      siteRole = await SiteRole.findOne(
+        createOptions({ override: true }, {
+          where: {
+            siteId: site.id,
+            roleId: role.id,
+          },
+        })
+      );
+    }
+    // if (!siteRole && !role && site?.id) {
+    //   siteRole = await SiteRole.findOne(
+    //     createOptions({ override: true }, {
+    //       where: {
+    //         siteId: site.id,
+    //         doc: {
+    //           default: true,
+    //         },
+    //       },
+    //       include: [{
+    //         model: Role,
+    //         as: 'role',
+    //         required: true,
+    //       }]
+    //     })
+    //   );
+    // }
+    if (!siteRole && site?.id) {
+      siteRole = await SiteRole.findOne(createOptions({ override: true }, {
+        where: {
+          siteId: site.id,
+          doc: {
+            default: true,
+          }
+        },
+        include: [{
+          model: Role,
+          as: 'role',
+          required: true,
+        }]
+      }));
+    }
+    if (siteRole && !role) {
+      role = siteRole.role;
+    }
+    return {
+      ...context,
+      role,
+      siteRole,
+      site,
+    };
+  }
 };
 
 export default dataModule;
