@@ -1,7 +1,6 @@
 import { describe, expect, test } from '@jest/globals';
 
 import coreModule from '../../../src/modules/core';
-import { CoreConfig } from '../../../src/modules/core/types';
 import dataModule, { getDatabase } from '../../../src/modules/data';
 import { MigrationConfig, migrationModule } from '../../../src/modules/migration';
 import { System } from '../../../src/system';

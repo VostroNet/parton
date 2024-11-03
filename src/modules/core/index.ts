@@ -8,14 +8,9 @@ import passport, { PassportStatic } from 'passport';
 
 import { System } from '../../system';
 import waterfall from '../../utils/waterfall';
-import { CliEvent } from '../cli';
 import { createContextFromRequest, ExpressEvent } from '../express';
-
-import { generateTypes } from './functions/generate-types';
 import { CoreModuleEvent, IAuthProvider, ICoreModule, IRole, IUser } from './types';
 import { SystemEvent } from '../../types/events';
-
-
 
 export const coreModule: ICoreModule = {
   name: 'core',
@@ -60,14 +55,6 @@ export const coreModule: ICoreModule = {
     return system;
   },
 
-  [CliEvent.Configure]: async (args, context, system) => {
-    if (args._.indexOf('generate-types') > -1) {
-      await generateTypes(system, context, system.cwd, args.output as string);
-    }
-    // if(args._.indexOf('start-server') > -1) {
-    //   await system.execute(SystemEvent.Ready, system);
-    // }
-  },
   [ExpressEvent.Initialize]: async (express, system: System) => {
     const providers = await system.all<IAuthProvider>(
       CoreModuleEvent.AuthProviderRegister,

@@ -22,6 +22,8 @@ import { buildSchemaFromDatabase } from './utils';
 
 import models from "./models/index";
 import { SiteRole } from '../../types/models/models/site-role';
+import { CliEvent, ClIModuleEvents } from '../cli';
+import { generateTypes } from './generate-types';
 
 export enum DataEvent {
   Initialize = 'data:initialize',
@@ -69,7 +71,8 @@ export interface DataModule
   CoreModuleEvents,
   DataEvents,
   DataModelHookEvents,
-  DataModulesModels {
+  DataModulesModels,
+  ClIModuleEvents {
   gqlManager?: GQLManager;
   getDatabase?: <T extends DatabaseContext>() => Promise<T>;
   getDefinition?: <T extends IDefinition>(name: string) => T | undefined;
@@ -246,6 +249,14 @@ export const dataModule: DataModule = {
   //   return (dataModule.gqlManager.adapters.sequelize as any).sequelize;
   // },
 
+  [CliEvent.Configure]: async (args, context, system) => {
+    if (args._.indexOf('generate-types') > -1) {
+      await generateTypes(system, context, system.cwd, args.output as string);
+    }
+    // if(args._.indexOf('start-server') > -1) {
+    //   await system.execute(SystemEvent.Ready, system);
+    // }
+  },
   [CoreModuleEvent.GraphQLSchemaConfigure]: async (role: IRole, system: System) => {
     //TODO await DataEvent.Loaded to be fired
     const { gqlManager } = system.get<DataModule>('data');
