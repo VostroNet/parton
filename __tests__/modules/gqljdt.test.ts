@@ -72,6 +72,7 @@ describe("modules:services:gqljdt", () => {
     try {
       await core.load();
       await core.initialize();
+      await core.configure();
       await core.ready();
     } catch (err: any) {
       expect(err).toBeUndefined();
@@ -123,6 +124,7 @@ describe("modules:services:gqljdt", () => {
     try {
       await core.load();
       await core.initialize();
+      await core.configure();
       await core.ready();
     } catch (err: any) {
       expect(err).toBeUndefined();

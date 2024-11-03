@@ -7,78 +7,27 @@ import { GraphQLSchema } from 'graphql';
 import passport, { PassportStatic } from 'passport';
 
 import { System } from '../../system';
-import { Context } from '../../types/system';
 import waterfall from '../../utils/waterfall';
-import { CliEvent, ClIModule } from '../cli';
-import { createContextFromRequest, ExpressEvent, ExpressModuleEvents } from '../express';
+import { CliEvent } from '../cli';
+import { createContextFromRequest, ExpressEvent } from '../express';
 
 import { generateTypes } from './functions/generate-types';
-import { RoleDoc } from './types';
+import { CoreModuleEvent, IAuthProvider, ICoreModule, IRole, IUser } from './types';
 import { SystemEvent } from '../../types/events';
 
-export enum CoreModuleEvent {
-  GraphQLSchemaConfigure = 'core:graphql-schema:configure',
-  GraphQLSchemaCreate = 'core:graphql-schema:create',
-  AuthProviderRegister = 'core:auth:provider:register',
-  AuthLogoutRequest = 'core:auth:logout:request',
-  AuthLoginRequest = 'core:auth:login:request',
-  AuthLoginSuccessResponse = 'core:auth:login:success',
-  UserSerialize = 'core:user:serialize',
-  UserDeserialize = 'core:user:deserialize',
-  GetAllRoles = 'core:roles:get:all'
-}
 
-export type IUser<T> = {
-  id: number;
-} & Partial<T>;
-
-export type IRole = {
-  name: string;
-  doc: RoleDoc,
-}
-
-export interface CoreModuleEvents {
-  [CoreModuleEvent.GraphQLSchemaConfigure]?: (
-    role: IRole,
-    core: System,
-  ) => Promise<GraphQLSchema | undefined>;
-  [CoreModuleEvent.GraphQLSchemaCreate]?: (
-    schema: GraphQLSchema,
-    role: IRole,
-    core: System,
-  ) => Promise<GraphQLSchema>;
-  [CoreModuleEvent.AuthProviderRegister]?: (passport: PassportStatic, system: System) => Promise<IAuthProvider>;
-  [CoreModuleEvent.AuthLoginSuccessResponse]?: <T>(loginResponse: any, user: IUser<T>, context: Context) => Promise<any>
-  [CoreModuleEvent.UserSerialize]?: <T>(user: IUser<T>, system: System) => Promise<string>;
-  [CoreModuleEvent.UserDeserialize]?: <T>(serialized: string, system: System) => Promise<any> // TODO: dont know why i cant define a return type
-  [CoreModuleEvent.GetAllRoles]?: (roles: IRole[] | undefined, system: System) => Promise<IRole[]>
-}
-
-export interface IAuthProvider {
-  name: string;
-  isBearer?: boolean;
-}
-
-export interface ICoreModule
-  extends ClIModule,
-  CoreModuleEvents,
-  ExpressModuleEvents {
-  schemas: {
-    [key: string]: GraphQLSchema;
-  };
-}
 
 export const coreModule: ICoreModule = {
   name: 'core',
   dependencies: [],
   schemas: {},
   ignore: ['schemas'],
-  [SystemEvent.Initialize]: async (system: System) => {
+  [SystemEvent.Configure]: async (system: System) => {
     system.setOptions(CoreModuleEvent.GraphQLSchemaConfigure, {
       ignoreReturn: true,
     });
 
-    const roles: IRole[] | undefined = await system.execute(CoreModuleEvent.GetAllRoles, undefined); // TODO: add hook to return first true vall
+    const roles: IRole[] | undefined = await system.execute(CoreModuleEvent.GetAllRoles, undefined, system); // TODO: add hook to return first true vall
     if (!roles) {
       system.logger.error('no roles found');
       return;

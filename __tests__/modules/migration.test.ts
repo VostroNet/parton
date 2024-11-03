@@ -5,7 +5,7 @@ import { System } from '../../src/system';
 import "../../__mocks__/http";
 
 describe('modules:migrations', () => {
-  test('event firing order', async () => {
+  test('basic migration test', async () => {
     const arr: string[] = [];
 
     try {

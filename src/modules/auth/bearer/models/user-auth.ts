@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
+import { IDefinition } from '../../../data/types';
 
-import { IDefinition } from "../../../core/types";
 
 const userAuthModel: IDefinition = {
   define: {

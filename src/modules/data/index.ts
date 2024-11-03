@@ -12,12 +12,11 @@ import { Role } from '../../types/models/models/role';
 import { IModule } from '../../types/system';
 import merge from '../../utils/merge';
 import waterfall from '../../utils/waterfall';
-import { MutationType, RoleDoc } from '../core/types';
+import { CoreModuleEvent, CoreModuleEvents, IRole, IUser, MutationType, RoleDoc } from '../core/types';
 
 import { DataHookEvent, DataHookMap, DataModelHookEvents, Hook } from './hooks';
 import { DataContext, FindOptions, IDefinition } from './types';
 import { validateFindOptions, validateMutation } from './validation';
-import { CoreModuleEvent, CoreModuleEvents, IRole, IUser } from '../core';
 import { User } from '../../types/models/models/user';
 import { buildSchemaFromDatabase } from './utils';
 

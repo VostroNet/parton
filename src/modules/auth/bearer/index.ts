@@ -3,11 +3,11 @@ import { Strategy as BearerStrategy } from 'passport-http-bearer';
 
 import { createContext } from '../../../system';
 import { IModule } from "../../../types/system";
-import { CoreModuleEvent, CoreModuleEvents } from "../../core";
 import { createOptions, DataModulesModels, getDatabase } from '../../data';
 
 import models from './models';
 import DatabaseContext from '../../../types/models';
+import { CoreModuleEvent, CoreModuleEvents } from '../../core/types';
 
 export interface BearerAuthModule extends IModule, CoreModuleEvents, DataModulesModels {
 

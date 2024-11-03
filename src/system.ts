@@ -49,6 +49,15 @@ export class System extends Loaf {
   getConfig = <T extends Config>() => {
     return this.config as T;
   };
+  readonly start = async () => {
+    await this.load();
+    await this.initialize();
+    await this.configure();
+    await this.ready();
+  };
+  readonly configure = () => {
+    return this.execute(SystemEvent.Configure, this);
+  }
 }
 export interface SystemContext extends Context {
   system: System;

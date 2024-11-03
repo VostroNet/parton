@@ -7,8 +7,7 @@ import { SystemEvents } from '../../types/events';
 import { Site } from '../../types/models/models/site';
 import { SiteRole } from '../../types/models/models/site-role';
 import { IModule } from '../../types/system';
-import { CoreModuleEvent, CoreModuleEvents } from '../core';
-import { RoleDoc } from '../core/types';
+import { CoreModuleEvent, CoreModuleEvents, RoleDoc } from '../core/types';
 import {
   // DataEvent,
   DataEvents,

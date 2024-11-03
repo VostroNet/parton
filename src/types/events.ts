@@ -5,6 +5,7 @@ import { Context, IModule } from './system';
 
 export enum SystemEvent {
   Initialize = 'system:init',
+  Configure = 'system:cfg',
   Ready = 'system:rdy',
   Shutdown = 'system:signal:-1',
   ContextCreate = 'system:context:create',
@@ -47,6 +48,10 @@ export type SystemEvents = {
   ): Promise<System>;
   // --- 
   readonly [SystemEvent.Initialize]?: (
+    core: System,
+    module: IModule,
+  ) => Promise<System>;
+  readonly [SystemEvent.Configure]?: (
     core: System,
     module: IModule,
   ) => Promise<System>;
