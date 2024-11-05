@@ -1,34 +1,10 @@
 import { Sequelize, FindOptions as SFindOptions, Transaction, WhereOptions } from 'sequelize';
-
+import { Definition, DefinitionOptions } from '@vostro/gqlize/lib/types';
 
 import { System } from "../../system";
 import { Role } from "../../types/models/models/role";
 import { User } from "../../types/models/models/user";
 import { Site } from '../../types/models/models/site';
-
-export interface MigrationConfig {
-  path: string,
-  fake?: boolean;
-}
-export interface MigratorContext {
-  options: MigrationConfig,
-  sequelize: Sequelize,
-  app: {
-    system: System,
-    // context: CoreContext,
-    // settings: ApplicationSettings
-  },
-  getModule: <T>(name: string) => T,
-  moduleExists: (name: string) => boolean,
-  runQuery: (moduleName: string, sql: string, options?: any) => Promise<void>
-  runQueryFile: (moduleName: string, file: string, options?: any) => Promise<void>
-}
-export interface MigratorArgs {
-  name: string,
-  path?: string,
-  context: MigratorContext,
-  dirname: string,
-}
 
 // export interface IMigration {
 //   name: string,
@@ -70,4 +46,11 @@ export interface FindOptions extends SFindOptions {
   transaction?: Transaction;
   disableEventLog?: boolean;
   conflictFields?: string[];
+}
+
+export interface IDefinition extends Definition {
+  options?: DefinitionOptions & {
+    tableName?: string;
+    indexes?: any[];
+  };
 }

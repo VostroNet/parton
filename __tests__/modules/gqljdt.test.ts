@@ -1,3 +1,5 @@
+import "../../__mocks__/http";
+
 import { describe, expect, jest, test } from '@jest/globals';
 import { mockRequest, mockResponse } from 'jest-mock-req-res';
 
@@ -11,10 +13,9 @@ import itemModule from '../../src/modules/items';
 import { fieldHashModule } from '../../src/modules/utils/field-hash';
 import { roleUpsertModule } from '../../src/modules/utils/role-upsert';
 import { System } from '../../src/system';
-import "../../__mocks__/http";
 import { createHexString } from '../../src/utils/string';
 import { createTestSite } from './items/utils';
-import { postgresConfig, sqliteConfig } from '../utils/config';
+import { sqliteConfig } from '../utils/config';
 import DatabaseContext from '../../src/types/models';
 
 
@@ -72,6 +73,7 @@ describe("modules:services:gqljdt", () => {
     try {
       await core.load();
       await core.initialize();
+      await core.configure();
       await core.ready();
     } catch (err: any) {
       expect(err).toBeUndefined();
@@ -123,6 +125,7 @@ describe("modules:services:gqljdt", () => {
     try {
       await core.load();
       await core.initialize();
+      await core.configure();
       await core.ready();
     } catch (err: any) {
       expect(err).toBeUndefined();
@@ -184,7 +187,7 @@ describe("modules:services:gqljdt", () => {
       console.error(err.stack)
       expect(err).toBeUndefined();
     }
-  });
+  }, 100000);
   //TODO: test redirect
   //TODO: test redirect with invalid role id
 });

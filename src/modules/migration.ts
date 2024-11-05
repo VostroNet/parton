@@ -12,8 +12,49 @@ import { IModule } from '../types/system';
 
 import { CoreConfig } from './core/types';
 import { getDatabase } from './data';
-import { MigratorArgs, MigratorContext } from './data/types';
 import waterfall from '../utils/waterfall';
+import { Sequelize } from 'sequelize';
+
+
+
+export interface MigrationConfig extends CoreConfig {
+  migrations?: MigrationConfigOptions;
+}
+
+export interface MigrationConfigOptions {
+  path: string,
+  fake?: boolean;
+}
+export interface MigratorContext {
+  options: MigrationConfigOptions,
+  sequelize: Sequelize,
+  app: {
+    system: System,
+    // context: CoreContext,
+    // settings: ApplicationSettings
+  },
+  getModule: <T>(name: string) => T,
+  moduleExists: (name: string) => boolean,
+  runQuery: (moduleName: string | undefined, sql: string, options?: any) => Promise<void>
+  runQueryFile: (moduleName: string | undefined, file: string, options?: any) => Promise<void>
+}
+export interface MigratorArgs {
+  name: string,
+  path?: string,
+  context: MigratorContext,
+  dirname: string,
+}
+
+export interface MigratorFile {
+  name: string,
+  dependencies?: string[],
+  up: (args: MigratorArgs) => Promise<void>,
+  down?: (args: MigratorArgs) => Promise<void>,
+  upRollback?: (args: MigratorArgs) => Promise<void>,
+  downRollback?: (args: MigratorArgs) => Promise<void>,
+}
+
+
 
 export const migrationModule: IModule & SystemEvents = {
   name: 'migrator',
@@ -24,7 +65,7 @@ export const migrationModule: IModule & SystemEvents = {
     }
   }],
   [SystemEvent.Initialize]: async (system: System) => {
-    const config = system.getConfig<CoreConfig>();
+    const config = system.getConfig<MigrationConfig>();
     if (!config.migrations) {
       system.logger.warn('No migration configuration found');
       return system;
@@ -39,8 +80,8 @@ export const migrationModule: IModule & SystemEvents = {
     function moduleExists(name: string) {
       return !!system.get(name);
     }
-    async function runQuery(moduleName: string, sql: string, options?: any) {
-      if (moduleExists(moduleName)) {
+    async function runQuery(moduleName: string | undefined, sql: string, options?: any) {
+      if (moduleExists(moduleName) || !moduleName) {
         await db.query(sql, options);
       }
     }
@@ -49,7 +90,7 @@ export const migrationModule: IModule & SystemEvents = {
       file: string,
       options?: any,
     ) {
-      if (moduleExists(moduleName)) {
+      if (moduleExists(moduleName) || !moduleName) {
         const sql = await readFile(file, { encoding: 'utf-8' });
         try {
           await db.query(sql, options);

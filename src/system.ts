@@ -2,13 +2,14 @@ import { ISlice, Loaf, LoafEvent, Logger } from '@vostro/sandwich';
 
 import { createOptions, getDatabase } from './modules/data';
 import { Config } from './types/config';
-import { SystemEvent } from './types/events';
+import { SystemContextRef, SystemEvent } from './types/events';
 import { Role } from './types/models/models/role';
 import { User } from './types/models/models/user';
 import { Context } from './types/system';
 import type { Site } from './types/models/models/site';
 import type { SiteRole } from './types/models/models/site-role';
 import DatabaseContext from './types/models';
+import { IRole, ISite, IUser } from './modules/core/types';
 
 function createHookProxy(sys: System): ISlice {
   return {
@@ -49,6 +50,15 @@ export class System extends Loaf {
   getConfig = <T extends Config>() => {
     return this.config as T;
   };
+  readonly start = async () => {
+    await this.load();
+    await this.initialize();
+    await this.configure();
+    await this.ready();
+  };
+  readonly configure = () => {
+    return this.execute(SystemEvent.Configure, this);
+  }
 }
 export interface SystemContext extends Context {
   system: System;
@@ -76,92 +86,33 @@ export function getSystemFromContext(context: Context): System {
 }
 
 
-export async function createContext(
+export async function createContext<TUser>(
   system: System,
-  user?: User,
-  site?: Site,
-  role?: Role,
+  user?: IUser<TUser>,
+  site?: ISite,
+  role?: IRole,
   override = false,
-  transaction?: any,
+  initContext?: Context | undefined,
+  ref?: SystemContextRef | undefined,
 ): Promise<Context> {
-  const db = await getDatabase<DatabaseContext>(system);
-  const { Site, Role, SiteRole } = db.models;
 
-  if (!site) {
-    site = await Site.findOne(createOptions({ override: true }, {
-      where: {
-        default: true
-      }
-    }));
-  }
-
-  if (user?.role) {
-    role = user.role;
-  } else if (user) {
-    role = await user.getRole(createOptions({ override: true }));
-  }
-  let siteRole: SiteRole | undefined;
-  if (!role && site) {
-    siteRole = await SiteRole.findOne(
-      createOptions({ override: true }, {
-        where: {
-          siteId: site.id,
-          doc: {
-            default: true,
-          },
-        },
-        include: [{
-          model: Role,
-          as: 'role',
-          required: true,
-        }]
-      })
-    );
-    if (siteRole) {
-      role = siteRole.role;
-    }
-  }
-  if (site && role && !siteRole) {
-    siteRole = await SiteRole.findOne(
-      createOptions({ override: true }, {
-        where: {
-          siteId: site.id,
-          roleId: role.id,
-        },
-      })
-    );
-  }
-  if (!siteRole && site) {
-    siteRole = await SiteRole.findOne(createOptions({ override: true }, {
-      where: {
-        siteId: site.id,
-        doc: {
-          default: true,
-        }
-      }
-    }));
-  }
   if (!role && override) {
     role = {
       name: 'system',
     } as any;
   }
-
   const context: Context = {
     system,
     role,
     override,
-    transaction,
     user,
     site,
-    siteRole,
+    ...initContext,
   };
   return system.execute(
     SystemEvent.ContextCreate,
     context,
     system,
-    role,
-    override,
-    transaction,
+    ref,
   );
 }

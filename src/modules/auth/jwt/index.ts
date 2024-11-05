@@ -5,12 +5,12 @@ import {Strategy as JwtStrategy} from "passport-jwt";
 import { Config } from "../../../types/config";
 import { IModule } from "../../../types/system";
 import { fetchWithTimeout } from "../../../utils/fetch";
-import { CoreModuleEvent, CoreModuleEvents } from "../../core";
 import { DataModulesModels } from "../../data";
 import { createContextFromRequest, ExpressEvent, ExpressModuleEvents } from "../../express";
 
 import models from "./models";
 import { getUserFromToken } from "./utils";
+import { CoreModuleEvent, CoreModuleEvents } from "../../core/types";
 
 
 export interface JwtAuthModule extends IModule, CoreModuleEvents, ExpressModuleEvents, DataModulesModels {
@@ -55,7 +55,7 @@ export const jwtAuthModule: JwtAuthModule = {
             });
             const jwks = (await response.json()) as JwksEndpoint;
             if(jwks?.keys && jwks.keys.length > 0) {
-              const key = await importJWK(jwks.keys[0], "RS256");
+              const key = await importJWK(jwks.keys[0] as any, "RS256");
               return done(null, key);
             }
           }

@@ -1,10 +1,10 @@
+import { IRole } from '../modules/core/types';
 import { System } from '../system';
-
-import { Role } from './models/models/role';
 import { Context, IModule } from './system';
 
 export enum SystemEvent {
   Initialize = 'system:init',
+  Configure = 'system:cfg',
   Ready = 'system:rdy',
   Shutdown = 'system:signal:-1',
   ContextCreate = 'system:context:create',
@@ -29,10 +29,8 @@ export type SystemEvents = {
   ): Promise<System>;
   [SystemEvent.ContextCreate]?(
     context: Context,
-    core: System,
-    role: Role,
-    override: boolean,
-    transaction: any,
+    system: System,
+    ref: SystemContextRef | undefined,
     module: IModule,
   ): Promise<Context>;
   [SystemEvent.UncaughtError]?(
@@ -50,6 +48,10 @@ export type SystemEvents = {
     core: System,
     module: IModule,
   ) => Promise<System>;
+  readonly [SystemEvent.Configure]?: (
+    core: System,
+    module: IModule,
+  ) => Promise<System>;
   readonly [SystemEvent.Ready]?: (
     core: System,
     module: IModule,
@@ -60,10 +62,8 @@ export type SystemEvents = {
   ) => Promise<System>;
   readonly [SystemEvent.ContextCreate]?: (
     context: Context,
-    core: System,
-    role: Role,
-    override: boolean,
-    transaction: any,
+    system: System,
+    ref: SystemContextRef | undefined,
     module: IModule,
   ) => Promise<Context>;
   readonly [SystemEvent.UncaughtError]?: (
@@ -77,3 +77,8 @@ export type SystemEvents = {
     module: IModule,
   ) => Promise<System>;
 };
+
+
+export interface SystemContextRef {
+  hostname?: string | undefined;
+}

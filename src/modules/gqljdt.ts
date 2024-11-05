@@ -6,13 +6,12 @@ import { System } from '../system';
 import { Role } from '../types/models/models/role';
 import { IModule } from '../types/system';
 import { createHexString } from '../utils/string';
-
-import { CoreModuleEvent as CoreModuleEvent, CoreModuleEvents } from './core';
 import {
   createContextFromRequest,
   ExpressEvent,
   ExpressModuleEvents,
 } from './express';
+import { CoreModuleEvent, CoreModuleEvents } from './core/types';
 
 export interface IGqlJdtModule
   extends IModule,

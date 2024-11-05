@@ -1,8 +1,8 @@
 import { describe, expect, test } from '@jest/globals';
 import { execute, GraphQLSchema, parse } from 'graphql';
 
-import coreModule, { CoreModuleEvent, CoreModuleEvents } from '../../../src/modules/core';
-import { CoreConfig } from '../../../src/modules/core/types';
+import coreModule from '../../../src/modules/core';
+import { CoreConfig, CoreModuleEvent, CoreModuleEvents, IRole } from '../../../src/modules/core/types';
 import dataModule, { createOptions, getDatabase } from '../../../src/modules/data';
 import itemModule from '../../../src/modules/items';
 // import { getPageFromRoleWebCache, getPagePathFromUri } from '../../../src/modules/items/logic/web';
@@ -10,7 +10,6 @@ import { ItemType, Page } from '../../../src/modules/items/types';
 import { fieldHashModule } from '../../../src/modules/utils/field-hash';
 import { roleUpsertModule } from '../../../src/modules/utils/role-upsert';
 import { createContext, System } from '../../../src/system';
-import { Role } from '../../../src/types/models/models/role';
 import { IDependencies } from '../../../src/types/system';
 
 import { createTestSite } from './utils';
@@ -24,7 +23,7 @@ describe("modules:items:graphql", () => {
       [key: string]: GraphQLSchema
     } = {};
     const schemaCollector: IDependencies & CoreModuleEvents = {
-      [CoreModuleEvent.GraphQLSchemaCreate]: async (schema: GraphQLSchema, role: Role) => {
+      [CoreModuleEvent.GraphQLSchemaCreate]: async (schema: GraphQLSchema, role: IRole) => {
         schemas[role.name] = schema;
         return schema;
       }
@@ -57,6 +56,7 @@ describe("modules:items:graphql", () => {
     try {
       await core.load();
       await core.initialize();
+      await core.configure();
       await core.ready();
     } catch (err: any) {
       expect(err).toBeUndefined();
@@ -128,7 +128,7 @@ describe("modules:items:graphql", () => {
       [key: string]: GraphQLSchema
     } = {};
     const schemaCollector: IDependencies & CoreModuleEvents = {
-      [CoreModuleEvent.GraphQLSchemaCreate]: async (schema: GraphQLSchema, role: Role) => {
+      [CoreModuleEvent.GraphQLSchemaCreate]: async (schema: GraphQLSchema, role: IRole) => {
         schemas[role.name] = schema;
         return schema;
       }
@@ -158,6 +158,7 @@ describe("modules:items:graphql", () => {
     try {
       await core.load();
       await core.initialize();
+      await core.configure();
       await core.ready();
     } catch (err: any) {
       expect(err).toBeUndefined();

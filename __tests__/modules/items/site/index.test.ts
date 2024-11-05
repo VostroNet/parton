@@ -2,12 +2,7 @@
 
 import { describe, expect, test } from '@jest/globals';
 
-import coreModule from '../../../../src/modules/core';
-import { CoreConfig } from '../../../../src/modules/core/types';
-import dataModule, { createOptions, getDatabase } from '../../../../src/modules/data';
-import itemModule from '../../../../src/modules/items';
-import { fieldHashModule } from '../../../../src/modules/utils/field-hash';
-import { roleUpsertModule } from '../../../../src/modules/utils/role-upsert';
+import { createOptions, getDatabase } from '../../../../src/modules/data';
 import { createContext, System } from '../../../../src/system';
 import { createBasicConfig } from '../utils';
 import DatabaseContext from '../../../../src/types/models';

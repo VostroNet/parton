@@ -9,14 +9,10 @@ import expressSession, { SessionOptions } from 'express-session';
 import { createContext, System } from '../system';
 import { Config } from '../types/config';
 import { SystemEvent } from '../types/events';
-import { User } from '../types/models/models/user';
-import waterfall from '../utils/waterfall';
-
-import { getDatabase } from './data';
 import { HttpEventType, HttpModule } from './http';
 import finalhandler from 'finalhandler';
-import DatabaseContext from '../types/models';
-import { IModule } from '../types/system';
+import { Context, IModule } from '../types/system';
+import { IUser } from './core/types';
 
 export enum ExpressEvent {
   Initialize = 'express:initialize',
@@ -31,14 +27,6 @@ export enum ExpressEvent {
   ExpressSessionConfigure = 'express:session:configure',
 }
 
-// const ExpressEventRequest: { [key: string]: ExpressEvent } = {
-//   get: ExpressEvent.Get,
-//   post: ExpressEvent.Post,
-//   put: ExpressEvent.Put,
-//   patch: ExpressEvent.Patch,
-//   delete: ExpressEvent.Delete,
-//   // use: ExpressEvent.Use,
-// };
 
 export interface ExpressModuleEvents {
   [ExpressEvent.Initialize]?(
@@ -143,32 +131,6 @@ export interface IExpressModule extends HttpModule, ExpressModuleEvents {
     res: ServerResponse<IncomingMessage>,
   ) => Promise<void>;
 }
-function createExpressFunction(evt: ExpressEvent, core: System) {
-  return async (
-    req: Express.Request,
-    res: Express.Response,
-    next: () => void,
-  ) => {
-    //TODO: patch res.end to ensure that the promise resolves
-    let called = false;
-    await core.condition(
-      evt,
-      async (result: boolean) => {
-        if (result === true) {
-          called = true;
-          return true;
-        }
-        return false;
-      },
-      req,
-      res,
-    );
-
-    if (called === false) {
-      return next();
-    }
-  };
-}
 
 interface ISessionOptions extends SessionOptions {
   resave: boolean;
@@ -210,17 +172,6 @@ export const expressModule: IExpressModule = {
       expressApp,
       system,
     );
-    // await system.execute(ExpressEvent.Use, expressApp, system);
-    // await waterfall(
-    //   Object.keys(ExpressEventRequest),
-    //   async (element: string) => {
-    //     const evt = ExpressEventRequest[element];
-    //     system.setOptions(evt, {
-    //       ignoreReturn: true,
-    //     });
-    //     (expressApp as any)[element](createExpressFunction(evt, system));
-    //   },
-    // );
 
     expressApp.use((req, res) => {
       if (system.getConfig().devMode) {
@@ -284,60 +235,20 @@ export const expressModule: IExpressModule = {
 export default expressModule;
 
 
-
-// export async function getDefaultRoleFromUri(
-//   uri: string,
-//   system: System,
-// ): Promise<Role> {
-//   const context: SystemContext = await createContext(system, undefined, undefined, undefined, true);
-//   const db = await getDatabase(system);
-//   const { Site, Role } = db.models;
-//   const url = new URL(uri);
-
-//   //TODO: check cache?
-
-//   const site = await Site.getSiteByHostname(url.hostname, context);
-//   if (!site) {
-//     throw new Error('No default site found');
-//   }
-//   const siteRoles = await site.getSiteRoles(createOptions(context, {
-//     where: {
-//       doc: {
-//         default: true,
-//       }
-//     },
-//     include: [{
-//       model: Role,
-//       as: "role",
-//       required: true,
-//     }]
-//   }));
-//   if (siteRoles.length === 0) {
-//     throw new Error('No default role found');
-//   }
-
-//   return siteRoles[0].role;
-// }
-
 export async function createContextFromRequest(
   req: Express.Request,
   system: System,
   override = false,
-  transaction?: any,
+  initContext?: Context | undefined,
 ) {
-  const db = await getDatabase<DatabaseContext>(system);
-  const { Site } = db.models;
-  const site = await Site.getSiteByHostname(req.hostname, { system, override: true, role: { name: "system" } });
-  if (!site) {
-    throw new Error('No default site found');
-  }
-  const context = await createContext(
+  return createContext(
     system,
-    req.user as User,
-    site,
+    req.user as IUser<any>,
+    undefined,
     undefined,
     override,
-    transaction,
-  );
-  return context;
+    initContext,
+    req
+  );;
 }
+

@@ -1,16 +1,15 @@
 import { describe, expect, test } from '@jest/globals';
 
 import coreModule from '../../../src/modules/core';
-import { CoreConfig } from '../../../src/modules/core/types';
 import dataModule, { getDatabase } from '../../../src/modules/data';
-import { migrationModule } from '../../../src/modules/migration';
+import { MigrationConfig, migrationModule } from '../../../src/modules/migration';
 import { System } from '../../../src/system';
 import DatabaseContext from '../../../src/types/models';
 
 
 describe('modules:data:migrations', () => {
   test('testing with no migrations', async () => {
-    const config: CoreConfig = {
+    const config: MigrationConfig = {
       name: 'data-test',
       slices: [dataModule, coreModule, migrationModule],
       clone: true,
@@ -44,7 +43,7 @@ describe('modules:data:migrations', () => {
     await core.shutdown();
   });
   test('testing a basic migration', async () => {
-    const config: CoreConfig = {
+    const config: MigrationConfig = {
       name: 'data-test',
       slices: [dataModule, coreModule, migrationModule],
       clone: true,
@@ -75,11 +74,11 @@ describe('modules:data:migrations', () => {
     const db = await getDatabase<DatabaseContext>(core);
     const [results] = await db.query('SELECT * FROM "SequelizeMeta";') as { name: string }[][];
     expect(results).toHaveLength(1);
-    expect(results[0].name).toBe('test/init');
+    expect(results[0].name).toBe('test1/init');
     await core.shutdown();
   });
   test('testing a complex migration', async () => {
-    const config: CoreConfig = {
+    const config: MigrationConfig = {
       name: 'data-test',
       slices: [dataModule, coreModule, migrationModule],
       clone: true,
@@ -89,6 +88,7 @@ describe('modules:data:migrations', () => {
         sequelize: {
           dialect: 'sqlite',
           storage: ':memory:',
+          // storage: './test.db',
           logging: false,
         },
       },
@@ -107,7 +107,7 @@ describe('modules:data:migrations', () => {
       const db = await getDatabase<DatabaseContext>(core);
       const [results] = await db.query('SELECT * FROM "SequelizeMeta";') as { name: string }[][];
       expect(results).toHaveLength(1);
-      expect(results[0].name).toBe('test/init');
+      expect(results[0].name).toBe('complex_test1');
 
       const [cmresults] = await db.query('SELECT * FROM "complex_table";') as { name: string }[][];
       // console.log("result", cmresults);
@@ -121,7 +121,7 @@ describe('modules:data:migrations', () => {
     }
   });
   test('testing a failed migration', async () => {
-    const config: CoreConfig = {
+    const config: MigrationConfig = {
       name: 'data-test',
       slices: [dataModule, coreModule, migrationModule],
       clone: true,

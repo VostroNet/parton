@@ -1,5 +1,6 @@
-import { IDefinition } from '../../core/types';
 
+
+import { IDefinition } from '../../data/types';
 import Role from './role';
 import Site from './site';
 import SiteRole from './site-role';

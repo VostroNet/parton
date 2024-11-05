@@ -1,7 +1,7 @@
 import { Database } from '@vostro/gqlize';
 import GQLManager from '@vostro/gqlize/lib/manager';
 import SequelizeAdapter from '@vostro/gqlize-adapter-sequelize';
-import { Model, ModelStatic, Options, Sequelize } from 'sequelize';
+import { Model, ModelStatic, Op, Options, Sequelize } from 'sequelize';
 import { Options as SequelizeOptions } from 'sequelize';
 
 import { System } from '../../system';
@@ -12,11 +12,18 @@ import { Role } from '../../types/models/models/role';
 import { IModule } from '../../types/system';
 import merge from '../../utils/merge';
 import waterfall from '../../utils/waterfall';
-import { IDefinition, MutationType } from '../core/types';
+import { CoreModuleEvent, CoreModuleEvents, IRole, IUser, MutationType, RoleDoc } from '../core/types';
 
 import { DataHookEvent, DataHookMap, DataModelHookEvents, Hook } from './hooks';
-import { DataContext, FindOptions } from './types';
+import { DataContext, FindOptions, IDefinition } from './types';
 import { validateFindOptions, validateMutation } from './validation';
+import { User } from '../../types/models/models/user';
+import { buildSchemaFromDatabase } from './utils';
+
+import models from "./models/index";
+import { SiteRole } from '../../types/models/models/site-role';
+import { CliEvent, ClIModuleEvents } from '../cli';
+import { generateTypes } from './generate-types';
 
 export enum DataEvent {
   Initialize = 'data:initialize',
@@ -61,9 +68,11 @@ export interface DataModulesModels {
 
 export interface DataModule
   extends IModule,
+  CoreModuleEvents,
   DataEvents,
   DataModelHookEvents,
-  DataModulesModels {
+  DataModulesModels,
+  ClIModuleEvents {
   gqlManager?: GQLManager;
   getDatabase?: <T extends DatabaseContext>() => Promise<T>;
   getDefinition?: <T extends IDefinition>(name: string) => T | undefined;
@@ -231,12 +240,77 @@ export const dataModule: DataModule = {
   name: 'data',
   gqlManager: undefined,
   ignore: ['gqlManager', 'models', 'getDatabase'],
+  dependencies: ['core'],
+  models: models,
   // getDatabase: async function getDatabase<T extends DatabaseContext>(): Promise<T> {
   //   if (!dataModule.gqlManager) {
   //     throw 'db instance is not populated something went wrong!';
   //   }
   //   return (dataModule.gqlManager.adapters.sequelize as any).sequelize;
   // },
+
+  [CliEvent.Configure]: async (args, context, system) => {
+    if (args._.indexOf('generate-types') > -1) {
+      await generateTypes(system, context, system.cwd, args.output as string);
+    }
+    // if(args._.indexOf('start-server') > -1) {
+    //   await system.execute(SystemEvent.Ready, system);
+    // }
+  },
+  [CoreModuleEvent.GraphQLSchemaConfigure]: async (role: IRole, system: System) => {
+    //TODO await DataEvent.Loaded to be fired
+    const { gqlManager } = system.get<DataModule>('data');
+
+    const roleDoc: RoleDoc = role.doc;
+    const schema = await buildSchemaFromDatabase(system, roleDoc, gqlManager);
+    if (!schema) {
+      system.logger.error(`no schema returned for role ${role.name}`);
+      return;
+    }
+    return schema;
+  },
+  [CoreModuleEvent.UserSerialize]: async (user: IUser<User>, system: System) => {
+    return `${user.id}`;
+  },
+  [CoreModuleEvent.UserDeserialize]: async (serialized: string, system: System) => {
+    const db = await getDatabase(system);
+    const { Role } = db.models;
+    // const transaction = await db.transaction();
+    const user: IUser<User> = (await db.models.User.findOne(
+      createOptions(
+        {
+          // transaction
+          override: true,
+        },
+        {
+          where: {
+            id: {
+              [Op.eq]: serialized,
+            },
+          },
+          include: [
+            {
+              required: true,
+              model: Role,
+              as: 'role',
+            },
+          ],
+          override: true,
+        },
+      ),
+    )) as any;
+    return user;
+  },
+  [CoreModuleEvent.GetAllRoles]: async (roles: IRole[] | undefined, system: System) => {
+    const db = await getDatabase(system);
+    const { Role } = db.models;
+    roles = (await Role.findAll(
+      createOptions(system, {
+        override: true,
+      }),
+    )) as any;
+    return roles
+  },
   [SystemEvent.Initialize]: async (core: System) => {
     core.setOptions(DataEvent.Initialize, {
       ignoreReturn: true,
@@ -418,6 +492,81 @@ export const dataModule: DataModule = {
     await db.close();
     return core;
   },
+  [SystemEvent.ContextCreate]: async (context, system, ref) => {
+    const db = await getDatabase<DatabaseContext>(system);
+    const { Site, Role, SiteRole } = db.models;
+    let { role, site, user } = context;
+
+    if (!site && ref?.hostname) {
+      site = await Site.getSiteByHostname(ref.hostname, { system, override: true, role: { name: "system" } });
+    }
+    if (!site) {
+      site = await Site.findOne(createOptions({ override: true }, {
+        where: {
+          default: true
+        }
+      }));
+    }
+
+    if (!role && user?.role) {
+      role = user.role;
+    } else if (user) {
+      role = await user.getRole(createOptions({ override: true }));
+    }
+    let siteRole: SiteRole | undefined;
+
+    if (site?.id && role?.id) {
+      siteRole = await SiteRole.findOne(
+        createOptions({ override: true }, {
+          where: {
+            siteId: site.id,
+            roleId: role.id,
+          },
+        })
+      );
+    }
+    // if (!siteRole && !role && site?.id) {
+    //   siteRole = await SiteRole.findOne(
+    //     createOptions({ override: true }, {
+    //       where: {
+    //         siteId: site.id,
+    //         doc: {
+    //           default: true,
+    //         },
+    //       },
+    //       include: [{
+    //         model: Role,
+    //         as: 'role',
+    //         required: true,
+    //       }]
+    //     })
+    //   );
+    // }
+    if (!siteRole && site?.id) {
+      siteRole = await SiteRole.findOne(createOptions({ override: true }, {
+        where: {
+          siteId: site.id,
+          doc: {
+            default: true,
+          }
+        },
+        include: [{
+          model: Role,
+          as: 'role',
+          required: true,
+        }]
+      }));
+    }
+    if (siteRole && !role) {
+      role = siteRole.role;
+    }
+    return {
+      ...context,
+      role,
+      siteRole,
+      site,
+    };
+  }
 };
 
 export default dataModule;

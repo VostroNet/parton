@@ -3,16 +3,16 @@ import path from 'path';
 
 import Sequelize from 'sequelize';
 
-import { System } from '../../../system';
-import { Logger } from '../../../types/logger';
-import { Context } from '../../../types/system';
+import { System } from '../../system';
+import { Logger } from '../../types/logger';
+import { Context } from '../../types/system';
 import {
   camelToSnakeCase,
   capitalize,
   uncapitalize,
-} from '../../../utils/string';
-import waterfall from '../../../utils/waterfall';
-import { getDatabase } from '../../data';
+} from '../../utils/string';
+import waterfall from '../../utils/waterfall';
+import { getDatabase } from '.';
 export async function generateTypes(
   system: System,
   _context: Context,
