@@ -6,8 +6,8 @@ import { Role } from '../types/models/models/role';
 import { Context, IModule } from '../types/system';
 import { createHexString } from '../utils/string';
 
-import { CoreModuleEvent as CoreModuleEvent, CoreModuleEvents } from './core';
 import { createContextFromRequest, ExpressEvent, ExpressModuleEvents } from './express';
+import { CoreModuleEvent, CoreModuleEvents } from './core/types';
 
 // export enum YogaEventType {
 //   Initialize = 'yoga:initialize',
@@ -45,7 +45,7 @@ export const yogaModule: IYogaModule = {
     const yoga = createYoga({
       schema,
       batching: true,
-      context: async(initialContext: GraphQLContext) => {
+      context: async (initialContext: GraphQLContext) => {
         const context = await createContextFromRequest(initialContext.request as any, system) as SystemContext;
         return context;
       },
