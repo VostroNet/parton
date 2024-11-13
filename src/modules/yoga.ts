@@ -2,12 +2,11 @@ import { GraphQLSchema } from 'graphql';
 import { createYoga, YogaInitialContext, YogaServerInstance } from 'graphql-yoga';
 
 import { System, SystemContext } from '../system';
-import { Role } from '../types/models/models/role';
 import { Context, IModule } from '../types/system';
 import { createHexString } from '../utils/string';
 
 import { createContextFromRequest, ExpressEvent, ExpressModuleEvents } from './express';
-import { CoreModuleEvent, CoreModuleEvents } from './core/types';
+import { CoreModuleEvent, CoreModuleEvents, IRole } from './core/types';
 
 // export enum YogaEventType {
 //   Initialize = 'yoga:initialize',
@@ -35,7 +34,7 @@ export const yogaModule: IYogaModule = {
   servers: {},
   [CoreModuleEvent.GraphQLSchemaCreate]: async (
     schema: GraphQLSchema,
-    role: Role,
+    role: IRole,
     system: System,
   ) => {
     const hexId = createHexString(role.id);

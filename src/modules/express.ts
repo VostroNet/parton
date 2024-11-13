@@ -245,7 +245,7 @@ export async function createContextFromRequest(
     system,
     req.user as IUser<any>,
     undefined,
-    undefined,
+    (req?.user as IUser<any>)?.role,
     override,
     initContext,
     req
