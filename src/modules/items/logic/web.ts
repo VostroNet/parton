@@ -78,6 +78,9 @@ export async function getPageFromItem(
     return undefined;
   }
   const layoutItem = getItemByPath<ItemLayoutData>(layout.path, store);
+  if(!layoutItem) {
+    return undefined;
+  }
 
   const sublayouts =
     item.data?.sublayouts?.map((sublayout) => {
@@ -85,22 +88,26 @@ export async function getPageFromItem(
         sublayout.path,
         store,
       );
+      if (!sublayoutItem) {
+        return undefined;
+      }
       return {
         id: sublayoutItem.id,
         path: sublayout.path,
+        placeholder: sublayout.placeholder,
         props: Object.assign(
           {},
           sublayout.props || {},
           sublayoutItem.data?.props || {},
         ),
       };
-    }) || [];
+    }).filter((s) => s !== undefined) || [];
 
   // TODO: look at getting values maybe have this preprocessed already
   // get layout and sublayout data
   const children = await Promise.all(
     item.children.map((c) => {
-      if (levels > 0) {
+      if (levels > 0 && rwcd.data.items[c]) {
         const item: Item<ItemPageData> = rwcd.data.items[c];
         const childPath = `${webPath}/${item.name}`;
         return getPageFromItem(rwcd, item, childPath, levels - 1);

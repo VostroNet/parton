@@ -167,6 +167,7 @@ export interface ItemPageData {
   };
   sublayouts: {
     path: string;
+    placeholder: string;
     props: any;
   }[];
   dynamic?: boolean;
