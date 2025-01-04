@@ -1,6 +1,6 @@
 import { ISlice, Loaf, LoafEvent, Logger } from '@vostro/sandwich';
 
-import { createOptions, getDatabase } from './modules/data';
+// import { createOptions, getDatabase } from './modules/data';
 import { Config } from './types/config';
 import { SystemContextRef, SystemEvent } from './types/events';
 import { Role } from './types/models/models/role';
@@ -60,6 +60,7 @@ export class System extends Loaf {
     return this.execute(SystemEvent.Configure, this);
   }
 }
+
 export interface SystemContext extends Context {
   system: System;
   role: Role;

@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-  
-import {DbOptions, Model} from "../data";
+  /* eslint-disable @typescript-eslint/no-empty-interface */
 
+// import {DbOptions, Model} from "../data";
+import Sequelize, {Model} from "sequelize";
 import {User} from "./user";
 
 export interface UserAuthCreationAttributes {
@@ -21,8 +22,7 @@ export interface UserAuthAttributes {
   userId: number | null;
 
 }
-
-export class UserAuth extends Model<UserAuthAttributes, UserAuthCreationAttributes> {
+export class UserAuth extends Sequelize.Model<UserAuthAttributes, UserAuthCreationAttributes> {
   createdAt: any;
   id: number;
   name: string | null;
@@ -34,6 +34,11 @@ export class UserAuth extends Model<UserAuthAttributes, UserAuthCreationAttribut
   createUser(item: User, options: DbOptions): Promise<User>;
   getUser(options: DbOptions): Promise<User>;
   setUser(item: User, options: DbOptions): Promise<void>;
+  static loginWithUsernamePassword(args: UserAuthLoginWithUsernamePasswordArgs, context: DataContext): Promise<any>;
 
 }
+
+export type UserAuthStatic = typeof UserAuth;
+
+export interface UserAuthLoginWithUsernamePasswordArgs { }
  

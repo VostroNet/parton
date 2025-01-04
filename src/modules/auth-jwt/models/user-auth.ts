@@ -1,4 +1,4 @@
-import { IDefinition } from "../../../data/types";
+import { IDefinition } from "../../data/types";
 
 
 const userAuthModel: IDefinition = {

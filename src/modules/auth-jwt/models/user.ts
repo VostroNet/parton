@@ -3,12 +3,12 @@ import { toGlobalId } from "graphql-relay";
 import { SignJWT } from "jose";
 
 import { JwtConfig } from "..";
-import { User } from "../../../../types/models/models/user";
-import { Context } from "../../../../types/system";
-import { createOptions } from "../../../data";
-import { getDefinition } from "../../../data/utils";
-import { getSystemFromContext } from "../../../../system";
-import { IDefinition } from "../../../data/types";
+import { User } from "../../../types/models/models/user";
+import { Context } from "../../../types/system";
+import { createOptions } from "../../data";
+import { getDefinition } from "../../data/utils";
+import { getSystemFromContext } from "../../../system";
+import { IDefinition } from "../../data/types";
 
 export interface IJwtFieldsDefinition extends IDefinition {
   jwtFields?: string[];

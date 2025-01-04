@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
   /* eslint-disable @typescript-eslint/no-empty-interface */
 
-import {DbOptions, Model} from "../data";
-
+// import {DbOptions, Model} from "../data";
+import Sequelize, {Model} from "sequelize";
 import {Role} from "./role";
 import {Site} from "./site";
 
@@ -29,8 +29,7 @@ export interface SiteRoleAttributes {
   updatedAt: any;
 
 }
-
-export class SiteRole extends Model<SiteRoleAttributes, SiteRoleCreationAttributes> {
+export class SiteRole extends Sequelize.Model<SiteRoleAttributes, SiteRoleCreationAttributes> {
   cacheDoc: any;
   cacheDocHash: string;
   createdAt: any;
@@ -52,5 +51,8 @@ export class SiteRole extends Model<SiteRoleAttributes, SiteRoleCreationAttribut
   updateCache(args: SiteRoleUpdateCacheArgs, context: DataContext): Promise<any>;
 
 }
+
+export type SiteRoleStatic = typeof SiteRole;
+
 export interface SiteRoleUpdateCacheArgs { }
  

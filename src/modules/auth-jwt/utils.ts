@@ -1,16 +1,17 @@
 import { fromGlobalId } from "graphql-relay";
 import { JWTPayload } from "jose";
-import { Op } from "sequelize";
+import { Attributes, CreateOptions, Op } from "sequelize";
 
-import { System } from "../../../system";
-import { Context } from "../../../types/system";
-import { createOptions, getDatabase } from "../../data";
-import { getDefinition } from "../../data/utils";
+import { System } from "../../system";
+import { Context } from "../../types/system";
+import { createOptions, getDatabase } from "../data";
+import { getDefinition } from "../data/utils";
 
 import { IJwtFieldsDefinition } from "./models/user";
 
 import { JwtConfig } from ".";
-import DatabaseContext from "../../../types/models";
+import DatabaseContext from "../../types/models";
+import { User } from "../../types/models/models/user";
 
 export interface JwtToken extends JWTPayload {
   userId: string;
@@ -36,7 +37,7 @@ export async function getUserFromToken(token: JwtToken, system: System, context:
       [Op.eq]: token.email,
     };
   }
-  let user = await User.findOne(createOptions(context, {
+  let user: User = await User.findOne(createOptions(context, {
     where,
     include: [{
       model: Role,
@@ -69,6 +70,7 @@ export async function getUserFromToken(token: JwtToken, system: System, context:
           ...userVars,
           roleId: role.id,
         }, createOptions(context));
+        
         await UserAuth.create({
           userId: user.id,
           name: token.source || "jwt",

@@ -5,6 +5,7 @@ import { IHashDefinition } from '../../utils/field-hash';
 import { Context } from '../../../types/system';
 import { createOptions, DataConfig, getDatabase } from '../../data';
 import { getSystemFromContext } from '../../../system';
+import DatabaseContext from '../../../types/models';
 
 const siteDefinition: IHashDefinition = {
   name: 'Site',
@@ -47,7 +48,7 @@ const siteDefinition: IHashDefinition = {
         try {
           const system = getSystemFromContext(context);
           const dialect = system.getConfig<DataConfig>().data.sequelize.dialect;
-          const db = await getDatabase(system);
+          const db = await getDatabase<DatabaseContext>(system);
           let hostFilter = db.literal(`"doc"->'hostnames' ? ${db.escape(hostname)}`);
           if (dialect === "sqlite") {
             hostFilter = db.literal(`"doc"->'hostnames' LIKE ${db.escape(`%${hostname}%`)}`);

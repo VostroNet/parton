@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
   /* eslint-disable @typescript-eslint/no-empty-interface */
 
-import {DbOptions, Model} from "../data";
-
+// import {DbOptions, Model} from "../data";
+import Sequelize, {Model} from "sequelize";
 import {SiteRole} from "./site-role";
 
 export interface SiteCreationAttributes {
@@ -26,8 +26,7 @@ export interface SiteAttributes {
   updatedAt: any;
 
 }
-
-export class Site extends Model<SiteAttributes, SiteCreationAttributes> {
+export class Site extends Sequelize.Model<SiteAttributes, SiteCreationAttributes> {
   createdAt: any;
   default: any;
   displayName: string;
@@ -51,5 +50,8 @@ export class Site extends Model<SiteAttributes, SiteCreationAttributes> {
   static getSiteByHostname(args: SiteGetSiteByHostnameArgs, context: DataContext): Promise<any>;
 
 }
+
+export type SiteStatic = typeof Site;
+
 export interface SiteGetSiteByHostnameArgs { }
  

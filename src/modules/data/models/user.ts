@@ -1,4 +1,6 @@
+import { GraphQLBoolean } from 'graphql';
 import DataTypes from '../../../types/data-types';
+import { Context } from '../../../types/system';
 import { IDefinition } from '../types';
 const userDefinition: IDefinition = {
   name: 'User',
@@ -35,18 +37,9 @@ const userDefinition: IDefinition = {
         foreignKey: 'roleId',
       },
     },
-    {
-      type: 'hasMany',
-      model: 'UserAuth',
-      name: 'auths',
-      options: {
-        as: 'auths',
-        foreignKey: 'userId',
-      },
-    },
   ],
   options: {
-    tableName: "users"
-  }
+    tableName: "users",
+  },
 };
 export default userDefinition;

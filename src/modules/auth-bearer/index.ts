@@ -1,13 +1,13 @@
 import bcrypt from 'bcrypt';
 import { Strategy as BearerStrategy } from 'passport-http-bearer';
 
-import { createContext } from '../../../system';
-import { IModule } from "../../../types/system";
-import { createOptions, DataModulesModels, getDatabase } from '../../data';
+import { createContext } from '../../system';
+import { IModule } from "../../types/system";
+import { buildOptions, DataModulesModels, getDatabase } from '../data';
 
 import models from './models';
-import DatabaseContext from '../../../types/models';
-import { CoreModuleEvent, CoreModuleEvents } from '../../core/types';
+import DatabaseContext from '../../types/models';
+import { CoreModuleEvent, CoreModuleEvents } from '../core/types';
 
 export interface BearerAuthModule extends IModule, CoreModuleEvents, DataModulesModels {
 
@@ -15,7 +15,7 @@ export interface BearerAuthModule extends IModule, CoreModuleEvents, DataModules
 
 export const bearerAuthModule: BearerAuthModule = {
   name: 'bearer',
-  dependencies: ["core"],
+  dependencies: ["core", "auth"],
   models,
   [CoreModuleEvent.AuthProviderRegister]: async (passport, system) => {
     passport.use(
@@ -26,7 +26,7 @@ export const bearerAuthModule: BearerAuthModule = {
           const context = await createContext(system, undefined, undefined, undefined, true);
 
           const userAuths = await UserAuth.findAll(
-            createOptions(context, {
+            buildOptions(context, {
               where: {
                 type: 'bearer',
               },
@@ -41,7 +41,7 @@ export const bearerAuthModule: BearerAuthModule = {
           );
           if (userAuth) {
             const user = await userAuth.getUser(
-              createOptions(
+              buildOptions(
                 {
                   override: true,
                 },

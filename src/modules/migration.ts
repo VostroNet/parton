@@ -170,7 +170,7 @@ export const migrationModule: IModule & SystemEvents = {
 
     const migrationContext: MigratorContext = {
       options,
-      sequelize: db,
+      sequelize: db as unknown as Sequelize,
       app: {
         system,
       },

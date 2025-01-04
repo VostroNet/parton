@@ -41,9 +41,10 @@ export async function generateTypes(
         logger,
       );
       modelNames += `  ${modelName} = "${modelName}",\n`;
-      infRef += `  [ModelNames.${modelName}]: typeof ${modelName};\n`;
+      infRef += `  [ModelNames.${modelName}]: ${modelName}Static;\n`;
+      // infRef += `  ${modelName}: ${modelName}Static;\n`;
       // models += `    ${modelName}: typeof ${modelName};\n`;
-      imports += `import {${modelName}} from "./models/${fileName}";\n`;
+      imports += `import {${modelName}Static} from "./models/${fileName}";\n`;
     },
   );
   const database = `import Sequelize, { Model, ModelStatic } from "sequelize";
@@ -56,14 +57,16 @@ ${modelNames}
 
 
 interface SConfig {
-  [key: string]: ModelStatic<Model<any, any>>; 
+  // [key: string]: ModelStatic<Model<any, any>>; 
 ${infRef}
 }
 
 
-export default class DatabaseContext extends Sequelize.Sequelize {
-  declare models: SConfig
-}\n`;
+export interface DatabaseContext extends Omit<Sequelize.Sequelize, 'models'> {
+  models: SConfig
+}
+export default DatabaseContext;  
+\n`;
   try {
     await fs.mkdir(outputPath);
   } catch (err: any) {
@@ -264,8 +267,8 @@ async function processModel(
       ? '/* eslint-disable @typescript-eslint/no-empty-interface */\n'
       : ''
     }
-import {DbOptions, Model} from "../data";
-
+// import {DbOptions, Model} from "../data";
+import Sequelize, {Model} from "sequelize";
 ${associatedImports}
 export interface ${modelName}CreationAttributes {
 ${creationFields}
@@ -273,10 +276,12 @@ ${creationFields}
 export interface ${modelName}Attributes {
 ${fields}
 }
-
-export class ${modelName} extends Model<${modelName}Attributes, ${modelName}CreationAttributes> {
-${fields || '\n'}${associations || '\n'}${instanceMethods || '\n'}${classMethods}
+export class ${modelName} extends Sequelize.Model<${modelName}Attributes, ${modelName}CreationAttributes> {
+${fields}${associations || '\n'}${instanceMethods || '\n'}${classMethods}
 }
+
+export type ${modelName}Static = typeof ${modelName};
+
 ${after} `;
   // console.log("out", code);
   const fileName = camelToSnakeCase(uncapitalize(modelName), '-');

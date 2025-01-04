@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
   
-import {DbOptions, Model} from "../data";
-
+// import {DbOptions, Model} from "../data";
+import Sequelize, {Model} from "sequelize";
 
 export interface ConfigCreationAttributes {
   config?: any;
@@ -16,8 +16,7 @@ export interface ConfigAttributes {
   updatedAt: any;
 
 }
-
-export class Config extends Model<ConfigAttributes, ConfigCreationAttributes> {
+export class Config extends Sequelize.Model<ConfigAttributes, ConfigCreationAttributes> {
   config: any;
   createdAt: any;
   id: number;
@@ -27,4 +26,7 @@ export class Config extends Model<ConfigAttributes, ConfigCreationAttributes> {
 
 
 }
+
+export type ConfigStatic = typeof Config;
+
  

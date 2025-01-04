@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-  
-import {DbOptions, Model} from "../data";
+  /* eslint-disable @typescript-eslint/no-empty-interface */
 
+// import {DbOptions, Model} from "../data";
+import Sequelize, {Model} from "sequelize";
 import {Role} from "./role";
 import {UserAuth} from "./user-auth";
 
@@ -26,8 +27,7 @@ export interface UserAttributes {
   userName: string;
 
 }
-
-export class User extends Model<UserAttributes, UserCreationAttributes> {
+export class User extends Sequelize.Model<UserAttributes, UserCreationAttributes> {
   createdAt: any;
   disabled: any;
   email: string | null;
@@ -52,6 +52,11 @@ export class User extends Model<UserAttributes, UserCreationAttributes> {
   createRole(item: Role, options: DbOptions): Promise<Role>;
   getRole(options: DbOptions): Promise<Role>;
   setRole(item: Role, options: DbOptions): Promise<void>;
+  static isLoggedIn(args: UserIsLoggedInArgs, context: DataContext): Promise<any>;
 
 }
+
+export type UserStatic = typeof User;
+
+export interface UserIsLoggedInArgs { }
  

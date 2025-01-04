@@ -1,4 +1,5 @@
 import { createContext, System } from "../../system";
+import DatabaseContext from "../../types/models";
 import { IModule } from "../../types/system";
 import waterfall from "../../utils/waterfall";
 import { CoreConfig } from "../core/types";
@@ -16,7 +17,7 @@ export const roleUpsertModule: DataEvents & IModule = {
 
       const roleSchema = roles[roleName];
 
-      const db = await getDatabase(system);
+      const db = await getDatabase<DatabaseContext>(system);
       const { Role } = db.models;
 
       const role = await Role.findOne(createOptions(context, {

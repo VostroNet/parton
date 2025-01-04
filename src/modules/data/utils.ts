@@ -107,7 +107,7 @@ export async function buildSchemaFromDatabase(
       if (m?.w || m?.r) {
         return true;
       }
-      if (m?.f && m.cm) {
+      if (m?.cm) {
         const fp = m.cm[methodName];
         if (fp?.w || fp?.r) {
           return true;

@@ -2,9 +2,8 @@ import bcrypt from 'bcrypt';
 
 import DataTypes from '../../../types/data-types';
 import { getContextFromOptions } from '../../data';
-import { FindOptions } from '../../data/types';
+import { FindOptions, IDefinition } from '../../data/types';
 import { validateFindOptions, validateMutation } from '../../data/validation';
-import { IDefinition } from '../types';
 import { MutationType } from '../../core/types';
 
 const userAuthModel: IDefinition = {

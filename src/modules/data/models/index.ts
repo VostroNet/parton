@@ -6,7 +6,6 @@ import Role from './role';
 import Site from './site';
 import SiteRole from './site-role';
 import User from './user';
-import UserAuth from './user-auth';
 
 const models: { [key: string]: IDefinition } = {
   Site,
@@ -15,6 +14,5 @@ const models: { [key: string]: IDefinition } = {
   Config,
   // EventLog,
   Role,
-  UserAuth,
 };
 export default models;

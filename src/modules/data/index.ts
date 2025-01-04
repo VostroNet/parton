@@ -9,7 +9,7 @@ import { Config } from '../../types/config';
 import { SystemEvent } from '../../types/events';
 import DatabaseContext from '../../types/models';
 import { Role } from '../../types/models/models/role';
-import { IModule } from '../../types/system';
+import { Context, IModule } from '../../types/system';
 import merge from '../../utils/merge';
 import waterfall from '../../utils/waterfall';
 import { CoreModuleEvent, CoreModuleEvents, IRole, IUser, MutationType, RoleDoc } from '../core/types';
@@ -93,37 +93,48 @@ export interface DatabaseOptions extends Options {
   paranoid?: boolean;
   fakeMigrate?: boolean;
 }
+export interface CreateOptions {
+  context: DataContext;
+  override?: boolean;
+  transaction?: any;
+  dataloader?: any;
+}
 
-export function createOptions(o: any, options: FindOptions = {}) {
+export function createOptions<T>(o: any, options: FindOptions = {}) {
   let context = o;
   if (o.context) {
     context = o.context;
   }
   const override = o.override || context.override;
   const transaction = o.transaction || context.transaction;
-  const opts = Object.assign(
-    {
-      override,
-    },
-    {
-      transaction,
-      context,
-    },
-    options,
-    context.dataloader,
-  );
-  return opts;
+  const opts = {
+    override,
+    transaction,
+    context,
+    ...options,
+    ...context.dataloader
+  };
+
+  return opts as T;
 }
-export function getDatabaseFromOptions<T extends Sequelize>(
+
+export function buildOptions<T>(context: Context, options: T) : T {
+  return createOptions(context, options) as T;
+}
+
+
+
+
+export function getDatabaseFromOptions<T extends Omit<Sequelize, 'models'> & {models: T["models"]}>(
   options: FindOptions,
 ): Promise<T> {
   const context = getContextFromOptions(options);
   return getDatabaseFromContext<T>(context);
 }
-export function getDatabaseFromContext<T extends Sequelize>(
+export function getDatabaseFromContext<T extends Omit<Sequelize, 'models'> & {models: T["models"]}>(
   context: DataContext,
 ): Promise<T> {
-  return getDatabase(context.system);
+  return getDatabase<T>(context.system);
 }
 
 /**
@@ -163,7 +174,7 @@ export function getRoleFromOptions(
   return context.role;
 }
 // let gqlManager: GQLManager;
-export async function getDatabase<T extends Sequelize>(
+export async function getDatabase<T extends Omit<Sequelize, 'models'> & {models: T["models"]}>(
   system: System,
 ): Promise<T> {
   const dataModule = system.get<DataModule>('data');
@@ -269,40 +280,9 @@ export const dataModule: DataModule = {
     }
     return schema;
   },
-  [CoreModuleEvent.UserSerialize]: async (user: IUser<User>, system: System) => {
-    return `${user.id}`;
-  },
-  [CoreModuleEvent.UserDeserialize]: async (serialized: string, system: System) => {
-    const db = await getDatabase(system);
-    const { Role } = db.models;
-    // const transaction = await db.transaction();
-    const user: IUser<User> = (await db.models.User.findOne(
-      createOptions(
-        {
-          // transaction
-          override: true,
-        },
-        {
-          where: {
-            id: {
-              [Op.eq]: serialized,
-            },
-          },
-          include: [
-            {
-              required: true,
-              model: Role,
-              as: 'role',
-            },
-          ],
-          override: true,
-        },
-      ),
-    )) as any;
-    return user;
-  },
+  
   [CoreModuleEvent.GetAllRoles]: async (roles: IRole[] | undefined, system: System) => {
-    const db = await getDatabase(system);
+    const db = await getDatabase<DatabaseContext>(system);
     const { Role } = db.models;
     roles = (await Role.findAll(
       createOptions(system, {
@@ -321,7 +301,7 @@ export const dataModule: DataModule = {
     core.setOptions(DataEvent.Setup, {
       ignoreReturn: true,
     });
-    core.get<DataModule>('data').getDatabase = <T extends Sequelize>() => getDatabase<T>(core);
+    core.get<DataModule>('data').getDatabase = <T extends Omit<Sequelize, 'models'> & {models: T["models"]}>() => getDatabase<T>(core);
     core.get<DataModule>('data').getDefinition = <
       T extends IDefinition | undefined,
     >(

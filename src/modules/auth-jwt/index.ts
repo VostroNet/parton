@@ -2,15 +2,15 @@
 import { exportJWK, importJWK, KeyLike } from "jose";
 import {Strategy as JwtStrategy} from "passport-jwt";
 
-import { Config } from "../../../types/config";
-import { IModule } from "../../../types/system";
-import { fetchWithTimeout } from "../../../utils/fetch";
-import { DataModulesModels } from "../../data";
-import { createContextFromRequest, ExpressEvent, ExpressModuleEvents } from "../../express";
+import { Config } from "../../types/config";
+import { IModule } from "../../types/system";
+import { fetchWithTimeout } from "../../utils/fetch";
+import { DataModulesModels } from "../data";
+import { createContextFromRequest, ExpressEvent, ExpressModuleEvents } from "../express";
 
 import models from "./models";
 import { getUserFromToken } from "./utils";
-import { CoreModuleEvent, CoreModuleEvents } from "../../core/types";
+import { CoreModuleEvent, CoreModuleEvents } from "../core/types";
 
 
 export interface JwtAuthModule extends IModule, CoreModuleEvents, ExpressModuleEvents, DataModulesModels {
