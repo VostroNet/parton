@@ -37,6 +37,9 @@ export async function buildSchemaFromDatabase(
         return true;
       }
       if (roleSchema.models) {
+        if (roleSchema.models.w || roleSchema.models.r) {
+          return true;
+        }
         const m = roleSchema.models[modelName];
         if (m?.w || m?.r) {
           return true;
@@ -49,6 +52,9 @@ export async function buildSchemaFromDatabase(
         return true;
       }
       if (roleSchema.models) {
+        if (roleSchema.models.w || roleSchema.models.r) {
+          return true;
+        }
         const m = roleSchema.models[modelName];
         if (m?.w || m?.r) {
           return true;
@@ -69,6 +75,9 @@ export async function buildSchemaFromDatabase(
       if (!roleSchema.models) {
         return false;
       }
+      if (roleSchema.models.w || roleSchema.models.r) {
+        return true;
+      }
       const m = roleSchema.models[modelName];
       if (m?.w || m?.r) {
         return true;
@@ -85,9 +94,11 @@ export async function buildSchemaFromDatabase(
       if (roleSchema.w || roleSchema.r) {
         return true;
       }
-
       if (!roleSchema.models) {
         return false;
+      }
+      if (roleSchema.models.w || roleSchema.models.r) {
+        return true;
       }
       const m = roleSchema.models[modelName];
       if (m?.w || m?.r) {
@@ -102,6 +113,9 @@ export async function buildSchemaFromDatabase(
 
       if (!roleSchema.models) {
         return false;
+      }
+      if (roleSchema.models.w || roleSchema.models.r) {
+        return true;
       }
       const m = roleSchema.models[modelName];
       if (m?.w || m?.r) {
@@ -124,6 +138,9 @@ export async function buildSchemaFromDatabase(
         return false;
       }
 
+      if (roleSchema.models.w || roleSchema.models.r) {
+        return true;
+      }
       const m = roleSchema.models[modelName];
       if (m?.w || m?.r) {
         return true;
@@ -144,6 +161,9 @@ export async function buildSchemaFromDatabase(
       if (!roleSchema.models) {
         return false;
       }
+      if (roleSchema.models.w || roleSchema.models.d || roleSchema.models.u) {
+        return true;
+      }
       const m = roleSchema.models[modelName];
       if (m?.w || m?.d || m.u) {
         return true;
@@ -158,6 +178,9 @@ export async function buildSchemaFromDatabase(
       if (!roleSchema.models) {
         return false;
       }
+      if (roleSchema.models.u) {
+        return true;
+      }
       const m = roleSchema.models[modelName];
       if (m?.u) {
         return true;
@@ -171,6 +194,9 @@ export async function buildSchemaFromDatabase(
 
       if (!roleSchema.models) {
         return false;
+      }
+      if (roleSchema.models.u) {
+        return true;
       }
       const m = roleSchema.models[modelName];
 
@@ -193,6 +219,9 @@ export async function buildSchemaFromDatabase(
       if (!roleSchema.models) {
         return false;
       }
+      if (roleSchema.models.w) {
+        return true;
+      }
       const m = roleSchema.models[modelName];
       if (m?.w) {
         return true;
@@ -205,6 +234,9 @@ export async function buildSchemaFromDatabase(
       }
       if (!roleSchema.models) {
         return false;
+      }
+      if (roleSchema.models.w) {
+        return true;
       }
       const m = roleSchema.models[modelName];
       if (m?.w) {
@@ -226,6 +258,9 @@ export async function buildSchemaFromDatabase(
       if (!roleSchema.models) {
         return false;
       }
+      if (roleSchema.models.d) {
+        return true;
+      }
       const m = roleSchema.models[modelName];
       if (m?.d) {
         return true;
@@ -241,12 +276,12 @@ export async function buildSchemaFromDatabase(
         return false;
       }
       const m = roleSchema.models[modelName];
-      if (m?.d) {
+      if (m?.w) {
         return true;
       }
-      if (m?.f) {
-        const fp = m.f[methodName];
-        if (fp?.d) {
+      if (m?.cm) {
+        const fp = m.cm[methodName];
+        if (fp?.w) {
           return true;
         }
       }
@@ -287,9 +322,15 @@ export async function buildSchemaFromDatabase(
       return false;
     },
   };
-  const schema = await createSchema(gqlManager, {
-    permission: permissionFunc,
-    // ...schemaConfig,
-  });
-  return schema;
+  try {
+    const schema = await createSchema(gqlManager, {
+      permission: permissionFunc,
+      // ...schemaConfig,
+    });
+    return schema;
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+
 }

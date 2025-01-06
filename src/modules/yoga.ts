@@ -16,6 +16,27 @@ import { CoreModuleEvent, CoreModuleEvents, IRole } from './core/types';
 //   [key in RedisEventType]?: (redis: Redis, core: System) => Promise<void>;
 // };
 
+
+// import { Plugin } from 'graphql-yoga'
+ 
+// function useContext(): Plugin {
+//   return {
+//     async onContextBuilding(args) {
+//       console.log("onContextBuilding", args);
+//       return;
+//     },
+//     onRequestParse(args) {
+//       console.log("onRequestParse", args);
+//       return;
+//     },
+//     onRequest(args) {
+//       console.log("onRequest", args);
+//       return;
+//     }
+//   }
+// }
+
+
 export interface IYogaModule
   extends IModule,
   CoreModuleEvents,
@@ -30,7 +51,11 @@ export interface GraphQLContext extends YogaInitialContext, Context {
 
 export const yogaModule: IYogaModule = {
   name: 'yoga',
-  dependencies: ['express'],
+  dependencies: ['express', {
+    optional: {
+      before: ["auth"]
+    }
+  }],
   servers: {},
   [CoreModuleEvent.GraphQLSchemaCreate]: async (
     schema: GraphQLSchema,
@@ -44,12 +69,14 @@ export const yogaModule: IYogaModule = {
     const yoga = createYoga({
       schema,
       batching: true,
-      context: async (initialContext: GraphQLContext) => {
-        const context = await createContextFromRequest(initialContext.request as any, system) as SystemContext;
+      context: async (initialContext: GraphQLContext, ...args) => {
+        // bodyInit should be the express request passed in.
+        const context = await createContextFromRequest((initialContext.request as any).bodyInit, system) as SystemContext;
         return context;
       },
       graphiql: true,
       graphqlEndpoint: `/graphql.api/${hexId}`,
+      // plugins: [useContext()],
     });
     system.get<IYogaModule>('yoga').servers[hexId] = yoga;
     return schema

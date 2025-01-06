@@ -19,6 +19,10 @@ const userDefinition: IDefinition = {
         isLoggedIn: {
           type: GraphQLBoolean,
           args: {},
+        },
+        getCurrentUser: {
+          type: "User",
+          args: {},
         }
       }
     }
@@ -29,6 +33,9 @@ const userDefinition: IDefinition = {
       isLoggedIn(args: never, context: Context) {
         return !!context.user;
       },
+      getCurrentUser(args: never, context: Context) {
+        return context.user;
+      }
     },
   },
 };

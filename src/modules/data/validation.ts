@@ -40,14 +40,14 @@ export async function validateFindOptions(
   if (!schema) {
     throw new Error('no schema found for role');
   }
-  const tablePerms = (schema?.models || {})[tableName];
-  if (!schema.r || !tablePerms?.r) {
+  const tablePerms = schema?.models?.[tableName];
+  if (!schema.r && !tablePerms?.r) {
     return invalidateFindOptions(options);
   }
   let roleLevel = RoleModelPermissionLevel.self;
   if (
-    schema.r !== RoleModelPermissionLevel.self &&
-    (tablePerms.r === true || tablePerms.r === RoleModelPermissionLevel.global)
+    schema.r !== RoleModelPermissionLevel.self ||
+    (tablePerms?.r === true || tablePerms?.r === RoleModelPermissionLevel.global)
   ) {
     roleLevel = RoleModelPermissionLevel.global;
   }

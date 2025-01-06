@@ -11,12 +11,18 @@ importers:
 
   .:
     dependencies:
+      '@azerothian/graphql-jtd':
+        specifier: ^2.0.1
+        version: 2.0.1(graphql@16.9.0)
       '@azerothian/object-loader':
         specifier: ^0.0.3
         version: 0.0.3
       '@graphql-tools/stitch':
         specifier: ^9.3.3
         version: 9.3.3(graphql@16.9.0)
+      '@jsonjoy.com/json-pack':
+        specifier: ^1.1.1
+        version: 1.1.1(tslib@2.8.1)
       '@types/cors':
         specifier: ^2.8.17
         version: 2.8.17
@@ -29,9 +35,6 @@ importers:
       '@vostro/gqlize-adapter-sequelize':
         specifier: ^5.3.1
         version: 5.3.1(@vostro/graphql-types@2.0.0(graphql@16.9.0))(graphql-relay@0.10.2(graphql@16.9.0))(sequelize@6.37.5(pg@8.13.1)(sqlite3@5.1.7))
-      '@vostro/graphql-jtd':
-        specifier: ^1.0.4
-        version: 1.0.4(graphql@16.9.0)
       '@vostro/graphql-types':
         specifier: ^2.0.0
         version: 2.0.0(graphql@16.9.0)
@@ -141,6 +144,9 @@ importers:
         specifier: ^2.6.0
         version: 2.6.0
     devDependencies:
+      '@azerothian/jtd-types':
+        specifier: ^2.0.0
+        version: 2.0.0
       '@babel/core':
         specifier: ^7.26.0
         version: 7.26.0
@@ -204,9 +210,6 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^8.13.0
         version: 8.13.0(eslint@9.14.0(jiti@1.21.6))(typescript@5.6.3)
-      '@vostro/jtd-types':
-        specifier: ^1.0.2
-        version: 1.0.2
       codecov:
         specifier: ^3.8.3
         version: 3.8.3(encoding@0.1.13)
@@ -294,6 +297,14 @@ packages:
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
+
+  '@azerothian/graphql-jtd@2.0.1':
+    resolution: {integrity: sha512-VvVmtaCyLqEP/J9hhEJUZtE5ktDaeYKOC120/tHzXwilvCIDTRHYU97UDK7lIz5VQ2fEQ+3Nqozsi0HzYJCENg==}
+    peerDependencies:
+      graphql: ^16.10.0
+
+  '@azerothian/jtd-types@2.0.0':
+    resolution: {integrity: sha512-ddMp1EtTfISWLBpTnO861ok4jSBMVbx1yR5exN/hABsnxCJvUPr4cJm9hZttqSVWztdPuhbKMoEwhbaSAcvTLA==}
 
   '@azerothian/object-loader@0.0.3':
     resolution: {integrity: sha512-ySXaPZxOMYrS5w1hJNetBXMutqaISts+KyF02F8C3k8Ydi/5DGW7/jht5wZdYNa1DoValHIcLG3+Lz0BdpgNuA==}
@@ -1523,6 +1534,24 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
+  '@jsonjoy.com/base64@1.1.2':
+    resolution: {integrity: sha512-q6XAnWQDIMA3+FTiOYajoYqySkO+JSat0ytXGSuRdq9uXE7o92gzuQwQM14xaCRlBLGq3v5miDGC4vkVTn54xA==}
+    engines: {node: '>=10.0'}
+    peerDependencies:
+      tslib: '2'
+
+  '@jsonjoy.com/json-pack@1.1.1':
+    resolution: {integrity: sha512-osjeBqMJ2lb/j/M8NCPjs1ylqWIcTRTycIhVB5pt6LgzgeRSb0YRZ7j9RfA8wIUrsr/medIuhVyonXRZWLyfdw==}
+    engines: {node: '>=10.0'}
+    peerDependencies:
+      tslib: '2'
+
+  '@jsonjoy.com/util@1.5.0':
+    resolution: {integrity: sha512-ojoNsrIuPI9g6o8UxhraZQSyF2ByJanAY4cTFbc8Mf2AXEF4aQRGY1dJxyJpuyav8r9FGflEt/Ff3u5Nt6YMPA==}
+    engines: {node: '>=10.0'}
+    peerDependencies:
+      tslib: '2'
+
   '@kamilkisiela/fast-url-parser@1.1.4':
     resolution: {integrity: sha512-gbkePEBupNydxCelHCESvFSFM8XPh1Zs/OAVRW/rKpEqPAl5PbOM90Si8mv9bvnR53uPD2s/FiRxdvSejpRJew==}
 
@@ -2083,11 +2112,6 @@ packages:
       graphql-relay: ^0.10.0
       sequelize: ^6.35.1
 
-  '@vostro/graphql-jtd@1.0.4':
-    resolution: {integrity: sha512-8fO15NF5BrwiRvikxjxB8UhWpszULCL1P34R8BzWvd1hRIsoXormzzAIi7yyPEtEmZFqln0jwUanZXFWlhHGKg==}
-    peerDependencies:
-      graphql: ^16.0.1
-
   '@vostro/graphql-types@2.0.0':
     resolution: {integrity: sha512-sh6nJqFlB7T/u1Lq5uFrt8rzpJHmouThCy1Iq8lGhff9XdV2BMonds+eNVn9fkw8MyJuwj06BCwVncTyIa2HhQ==}
     peerDependencies:
@@ -2096,9 +2120,6 @@ packages:
   '@vostro/graphql16@16.8.1':
     resolution: {integrity: sha512-LSnQ/lApWzL/qvlRVVI5JjvNQx/nlSh2DR8Lw4gXmauMDL+qxNwceDcA/iJordZWpYREAk9vu284jP7nrQfy9g==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
-
-  '@vostro/jtd-types@1.0.2':
-    resolution: {integrity: sha512-RWSgwpIAnceanquFGCzP5oyrUUjEb6QQPxXRUT3cFc1vIdKj+uXRy3LXQrwzFjrX2CMHmjkJNu9lLLycmnPbqg==}
 
   '@vostro/object-visit@1.1.0':
     resolution: {integrity: sha512-PoRnLnokaqADO1mUpGCwTjruJbTW+ameXCOPPylPqGfLIgLGJe33MFWYVnaq4y9vxQuSJVPleA4wuGordmBWIw==}
@@ -2882,6 +2903,15 @@ packages:
 
   debug@4.3.7:
     resolution: {integrity: sha512-Er2nc/H7RrMXZBFCEim6TCmMk02Z8vLC2Rbi1KEBggpo0fS6l0S1nnapwmIi3yW/+GOJap1Krg4w0Hg80oCqgQ==}
+    engines: {node: '>=6.0'}
+    peerDependencies:
+      supports-color: '*'
+    peerDependenciesMeta:
+      supports-color:
+        optional: true
+
+  debug@4.4.0:
+    resolution: {integrity: sha512-6WTZ/IxCY/T6BALoZHaE4ctp9xm+Z5kY/pzYaCHRFeyVhojxlrm+46y68HA6hr0TcwEssoxNiDEUJQjfPZ/RYA==}
     engines: {node: '>=6.0'}
     peerDependencies:
       supports-color: '*'
@@ -3789,6 +3819,10 @@ packages:
     resolution: {integrity: sha512-sqbjZKK7kf44hfdE94EoX8MZNk0n7HeW37O4YrVGCF4wzgQjp+akPAkfUK5LZ6KuR/6sqeAVuXHji+RzQgOn5A==}
     engines: {node: '>=18'}
     hasBin: true
+
+  hyperdyperid@1.2.0:
+    resolution: {integrity: sha512-Y93lCzHYgGWdrJ66yIktxiaGULYc6oGiABxhcO5AufBeOyoIdZF7bIfLaOrbM0iGIOXQQgxxRrFEnb+Y6w1n4A==}
+    engines: {node: '>=10.18'}
 
   iconv-lite@0.4.24:
     resolution: {integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==}
@@ -5793,6 +5827,12 @@ packages:
   text-table@0.2.0:
     resolution: {integrity: sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==}
 
+  thingies@1.21.0:
+    resolution: {integrity: sha512-hsqsJsFMsV+aD4s3CWKk85ep/3I9XzYV/IXaSouJMYIoDlgyi11cBhsqYe9/geRfB0YIikBQg6raRaM+nIMP9g==}
+    engines: {node: '>=10.18'}
+    peerDependencies:
+      tslib: ^2
+
   through2@2.0.5:
     resolution: {integrity: sha512-/mrRod8xqpA+IHSLyGCQ2s8SPHiCDEeQJSep1jqLYeEUClOFG2Qsh+4FU6G9VeqpZnGW/Su8LQGc4YKni5rYSQ==}
 
@@ -6290,6 +6330,15 @@ snapshots:
     dependencies:
       '@jridgewell/gen-mapping': 0.3.5
       '@jridgewell/trace-mapping': 0.3.25
+
+  '@azerothian/graphql-jtd@2.0.1(graphql@16.9.0)':
+    dependencies:
+      debug: 4.4.0
+      graphql: 16.9.0
+    transitivePeerDependencies:
+      - supports-color
+
+  '@azerothian/jtd-types@2.0.0': {}
 
   '@azerothian/object-loader@0.0.3':
     dependencies:
@@ -7757,6 +7806,22 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
+  '@jsonjoy.com/base64@1.1.2(tslib@2.8.1)':
+    dependencies:
+      tslib: 2.8.1
+
+  '@jsonjoy.com/json-pack@1.1.1(tslib@2.8.1)':
+    dependencies:
+      '@jsonjoy.com/base64': 1.1.2(tslib@2.8.1)
+      '@jsonjoy.com/util': 1.5.0(tslib@2.8.1)
+      hyperdyperid: 1.2.0
+      thingies: 1.21.0(tslib@2.8.1)
+      tslib: 2.8.1
+
+  '@jsonjoy.com/util@1.5.0(tslib@2.8.1)':
+    dependencies:
+      tslib: 2.8.1
+
   '@kamilkisiela/fast-url-parser@1.1.4': {}
 
   '@mapbox/node-pre-gyp@1.0.11(encoding@0.1.13)':
@@ -8360,20 +8425,11 @@ snapshots:
       pluralize: 8.0.0
       sequelize: 6.37.5(pg@8.13.1)(sqlite3@5.1.7)
 
-  '@vostro/graphql-jtd@1.0.4(graphql@16.9.0)':
-    dependencies:
-      debug: 4.3.7
-      graphql: 16.9.0
-    transitivePeerDependencies:
-      - supports-color
-
   '@vostro/graphql-types@2.0.0(graphql@16.9.0)':
     dependencies:
       graphql: 16.9.0
 
   '@vostro/graphql16@16.8.1': {}
-
-  '@vostro/jtd-types@1.0.2': {}
 
   '@vostro/object-visit@1.1.0': {}
 
@@ -9397,6 +9453,10 @@ snapshots:
       ms: 2.1.3
 
   debug@4.3.7:
+    dependencies:
+      ms: 2.1.3
+
+  debug@4.4.0:
     dependencies:
       ms: 2.1.3
 
@@ -10487,6 +10547,8 @@ snapshots:
       ms: 2.1.3
 
   husky@9.1.6: {}
+
+  hyperdyperid@1.2.0: {}
 
   iconv-lite@0.4.24:
     dependencies:
@@ -12733,6 +12795,10 @@ snapshots:
   text-extensions@1.9.0: {}
 
   text-table@0.2.0: {}
+
+  thingies@1.21.0(tslib@2.8.1):
+    dependencies:
+      tslib: 2.8.1
 
   through2@2.0.5:
     dependencies:
