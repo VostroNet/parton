@@ -18,6 +18,8 @@ import { getItemByPath } from '../utils';
 import { createContextFromRequest } from '../../express';
 import { getSystemFromContext, SystemContext } from '../../../system';
 import { minimatch } from 'minimatch';
+import path from 'path';
+import { Context } from '../../../types/system';
 
 // export function getTopItemFromUri(store: RoleWebCacheDoc, uri: Url.URL) {
 //   const hostname = uri
@@ -109,7 +111,7 @@ export async function getPageFromItem(
     item.children.map((c) => {
       if (levels > 0 && rwcd.data.items[c]) {
         const item: Item<ItemPageData> = rwcd.data.items[c];
-        const childPath = `${webPath}/${item.name}`;
+        const childPath = path.resolve(`${webPath}/${item.name}`);
         return getPageFromItem(rwcd, item, childPath, levels - 1);
       } else {
         return { id: c } as ItemIdRef;
@@ -149,16 +151,16 @@ export async function getPageFromItem(
 export async function getPageResolver(
   _root: any,
   args: { uri: string; levels: number },
-  context: DataContext,
+  context: Context,
 ) {
   const { uri, levels } = args;
   const url = new URL(uri);
 
   const system = getSystemFromContext(context);
-  const reqContext = await createContextFromRequest({ hostname: url.hostname } as any, system, context.override, context.transaction) as SystemContext;
+  // const reqContext = await createContextFromRequest(context.request, system, context.override, context.transaction) as SystemContext;
 
-  if (!reqContext.siteRole?.cacheDoc) {
+  if (!context.siteRole?.cacheDoc) {
     throw new GraphQLError('Cache doc is corrupt, unable to retrieve page');
   }
-  return getPageFromSiteRoleWebCache(reqContext.siteRole.cacheDoc, url.pathname, levels);
+  return getPageFromSiteRoleWebCache(context.siteRole.cacheDoc, url.pathname, levels);
 }

@@ -85,7 +85,7 @@ export async function createSingleItemData(
     name: itemData.name,
     type: itemData.type || ItemType.Folder,
     parentId,
-    templatePath: itemData.templatePath,
+    template: itemData.template,
     displayName: itemData.displayName,
     index: itemData.index || 0,
     data: itemData.data,
@@ -143,12 +143,12 @@ export function compileTemplateDataForItem(
     templates.push(item);
   }
   // eslint-disable-next-line functional/no-loop-statements
-  while (current.templatePath) {
-    current = store.items[current.templatePath];
+  while (current.template) {
+    current = store.items[store.paths[current.template]];
     if (current) {
       templates.push(current);
     }
-    if (!current.templatePath) {
+    if (!current.template) {
       break;
     }
   }
@@ -193,6 +193,10 @@ export async function createRoleItemsCache(
     Object.keys(store.items).map(async (itemId) => {
       const item = store.items[itemId];
       item.values = await processTemplateFieldsForItem(item, store, context);
+      item.children = item.children.filter((childId) => {
+        return store.items[childId];
+      });
+
       store.items[itemId] = await core.execute(
         ItemEvent.ProcessItem,
         item,
@@ -210,7 +214,7 @@ async function processTemplateFieldsForItem(
   store: SiteRoleItemStore,
   context: DataContext,
 ) {
-  if (!item.templatePath || !item.data) {
+  if (!item.template || !item.data) {
     return {};
   }
   const templateData = getTemplateDataForItem(item, store);
@@ -244,11 +248,11 @@ export function getItemByPath<T>(path: string, store: SiteRoleItemStore) {
 }
 
 export function getTemplateDataForItem(item: Item<any>, store: SiteRoleItemStore) {
-  if (!item.templatePath) {
+  if (!item.template) {
     return {};
   }
   const templateItem = getItemByPath<ItemTemplateData>(
-    item.templatePath,
+    item.template,
     store,
   );
   if (!templateItem?.id) {
