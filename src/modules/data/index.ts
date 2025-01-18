@@ -559,7 +559,7 @@ export const dataModule: DataModule = {
     return {
       ...options,
       scalarPostProcessor: (typeDef: IJtdMin<IDataJTDMetadata>, name, graphqlType: GraphQLType, {data, type}: JtdCurrentObject, isScalarType) => {
-        if(type === "GraphQLInputObjectType" && graphqlType.toString() === "ID") {
+        if(graphqlType.toString() === "ID") {
           // console.log("ID", typeDef);
 
           // TODO: better way, maybe look into graphql extensions to include rel info
@@ -567,7 +567,11 @@ export const dataModule: DataModule = {
           // if (name === "siteId") {
           //   console.log("siteId", typeDef);
           // }
-          if (model?.associations) {
+          
+          if(!model) {
+            return typeDef;
+          }
+          if (model.associations) {
             const assoc = Object.keys(model?.associations).find((key) => {
               return  model.associations[key]?.identifierField === name;
             });
@@ -580,7 +584,9 @@ export const dataModule: DataModule = {
                 access: association.associationAccessor,
               };
             }
-
+          }
+          if(model.primaryKeyAttributes?.indexOf(name) > -1) {
+            typeDef.md.pk = true;
           }
         }
         // if (name === "siteId") {
@@ -605,4 +611,5 @@ interface IDataJTDMetadata {
   rel: string
   relType: string
   access: string
+  pk: boolean
 }
