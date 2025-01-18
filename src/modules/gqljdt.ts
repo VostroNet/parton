@@ -1,6 +1,6 @@
-import { generateJDTMinFromSchema } from '@azerothian/graphql-jtd';
-import { IJtdMinRoot, JtdMinType } from '@azerothian/jtd-types';
-import { GraphQLSchema } from 'graphql';
+import { generateJDTMinFromSchema, generateJTDMinOptions } from '@azerothian/graphql-jtd';
+import { IJtdMin, IJtdMinRoot, JtdMinType,  } from '@azerothian/jtd-types';
+import { GraphQLObjectTypeConfig, GraphQLScalarType, GraphQLSchema, GraphQLType } from 'graphql';
 
 import { System } from '../system';
 import { Role } from '../types/models/models/role';
@@ -14,6 +14,24 @@ import {
 import { CoreModuleEvent, CoreModuleEvents } from './core/types';
 
 import {CborEncoder} from "@jsonjoy.com/json-pack/lib/cbor/index"
+
+
+
+
+export enum GqlJdtEvent {
+  Configure = 'gqljdt:configure',
+}
+
+
+
+export interface GqlJdtModuleEvents {
+  [GqlJdtEvent.Configure]?(
+    options: generateJTDMinOptions,
+    core: System,
+    module: IModule,
+  ): Promise<Express.Application>;
+}
+
 
 export interface IGqlJdtModule
   extends IModule,
@@ -35,19 +53,22 @@ export const gqljdtModule: IGqlJdtModule = {
     }
   }],
   jdtCache: {},
-  [CoreModuleEvent.GraphQLSchemaCreate]: async (
+  [CoreModuleEvent.GraphQLSchemaCreate]: async function(
     schema: GraphQLSchema,
     role: Role,
     system: System,
-  ) => {
+  ) {
     try {
       const roleHex = createHexString(role.id);
-      const jtdMin = generateJDTMinFromSchema(schema, (type) => {
-        if(type.toString() === "GQLTDate") {
-          return JtdMinType.TIMESTAMP;
+      const options = await system.execute<generateJTDMinOptions>(GqlJdtEvent.Configure,{
+        customScalarResolver: (name, type) => {
+          if(type.toString() === "GQLTDate") {
+            return JtdMinType.TIMESTAMP;
+          }
+          return undefined;
         }
-        return undefined;
-      });
+      }, system, this);
+      const jtdMin = generateJDTMinFromSchema(schema, options);
       const encoder = new CborEncoder();
       const pack = encoder.encode(jtdMin);
 

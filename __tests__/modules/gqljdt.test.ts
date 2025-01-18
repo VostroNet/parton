@@ -87,7 +87,7 @@ describe("modules:services:gqljdt", () => {
     expect(gqlJdtSlice.jdtCache).toBeDefined();
     const hexId = createHexString(role?.id);
     expect(gqlJdtSlice.jdtCache[hexId]).toBeDefined();
-    expect(gqlJdtSlice.jdtCache[hexId].p?.Query?.p?.getPage).toBeDefined();
+    expect(gqlJdtSlice.jdtCache[hexId].schema.p?.Query?.p?.getPage).toBeDefined();
     await core.shutdown();
   });
 

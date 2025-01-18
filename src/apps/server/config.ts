@@ -6,6 +6,7 @@ import dataModule from // createOptions,
 // getDatabase,
 '../../modules/data';
 import expressModule from '../../modules/express';
+import gqljdtModule from '../../modules/gqljdt';
 import httpModule from '../../modules/http';
 import { fieldHashModule } from '../../modules/utils/field-hash';
 import { roleUpsertModule } from '../../modules/utils/role-upsert';
@@ -65,6 +66,7 @@ const config: CoreConfig = {
     dataModule,
     httpModule,
     expressModule,
+    gqljdtModule,
     yogaModule,
     roleUpsertModule,
     fieldHashModule,

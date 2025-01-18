@@ -49,8 +49,11 @@ export default async (args: minimist.ParsedArgs) => {
   await system.load();
   logger.debug('firing initialize');
   await system.initialize();
+  logger.debug('firing configure');
+  await system.configure();
   logger.debug('firing system:ready');
-  await system.execute(SystemEvent.Ready, system);
-
+  await system.ready();
+  // await system.execute(SystemEvent.Ready, system);
+  
   logger.debug('finished');
 };

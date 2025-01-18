@@ -17,13 +17,16 @@ import { CoreModuleEvent, CoreModuleEvents, IRole, IUser, MutationType, RoleDoc 
 import { DataHookEvent, DataHookMap, DataModelHookEvents, Hook } from './hooks';
 import { DataContext, FindOptions, IDefinition } from './types';
 import { validateFindOptions, validateMutation } from './validation';
-import { User } from '../../types/models/models/user';
 import { buildSchemaFromDatabase } from './utils';
 
 import models from "./models/index";
 import { SiteRole } from '../../types/models/models/site-role';
 import { CliEvent, ClIModuleEvents } from '../cli';
 import { generateTypes } from './generate-types';
+import { GqlJdtEvent, GqlJdtModuleEvents } from '../gqljdt';
+import { IJtdMin } from '@azerothian/jtd-types';
+import {GraphQLType } from 'graphql';
+import { JtdCurrentObject } from '@azerothian/graphql-jtd';
 
 export enum DataEvent {
   Initialize = 'data:initialize',
@@ -39,11 +42,11 @@ export type DataEvents = {
     core: System,
   ) => Promise<void>;
   readonly [DataEvent.Configure]?: (
-    models: { [key: string]: any },
+    models: { [key: string]: IDefinition },
     core: System,
   ) => Promise<{ [key: string]: any }>;
   readonly [DataEvent.ConfigureComplete]?: (
-    models: { [key: string]: any },
+    models: { [key: string]: IDefinition },
     core: System,
   ) => Promise<{ [key: string]: any }>;
   readonly [DataEvent.Setup]?: (
@@ -72,7 +75,8 @@ export interface DataModule
   DataEvents,
   DataModelHookEvents,
   DataModulesModels,
-  ClIModuleEvents {
+  ClIModuleEvents,
+  GqlJdtModuleEvents {
   gqlManager?: GQLManager;
   getDatabase?: <T extends DatabaseContext>() => Promise<T>;
   getDefinition?: <T extends IDefinition>(name: string) => T | undefined;
@@ -546,7 +550,59 @@ export const dataModule: DataModule = {
       siteRole,
       site,
     };
+  },
+  [GqlJdtEvent.Configure]: async function(options, system) {
+    const db = await getDatabase<DatabaseContext>(system);
+
+
+
+    return {
+      ...options,
+      scalarPostProcessor: (typeDef: IJtdMin<IDataJTDMetadata>, name, graphqlType: GraphQLType, {data, type}: JtdCurrentObject, isScalarType) => {
+        if(type === "GraphQLInputObjectType" && graphqlType.toString() === "ID") {
+          // console.log("ID", typeDef);
+
+          // TODO: better way, maybe look into graphql extensions to include rel info
+          const model = db.models[data.name.replace(/(Optional|Required)Input/g, "")];
+          // if (name === "siteId") {
+          //   console.log("siteId", typeDef);
+          // }
+          if (model?.associations) {
+            const assoc = Object.keys(model?.associations).find((key) => {
+              return  model.associations[key]?.identifierField === name;
+            });
+            const association = model?.associations[assoc];
+            if (association) {
+              typeDef.md = {
+                ...typeDef.md, 
+                rel: association.target?.name,
+                relType: association.associationType,
+                access: association.associationAccessor,
+              };
+            }
+
+          }
+        }
+        // if (name === "siteId") {
+        //   console.log("siteId", typeDef);
+        // }
+        // if (isScalarType && (graphqlType as GraphQLScalarType).name === "ID" && data.interfaces?.[0]?.name === "Node") {
+
+          
+        // }
+       
+        return typeDef;
+      },
+    }
+
+
   }
 };
 
 export default dataModule;
+
+interface IDataJTDMetadata {
+  rel: string
+  relType: string
+  access: string
+}
