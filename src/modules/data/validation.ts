@@ -161,7 +161,7 @@ export async function validateMutation<T>(
       throw new Error('invalid mutation type');
   }
 
-  if (!mutationKey.doc || !mutationKey.table) {
+  if (!mutationKey.doc && !mutationKey.table) {
     throw new Error('ENOPERMS');
   }
   let roleLevel = RoleModelPermissionLevel.self;
@@ -177,6 +177,14 @@ export async function validateMutation<T>(
   if (denyOnSelf && roleLevel === RoleModelPermissionLevel.self) {
     throw new Error('EDENYONSELF');
   }
+  // if wildcard table perms, allow all
+  if(!mutationKey.table && mutationKey.doc && !tablePerms?.f) {
+    options.valid = true;
+    options.validated = true;
+    return model;
+  }
+
+
   if (!tablePerms?.f) {
     throw new Error('ENOPERMFIELDS');
   }

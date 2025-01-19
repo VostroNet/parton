@@ -3,8 +3,8 @@ import { RoleDoc } from "../core/types";
 
 import { DataModule } from ".";
 
-import { createSchema } from '@vostro/gqlize';
-import GQLManager from '@vostro/gqlize/lib/manager';
+import { createSchema } from '@azerothian/gqlize';
+import GQLManager from '@azerothian/gqlize/lib/manager';
 import { IDefinition } from "./types";
 
 export function getDefinition<T extends IDefinition>(name: string, system: System): T {

@@ -1,6 +1,6 @@
-import { Database } from '@vostro/gqlize';
-import GQLManager from '@vostro/gqlize/lib/manager';
-import SequelizeAdapter from '@vostro/gqlize-adapter-sequelize';
+import { Database } from '@azerothian/gqlize';
+import GQLManager from '@azerothian/gqlize/lib/manager';
+import SequelizeAdapter from '@azerothian/gqlize-adapter-sequelize';
 import { Model, ModelStatic, Op, Options, Sequelize } from 'sequelize';
 import { Options as SequelizeOptions } from 'sequelize';
 
@@ -24,7 +24,7 @@ import { SiteRole } from '../../types/models/models/site-role';
 import { CliEvent, ClIModuleEvents } from '../cli';
 import { generateTypes } from './generate-types';
 import { GqlJdtEvent, GqlJdtModuleEvents } from '../gqljdt';
-import { IJtdMin } from '@azerothian/jtd-types';
+import { IJtdMetadata, IJtdMin } from '@azerothian/jtd-types';
 import {GraphQLType } from 'graphql';
 import { JtdCurrentObject } from '@azerothian/graphql-jtd';
 
@@ -607,7 +607,7 @@ export const dataModule: DataModule = {
 
 export default dataModule;
 
-interface IDataJTDMetadata {
+interface IDataJTDMetadata extends IJtdMetadata {
   rel: string
   relType: string
   access: string

@@ -1,4 +1,4 @@
-import { RelationshipType } from '@vostro/gqlize/lib/types';
+import { RelationshipType } from '@azerothian/gqlize/lib/types';
 
 import DataTypes from '../../../types/data-types';
 import { IHashDefinition } from '../../utils/field-hash';
