@@ -4,7 +4,8 @@ import { describe, expect, jest, test } from '@jest/globals';
 import type Express from 'express';
 import { mockRequest, mockResponse } from 'jest-mock-req-res';
 
-import bearerAuthModule from '../../../src/modules/auth/bearer';
+import authModule from '../../../src/modules/auth';
+import bearerAuthModule from '../../../src/modules/auth-bearer';
 import { createOptions, getDatabase } from '../../../src/modules/data';
 import expressModule, { ExpressEvent, ExpressModuleEvents } from '../../../src/modules/express';
 import httpModule, { HttpEventType, HttpModuleEvents } from '../../../src/modules/http';
@@ -30,7 +31,7 @@ describe('modules:auth:bearer', () => {
         // return httpServer;
       },
     };
-    const config = await createBasicConfig("express-bearer-test", [httpModule, expressModule, module, bearerAuthModule])
+    const config = await createBasicConfig("express-bearer-test", [httpModule, expressModule, module, authModule, bearerAuthModule])
 
 
     const core = new System(config);

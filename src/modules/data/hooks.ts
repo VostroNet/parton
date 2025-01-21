@@ -2,6 +2,8 @@ import {
   AssociationOptions,
   InstanceDestroyOptions,
   InstanceRestoreOptions,
+  QueryOptions,
+  Sequelize,
   SyncOptions,
 } from 'sequelize';
 import { ValidationOptions } from 'sequelize/lib/instance-validator';
@@ -10,6 +12,8 @@ import { System } from '../../system';
 import { Model } from '../../types/models/data';
 
 import { FindOptions } from './types';
+import { AbstractQuery } from 'sequelize/lib/dialects/abstract/query';
+import { IModule } from '../../types/system';
 
 export enum DataHookEvent {
   BeforeValidate = 'data:hook:beforeValidate',
@@ -65,31 +69,36 @@ export type DataHookEvents = {
     attributes: any,
     options: any,
     modelName: string,
-  ) => Promise<void>;
+  ) => Promise<void> | void;
   readonly [DataHookEvent.AfterDefine]?: (
     model: any,
     modelName: string,
-  ) => Promise<void>;
+  ) => Promise<void> | void;
   readonly [DataHookEvent.BeforeInit]?: (
     config: any,
     options: any,
-  ) => Promise<void>;
-  readonly [DataHookEvent.AfterInit]?: (sequelize: any) => Promise<void>;
-  readonly [DataHookEvent.BeforeConnect]?: (config: any) => Promise<void>;
+  ) => Promise<void> | void;
+  readonly [DataHookEvent.AfterInit]?: (sequelize: Sequelize, system: System, module: IModule) => Promise<void> | void;
+  readonly [DataHookEvent.BeforeConnect]?: (config: any) => Promise<void> | void;
   readonly [DataHookEvent.AfterConnect]?: (
     connection: any,
     config: any,
-  ) => Promise<void>;
+  ) => Promise<void> | void;
   readonly [DataHookEvent.BeforeDisconnect]?: (
     connection: any,
-  ) => Promise<void>;
-  readonly [DataHookEvent.AfterDisconnect]?: (connection: any) => Promise<void>;
+  ) => Promise<void> | void;
+  readonly [DataHookEvent.AfterDisconnect]?: (connection: any) => Promise<void> | void;
   readonly [DataHookEvent.BeforePoolAcquire]?: (
     connection: any,
-  ) => Promise<void>;
+  ) => Promise<void> | void;
   readonly [DataHookEvent.AfterPoolAcquire]?: (
     connection: any,
-  ) => Promise<void>;
+  ) => Promise<void> | void;
+  readonly [DataHookEvent.BeforeQuery]?: (options: QueryOptions, query: AbstractQuery, system: System, module: IModule) => Promise<void> | void;
+  readonly [DataHookEvent.AfterQuery]?: (options: QueryOptions, query: AbstractQuery, system: System, module: IModule) => Promise<void> | void;
+  readonly [DataHookEvent.AfterSync]?: (sequelize: Sequelize) => Promise<void> | void;
+  readonly [DataHookEvent.AfterBulkSync]?: (sequelize: Sequelize) => Promise<void> | void;
+
 };
 
 export type DataModelHookEvents = {
@@ -120,7 +129,7 @@ export type DataModelHookEvents = {
     error: Error,
     modelName: string,
     system: System,
-  ) => Promise<void>;
+  ) => Promise<void> | void;
   readonly [DataHookEvent.BeforeCreate]?: <
     T1 extends NonNullable<unknown>,
     T2 extends NonNullable<unknown>,
@@ -201,7 +210,7 @@ export type DataModelHookEvents = {
     options: any,
     modelName: string,
     system: System,
-  ) => Promise<Model<T1, T2>>;
+  ) => Promise<Model<T1, T2>> | Model<T1, T2>;
   readonly [DataHookEvent.AfterSave]?: <
     T1 extends NonNullable<unknown>,
     T2 extends NonNullable<unknown>,
@@ -210,7 +219,7 @@ export type DataModelHookEvents = {
     options: any,
     modelName: string,
     system: System,
-  ) => Promise<Model<T1, T2>>;
+  ) => Promise<Model<T1, T2>> | Model<T1, T2>;
   readonly [DataHookEvent.BeforeUpsert]?: <
     T1 extends NonNullable<unknown>,
     T2 extends NonNullable<unknown>,
@@ -238,7 +247,7 @@ export type DataModelHookEvents = {
     options: any,
     modelName: string,
     system: System,
-  ) => Promise<Model<T1, T2>[]>;
+  ) => Promise<Model<T1, T2>[]> | Model<T1, T2>[];
   readonly [DataHookEvent.AfterBulkCreate]?: <
     T1 extends NonNullable<unknown>,
     T2 extends NonNullable<unknown>,
@@ -247,7 +256,7 @@ export type DataModelHookEvents = {
     options: any,
     modelName: string,
     system: System,
-  ) => Promise<Model<T1, T2>[]>;
+  ) => Promise<Model<T1, T2>[]> |  Model<T1, T2>[];
   readonly [DataHookEvent.BeforeBulkDestroy]?: (
     options: any,
     modelName: string,
@@ -257,7 +266,7 @@ export type DataModelHookEvents = {
     options: any,
     modelName: string,
     system: System,
-  ) => Promise<any>;
+  ) => Promise<void> | void;
   readonly [DataHookEvent.BeforeBulkRestore]?: (
     options: any,
     modelName: string,
@@ -272,12 +281,12 @@ export type DataModelHookEvents = {
     options: any,
     modelName: string,
     system: System,
-  ) => Promise<any>;
+  ) => Promise<void> | void;
   readonly [DataHookEvent.AfterBulkUpdate]?: (
     options: any,
     modelName: string,
     system: System,
-  ) => Promise<any>;
+  ) => Promise<void> | void;
   readonly [DataHookEvent.BeforeFind]?: (
     options: FindOptions,
     modelName: string,

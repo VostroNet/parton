@@ -25,13 +25,17 @@ import { CliEvent, ClIModuleEvents } from '../cli';
 import { generateTypes } from './generate-types';
 import { GqlJdtEvent, GqlJdtModuleEvents } from '../gqljdt';
 import { IJtdMetadata, IJtdMin } from '@azerothian/jtd-types';
-import {GraphQLType } from 'graphql';
+import { GraphQLType } from 'graphql';
 import { JtdCurrentObject } from '@azerothian/graphql-jtd';
+import { createNamespace } from 'cls-hooked';
+export const clsHookedNamespace = createNamespace('parton');
+Sequelize.useCLS(clsHookedNamespace);
 
 export enum DataEvent {
   Initialize = 'data:initialize',
   Configure = 'data:configure',
   ConfigureComplete = 'data:configure-complete',
+  Connected = 'data:connected',
   Setup = 'data:setup',
   Loaded = 'data:loaded',
   ModelHook = 'data:model-hook',
@@ -49,6 +53,11 @@ export type DataEvents = {
     models: { [key: string]: IDefinition },
     core: System,
   ) => Promise<{ [key: string]: any }>;
+  readonly [DataEvent.Connected]?: (
+    core: System,
+    gqlManager: GQLManager,
+  ) => Promise<void>;
+
   readonly [DataEvent.Setup]?: (
     core: System,
     gqlManager: GQLManager,
@@ -122,7 +131,7 @@ export function createOptions<T>(o: any, options: FindOptions = {}) {
   return opts as T;
 }
 
-export function buildOptions<T>(context: Context, options: T) : T {
+export function buildOptions<T>(context: Context, options?: T) : T {
   return createOptions(context, options) as T;
 }
 
@@ -343,7 +352,7 @@ export const dataModule: DataModule = {
     if (core.get<DataModule>('data').gqlManager) {
       throw new Error('gqlManager is already initialised');
     }
-
+    // console.log("globalHooks", globalHooks);
     core.get<DataModule>('data').gqlManager = new Database({
       globalHooks,
     });
@@ -396,7 +405,11 @@ export const dataModule: DataModule = {
     }
 
     core.get<DataModule>('data').models = models;
-
+    await core.execute(
+      DataEvent.Connected,
+      core,
+      core.get<DataModule>('data').gqlManager,
+    );
     await core.execute(
       DataEvent.Setup,
       core,
@@ -553,9 +566,6 @@ export const dataModule: DataModule = {
   },
   [GqlJdtEvent.Configure]: async function(options, system) {
     const db = await getDatabase<DatabaseContext>(system);
-
-
-
     return {
       ...options,
       scalarPostProcessor: (typeDef: IJtdMin<IDataJTDMetadata>, name, graphqlType: GraphQLType, {data, type}: JtdCurrentObject, isScalarType) => {

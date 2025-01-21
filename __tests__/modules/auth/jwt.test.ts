@@ -7,7 +7,7 @@ import { mockRequest, mockResponse } from 'jest-mock-req-res';
 import { exportJWK, generateKeyPair, SignJWT } from 'jose';
 import fetch from 'node-fetch'
 
-import jwtAuthModule, { JwtConfig } from "../../../src/modules/auth/jwt";
+import jwtAuthModule, { JwtConfig } from "../../../src/modules/auth-jwt";
 import coreModule from '../../../src/modules/core';
 import { CoreConfig, RoleDoc } from '../../../src/modules/core/types';
 import dataModule, { createOptions, getDatabase } from '../../../src/modules/data';

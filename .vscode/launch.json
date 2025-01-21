@@ -16,10 +16,14 @@
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
+      // "internalConsoleOptions": "neverOpen",
       // "disableOptimisticBPs": true,
       "windows": {
         "program": "${workspaceFolder}/node_modules/jest/bin/jest"
+      },
+      "env": {
+        "NODE_ENV": "test",
+        "DEBUG": "*"
       }
     },
     {

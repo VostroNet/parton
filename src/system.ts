@@ -99,14 +99,24 @@ export async function createContext<TUser>(
 
   if (!role && override) {
     role = {
+      id: -1,
       name: 'system',
     } as any;
+    if(!user) {
+      user = {
+        id: -1,
+        userName: 'system',
+        getRole: () => role,
+      } as any
+    }
+
   }
   const context: Context = {
     system,
     role,
     override,
     user,
+    getUser: () => user,
     site,
     ...initContext,
   };
