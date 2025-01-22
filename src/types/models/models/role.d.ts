@@ -11,32 +11,32 @@ export interface RoleCreationAttributes {
   cacheDocHash?: string;
   doc?: any;
   docHash?: string;
-  enabled?: any;
+  enabled?: boolean;
   name?: string;
 
 }
 export interface RoleAttributes {
   cacheDoc: any;
   cacheDocHash: string;
-  createdAt: any;
+  createdAt: Date | string;
   doc: any;
   docHash: string;
-  enabled: any;
+  enabled: boolean;
   id: number;
   name: string;
-  updatedAt: any;
+  updatedAt: Date | string;
 
 }
 export class Role extends Sequelize.Model<RoleAttributes, RoleCreationAttributes> {
   cacheDoc: any;
   cacheDocHash: string;
-  createdAt: any;
+  createdAt: Date | string;
   doc: any;
   docHash: string;
-  enabled: any;
+  enabled: boolean;
   id: number;
   name: string;
-  updatedAt: any;
+  updatedAt: Date | string;
   siteRoles?: SiteRole[] | null;
   users?: User[] | null;
   addSiteRole(item: SiteRole, options: DbOptions): Promise<SiteRole>;

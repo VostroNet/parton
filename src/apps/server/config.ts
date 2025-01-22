@@ -5,6 +5,7 @@ import dataModule from // createOptions,
 // DataEvents,
 // getDatabase,
 '../../modules/data';
+import eventLogModule from '../../modules/data/event-logs';
 import expressModule from '../../modules/express';
 import gqljdtModule from '../../modules/gqljdt';
 import httpModule from '../../modules/http';
@@ -70,6 +71,7 @@ const config: CoreConfig = {
     yogaModule,
     roleUpsertModule,
     fieldHashModule,
+    eventLogModule,
   ],
   roles: {
     admin: adminRole,
@@ -79,9 +81,18 @@ const config: CoreConfig = {
     reset: true,
     sync: true,
     sequelize: {
-      dialect: 'sqlite',
-      // storage: ':memory:',
-      storage: './db.sqlite',
+      // dialect: 'sqlite',
+      // // storage: ':memory:',
+      // storage: './db.sqlite',
+      // logging: false,
+      
+      dialect: 'postgres',
+      host: 'postgres.local',
+      port: 5432,
+      username: 'postgres',
+      password: 'postgres',
+      database: 'local',
+      schema: 'evntlog1',
       logging: false,
     },
   },

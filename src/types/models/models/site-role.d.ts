@@ -9,7 +9,7 @@ import {Site} from "./site";
 export interface SiteRoleCreationAttributes {
   cacheDoc?: any;
   cacheDocHash?: string;
-  default?: any;
+  default?: boolean;
   doc?: any;
   docHash?: string;
   roleId?: number | null;
@@ -19,27 +19,27 @@ export interface SiteRoleCreationAttributes {
 export interface SiteRoleAttributes {
   cacheDoc: any;
   cacheDocHash: string;
-  createdAt: any;
-  default: any;
+  createdAt: Date | string;
+  default: boolean;
   doc: any;
   docHash: string;
   id: number;
   roleId: number | null;
   siteId: number | null;
-  updatedAt: any;
+  updatedAt: Date | string;
 
 }
 export class SiteRole extends Sequelize.Model<SiteRoleAttributes, SiteRoleCreationAttributes> {
   cacheDoc: any;
   cacheDocHash: string;
-  createdAt: any;
-  default: any;
+  createdAt: Date | string;
+  default: boolean;
   doc: any;
   docHash: string;
   id: number;
   roleId: number | null;
   siteId: number | null;
-  updatedAt: any;
+  updatedAt: Date | string;
   role?: Role | null;
   site?: Site | null;
   createRole(item: Role, options: DbOptions): Promise<Role>;

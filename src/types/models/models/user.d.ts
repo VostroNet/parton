@@ -7,7 +7,7 @@ import {Role} from "./role";
 import {UserAuth} from "./user-auth";
 
 export interface UserCreationAttributes {
-  disabled?: any;
+  disabled?: boolean;
   email?: string | null;
   firstName?: string | null;
   lastName?: string | null;
@@ -16,26 +16,26 @@ export interface UserCreationAttributes {
 
 }
 export interface UserAttributes {
-  createdAt: any;
-  disabled: any;
+  createdAt: Date | string;
+  disabled: boolean;
   email: string | null;
   firstName: string | null;
   id: number;
   lastName: string | null;
   roleId: number | null;
-  updatedAt: any;
+  updatedAt: Date | string;
   userName: string;
 
 }
 export class User extends Sequelize.Model<UserAttributes, UserCreationAttributes> {
-  createdAt: any;
-  disabled: any;
+  createdAt: Date | string;
+  disabled: boolean;
   email: string | null;
   firstName: string | null;
   id: number;
   lastName: string | null;
   roleId: number | null;
-  updatedAt: any;
+  updatedAt: Date | string;
   userName: string;
   auths?: UserAuth[] | null;
   role?: Role | null;
@@ -52,11 +52,15 @@ export class User extends Sequelize.Model<UserAttributes, UserCreationAttributes
   createRole(item: Role, options: DbOptions): Promise<Role>;
   getRole(options: DbOptions): Promise<Role>;
   setRole(item: Role, options: DbOptions): Promise<void>;
+  jwtToken(args: UserJwtTokenArgs, context: DataContext): Promise<any>;
+  static getCurrentUser(args: UserGetCurrentUserArgs, context: DataContext): Promise<any>;
   static isLoggedIn(args: UserIsLoggedInArgs, context: DataContext): Promise<any>;
 
 }
 
 export type UserStatic = typeof User;
 
+export interface UserJwtTokenArgs { }
+export interface UserGetCurrentUserArgs { }
 export interface UserIsLoggedInArgs { }
  
