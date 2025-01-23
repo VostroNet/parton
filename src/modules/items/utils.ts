@@ -187,6 +187,12 @@ export async function createRoleItemsCache(
       delete store.paths[itemPath];
     }
   });
+  const pathItemIds = Object.keys(store.paths).map((path) => store.paths[path]);
+  Object.keys(store.items).forEach((itemId) => {
+    if (!pathItemIds.includes(itemId)) {
+      delete store.items[itemId];
+    }
+  });
   // maybe only do this on demand?
   const core = getSystemFromContext(context);
   await Promise.all(

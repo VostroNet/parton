@@ -1,6 +1,6 @@
 
 import { exportJWK, importJWK, KeyLike } from "jose";
-import {Strategy as JwtStrategy} from "passport-jwt";
+import { Strategy as JwtStrategy } from "passport-jwt";
 
 import { Config } from "../../types/config";
 import { IModule } from "../../types/system";
@@ -10,7 +10,8 @@ import { createContextFromRequest, ExpressEvent, ExpressModuleEvents } from "../
 
 import models from "./models";
 import { getUserFromToken } from "./utils";
-import { CoreModuleEvent, CoreModuleEvents } from "../core/types";
+import { CoreModuleEvent, CoreModuleEvents, IUser } from "../core/types";
+import { User } from "../../types/models/models/user";
 
 
 export interface JwtAuthModule extends IModule, CoreModuleEvents, ExpressModuleEvents, DataModulesModels {
@@ -45,8 +46,8 @@ export const jwtAuthModule: JwtAuthModule = {
     passport.use(
       new JwtStrategy({
         // secretOrKey: key,
-        secretOrKeyProvider: async(request, rawJwtToken, done) => {
-          if(authConfig?.auth?.jwt?.publicKey) {
+        secretOrKeyProvider: async (request, rawJwtToken, done) => {
+          if (authConfig?.auth?.jwt?.publicKey) {
             return done(null, authConfig?.auth?.jwt?.publicKey);
           }
           if (authConfig?.auth?.jwks) {
@@ -54,7 +55,7 @@ export const jwtAuthModule: JwtAuthModule = {
               timeout: 5000,
             });
             const jwks = (await response.json()) as JwksEndpoint;
-            if(jwks?.keys && jwks.keys.length > 0) {
+            if (jwks?.keys && jwks.keys.length > 0) {
               const key = await importJWK(jwks.keys[0] as any, "RS256");
               return done(null, key);
             }
@@ -73,19 +74,19 @@ export const jwtAuthModule: JwtAuthModule = {
           return token as string | null;
         },
         passReqToCallback: true,
-      }, async(req: any, token: any, done: any) => {
+      }, async (req: any, token: any, done: any) => {
         try {
           const context = await createContextFromRequest(req, system, true);
           const user = await getUserFromToken(token, system, context);
           if (user) {
-            await system.execute(CoreModuleEvent.AuthLoginSuccessResponse, {
+            await system.execute(CoreModuleEvent.AuthLoginSuccess, {
               type: "jwt",
               user,
               ip: req.ip
             }, context);
-            return done(null, user, {scope: "all"});
+            return done(null, user, { scope: "all" });
           }
-          await system.execute(CoreModuleEvent.AuthLoginFailureResponse, {
+          await system.execute(CoreModuleEvent.AuthLoginFailure, {
             type: 'jwt',
             ref: {},
             ip: req.ip,
@@ -95,13 +96,13 @@ export const jwtAuthModule: JwtAuthModule = {
           return done(err);
         }
       }
-    ));
+      ));
     return {
       name: "jwt",
       isBearer: true,
     };
   },
-  [ExpressEvent.Initialize]: async(express, system) => {
+  [ExpressEvent.Initialize]: async (express, system) => {
     const authConfig = system.getConfig<JwtConfig>()
     const publicKey = authConfig?.auth?.jwt?.publicKey;
     if (publicKey) {
@@ -116,8 +117,8 @@ export const jwtAuthModule: JwtAuthModule = {
     }
     return express;
   },
-  [CoreModuleEvent.AuthLoginSuccessResponse]: async(loginResponse, user: any, context) => {
-    const jwtToken = await user.jwtToken({}, context);
+  [CoreModuleEvent.AuthLoginSuccessResponse]: async <T = User>(loginResponse, user: IUser<T>, context) => {
+    const jwtToken = await (user as any).jwtToken({}, context);
     return {
       ...loginResponse,
       jwtToken,

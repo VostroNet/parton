@@ -1,5 +1,5 @@
 import { generateJDTMinFromSchema, generateJTDMinOptions } from '@azerothian/graphql-jtd';
-import { IJtdMin, IJtdMinRoot, JtdMinType,  } from '@azerothian/jtd-types';
+import { IJtdMin, IJtdMinRoot, JtdMinType, } from '@azerothian/jtd-types';
 import { GraphQLObjectTypeConfig, GraphQLScalarType, GraphQLSchema, GraphQLType } from 'graphql';
 
 import { System } from '../system';
@@ -13,7 +13,8 @@ import {
 } from './express';
 import { CoreModuleEvent, CoreModuleEvents } from './core/types';
 
-import {CborEncoder} from "@jsonjoy.com/json-pack/lib/cbor/index"
+import { CborEncoder } from "@jsonjoy.com/json-pack/lib/cbor/index"
+import { Config } from '../types/config';
 
 
 
@@ -22,6 +23,11 @@ export enum GqlJdtEvent {
   Configure = 'gqljdt:configure',
 }
 
+export interface GqlJdtConfig extends Config {
+  gqljdt?: {
+    enableCborEncoder?: boolean;
+  };
+}
 
 
 export interface GqlJdtModuleEvents {
@@ -39,7 +45,8 @@ export interface IGqlJdtModule
   ExpressModuleEvents {
   jdtCache: {
     [key in string]: {
-      pack: Uint8Array;
+      header: string;
+      pack: Uint8Array | string;
       schema: IJtdMinRoot
     }
   };
@@ -53,32 +60,43 @@ export const gqljdtModule: IGqlJdtModule = {
     }
   }],
   jdtCache: {},
-  [CoreModuleEvent.GraphQLSchemaCreate]: async function(
+  [CoreModuleEvent.GraphQLSchemaCreate]: async function (
     schema: GraphQLSchema,
     role: Role,
     system: System,
   ) {
     try {
       const roleHex = createHexString(role.id);
-      const options = await system.execute<generateJTDMinOptions>(GqlJdtEvent.Configure,{
+      const options = await system.execute<generateJTDMinOptions>(GqlJdtEvent.Configure, {
         customScalarResolver: (name, type) => {
-          if(type.toString() === "GQLTDate") {
+          if (type.toString() === "GQLTDate") {
             return JtdMinType.TIMESTAMP;
           }
           return undefined;
         }
       }, system, this);
       const jtdMin = generateJDTMinFromSchema(schema, options);
-      const encoder = new CborEncoder();
-      const pack = encoder.encode(jtdMin);
+      const config = system.getConfig<GqlJdtConfig>();
 
       if (!system.get<IGqlJdtModule>('gqljdt').jdtCache) {
         system.get<IGqlJdtModule>('gqljdt').jdtCache = {};
       }
-      system.get<IGqlJdtModule>('gqljdt').jdtCache[roleHex] = {
-        pack,
-        schema: jtdMin
-      };
+      if (config.gqljdt?.enableCborEncoder) {
+        const encoder = new CborEncoder();
+        const pack = encoder.encode(jtdMin);
+
+        system.get<IGqlJdtModule>('gqljdt').jdtCache[roleHex] = {
+          header: "Application/cbor",
+          pack,
+          schema: jtdMin
+        };
+      } else {
+        system.get<IGqlJdtModule>('gqljdt').jdtCache[roleHex] = {
+          header: "Application/json",
+          pack: JSON.stringify(jtdMin, undefined, 0),
+          schema: jtdMin
+        };
+      }
     } catch (e) {
       console.error(e);
     }
@@ -104,9 +122,10 @@ export const gqljdtModule: IGqlJdtModule = {
         if (!cache) {
           return res.status(404).send('Not found');
         }
-        return res.write(cache.pack, () => {
-          res.end();
-        });
+        return res.setHeader(`Content-Type`, cache.header)//.send(cache.pack);
+          .write(cache.pack, () => {
+            res.end();
+          });
         // return res.send(cache.pack);
       }
       return res.redirect('/');

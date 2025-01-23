@@ -235,4 +235,119 @@ describe('modules:items:role:cache', () => {
     // expect(Object.keys(rs?.doc?.data?.items)).toHaveLength(4);
     await core.shutdown();
   });
+  test('web paths - permissions test', async () => {
+    const testRole: RoleDoc = {
+      schema: {
+        w: true,
+        d: true,
+      },
+    };
+    const testSiteRoleDoc: SiteRoleDoc = {
+      default: true,
+      items: {
+        r: false,
+        sets: [{
+          permission: {
+            r: true,
+          },
+          paths: [
+            "/localhost",
+          ]
+        }],
+      },
+    };
+    const config: CoreConfig = {
+      name: 'data-test',
+      slices: [
+        dataModule,
+        coreModule,
+        itemModule,
+        fieldHashModule,
+        roleUpsertModule,
+        createSiteSetupModule([{
+          name: 'test',
+          displayName: 'Test',
+          default: true,
+          sitePath: "/localhost", // ??
+          roles: {
+            test: testSiteRoleDoc,
+          },
+          items: [
+            {
+              name: 'localhost',
+              type: ItemType.Folder,
+              data: {
+                dynamic: false
+              },
+              children: [
+                {
+                  name: 'sub',
+                  type: ItemType.Folder,
+                  children: [
+                    {
+                      name: 'sub',
+                      type: ItemType.Folder,
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              name: 'denied',
+              type: ItemType.Folder,
+            },
+          ],
+        }])
+      ],
+      clone: true,
+      roles: {
+        test: testRole,
+      },
+      data: {
+        reset: true,
+        sync: true,
+        sequelize: sqliteConfig
+      },
+    };
+
+    const core = new System(config);
+    try {
+      await core.load();
+      await core.initialize();
+      await core.ready();
+    } catch (err: any) {
+      expect(err).toBeUndefined();
+    }
+    const db = await getDatabase<DatabaseContext>(core);
+
+    const context = await createContext(core, undefined, undefined, undefined, true);
+    const { Role } = db.models;
+    const role = await Role.findOne(
+      createOptions(context, { where: { name: 'test' } }),
+    );
+    expect(role).toBeDefined();
+    expect(role).not.toBeNull();
+    const siteRoles = await role.getSiteRoles(createOptions(context, {
+      where: {
+        doc: {
+          default: true,
+        },
+      }
+    }));
+    expect(siteRoles).toBeDefined();
+    expect(siteRoles).toHaveLength(1);
+    const siteRole = siteRoles[0]
+    expect(siteRole?.cacheDoc).toBeDefined();
+    expect(siteRole?.cacheDoc?.web).toBeDefined();
+    // expect(role?.cacheDoc?.web?.hostnames).toBeDefined();
+    // expect(role?.cacheDoc?.web?.hostnames["localhost.com"]).toBeDefined();
+    expect(siteRole?.cacheDoc?.web?.paths).toBeDefined();
+
+    expect(siteRole?.cacheDoc?.web?.paths['/']).toBeDefined();
+    expect(siteRole?.cacheDoc?.web?.paths['/sub']).toBeUndefined();
+    expect(siteRole?.cacheDoc?.web?.paths['/sub/sub']).toBeUndefined();
+    // expect(Object.keys(rs?.doc?.data?.items)).toHaveLength(4);
+    await core.shutdown();
+
+  });
 });

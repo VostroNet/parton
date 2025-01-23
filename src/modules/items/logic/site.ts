@@ -104,12 +104,14 @@ export async function upsertSiteFromImportSite(
       }));
       if (!siteRole) {
         await SiteRole.create({
+          default: !!siteRoleRef.default,
           siteId: site.id,
           roleId: role.id,
           doc: siteRoleRef,
         }, createOptions(context));
       } else {
         await siteRole.update({
+          default: !!siteRoleRef.default,
           doc: siteRoleRef,
         }, createOptions(context));
       }

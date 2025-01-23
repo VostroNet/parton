@@ -13,7 +13,7 @@ import passport from 'passport';
 import bodyParser from "body-parser";
 import { Request } from 'express';
 
-export interface LocalAuthModule extends IModule, CoreModuleEvents, DataModulesModels,ExpressModuleEvents {
+export interface LocalAuthModule extends IModule, CoreModuleEvents, DataModulesModels, ExpressModuleEvents {
 
 }
 
@@ -32,16 +32,16 @@ export const LocalAuthModule: LocalAuthModule = {
           const db = await getDatabase<DatabaseContext>(system);
           const { UserAuth } = db.models;
           const user = await UserAuth.loginWithUsernamePassword({ username, password }, context);
-          
+
           if (user) {
-            await system.execute(CoreModuleEvent.AuthLoginSuccessResponse, {
+            await system.execute(CoreModuleEvent.AuthLoginSuccess, {
               type: "local",
               user,
               ip: req.ip
             }, context);
             return done(null, user, { scope: 'all' });
           }
-          await system.execute(CoreModuleEvent.AuthLoginFailureResponse, {
+          await system.execute(CoreModuleEvent.AuthLoginFailure, {
             type: 'local',
             ref: {
               username,
@@ -65,7 +65,7 @@ export const LocalAuthModule: LocalAuthModule = {
 
   //   return loginResponse;
   // },
-  
+
   [ExpressEvent.Initialize]: async (express, system: System) => {
     const jsonParser = bodyParser.json();
     express.post('/auth.api/login', jsonParser, async (req, res) => {
@@ -76,11 +76,11 @@ export const LocalAuthModule: LocalAuthModule = {
         if (!user) {
           return res.status(401).json({ error: 'Invalid username or password' });
         }
-        req.logIn(user, async (err) => {
+        return req.logIn(user, async (err) => {
           if (err) {
             return res.status(500).json({ error: err });
           }
-          // const context = await createContext(system, undefined, undefined, undefined, true);
+          const context = await createContext(system, undefined, undefined, undefined, true);
           const userInfo = {
             id: user.id,
             userName: user.userName,
@@ -92,8 +92,8 @@ export const LocalAuthModule: LocalAuthModule = {
               name: user.role.name,
             }
           };
-          // const loginResponse = await system.execute(CoreModuleEvent.AuthLoginSuccessResponse, user, context);
-          return res.json(userInfo);
+          const loginResponse = await system.execute(CoreModuleEvent.AuthLoginSuccessResponse, userInfo, user, context);
+          return res.json(loginResponse);
         });
       })(req, res);
     });

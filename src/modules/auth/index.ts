@@ -14,15 +14,14 @@ export interface AuthModule
   extends IModule,
   DataModulesModels,
   CoreModuleEvents,
-  ExpressModuleEvents
-  {
+  ExpressModuleEvents {
 
-  }
+}
 export const authModule: AuthModule = {
   name: 'auth',
   dependencies: ['core', 'data'],
   models: models,
-  [CoreModuleEvent.AuthLoginSuccessResponse]: async (data, context) => {
+  [CoreModuleEvent.AuthLoginSuccess]: async (data, context) => {
     const db = await getDatabaseFromContext<DatabaseContext>(context);
     const { AuthLog } = db.models;
     return AuthLog.create({
@@ -33,7 +32,7 @@ export const authModule: AuthModule = {
     }, buildOptions(context));
   },
 
-  [CoreModuleEvent.AuthLoginFailureResponse]: async (data, context) => {
+  [CoreModuleEvent.AuthLoginFailure]: async (data, context) => {
 
     const db = await getDatabaseFromContext<DatabaseContext>(context);
     const { AuthLog } = db.models;

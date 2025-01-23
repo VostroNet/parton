@@ -125,8 +125,9 @@ export enum CoreModuleEvent {
   GraphQLSchemaCreate = 'core:graphql-schema:create',
   AuthProviderRegister = 'core:auth:provider:register',
   AuthLogoutRequest = 'core:auth:logout:request',
-  AuthLoginFailureResponse = 'core:auth:login:failure',
-  AuthLoginSuccessResponse = 'core:auth:login:success',
+  AuthLoginFailure = 'core:auth:login:failure',
+  AuthLoginSuccess = 'core:auth:login:success',
+  AuthLoginSuccessResponse = 'core:auth:login:success:response',
   UserSerialize = 'core:user:serialize',
   UserDeserialize = 'core:user:deserialize',
   GetAllRoles = 'core:roles:get:all'
@@ -145,16 +146,18 @@ export interface CoreModuleEvents {
     core: System,
   ) => Promise<GraphQLSchema>;
   [CoreModuleEvent.AuthProviderRegister]?: (passport: PassportStatic, system: System) => Promise<IAuthProvider>;
-  [CoreModuleEvent.AuthLoginFailureResponse]?: <T>(data: {
+  [CoreModuleEvent.AuthLoginFailure]?: <T>(data: {
     type: string,
     user: IUser<T>,
     ip: string
   }, context: Context) => Promise<any>
-  [CoreModuleEvent.AuthLoginSuccessResponse]?: <T>(data: {
+  [CoreModuleEvent.AuthLoginSuccess]?: <T>(data: {
     type: string,
     user: IUser<T>
     ip: string
   }, context: Context) => Promise<any>
+  [CoreModuleEvent.AuthLoginSuccessResponse]?: <T>(loginResponse: any, user: IUser<T>, context: Context) => Promise<any>
+
   [CoreModuleEvent.UserSerialize]?: <T>(user: IUser<T>, system: System) => Promise<string>;
   [CoreModuleEvent.UserDeserialize]?: <T>(serialized: string, system: System) => Promise<any> // TODO: dont know why i cant define a return type
   [CoreModuleEvent.GetAllRoles]?: (roles: IRole[] | undefined, system: System) => Promise<IRole[]>

@@ -57,16 +57,16 @@ export const bearerAuthModule: BearerAuthModule = {
                 },
               ),
             );
-            
-            await system.execute(CoreModuleEvent.AuthLoginSuccessResponse, {
+
+            await system.execute(CoreModuleEvent.AuthLoginSuccess, {
               type: "bearer",
               user,
               ip: req.ip
             }, context);
             return done(null, user, { scope: 'all' });
           }
-          
-          await system.execute(CoreModuleEvent.AuthLoginFailureResponse, {
+
+          await system.execute(CoreModuleEvent.AuthLoginFailure, {
             type: 'bearer',
             ref: {},
             ip: req.ip,
