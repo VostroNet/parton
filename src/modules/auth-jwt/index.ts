@@ -78,8 +78,18 @@ export const jwtAuthModule: JwtAuthModule = {
           const context = await createContextFromRequest(req, system, true);
           const user = await getUserFromToken(token, system, context);
           if (user) {
+            await system.execute(CoreModuleEvent.AuthLoginSuccessResponse, {
+              type: "jwt",
+              user,
+              ip: req.ip
+            }, context);
             return done(null, user, {scope: "all"});
           }
+          await system.execute(CoreModuleEvent.AuthLoginFailureResponse, {
+            type: 'jwt',
+            ref: {},
+            ip: req.ip,
+          }, context);
           return done(null, false);
         } catch (err) {
           return done(err);

@@ -1,32 +1,34 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-  /* eslint-disable @typescript-eslint/no-empty-interface */
-
+  
 // import {DbOptions, Model} from "../data";
 import Sequelize, {Model} from "sequelize";
 import {User} from "./user";
 
-export interface UserAuthCreationAttributes {
-  name?: string | null;
-  token?: string;
+export interface AuthLogCreationAttributes {
+  ipAddress?: any | null;
+  operation?: string;
+  time?: Date | string;
   type?: string;
   userId?: number | null;
 
 }
-export interface UserAuthAttributes {
+export interface AuthLogAttributes {
   createdAt: Date | string;
   id: number;
-  name: string | null;
-  token: string;
+  ipAddress: any | null;
+  operation: string;
+  time: Date | string;
   type: string;
   updatedAt: Date | string;
   userId: number | null;
 
 }
-export class UserAuth extends Sequelize.Model<UserAuthAttributes, UserAuthCreationAttributes> {
+export class AuthLog extends Sequelize.Model<AuthLogAttributes, AuthLogCreationAttributes> {
   createdAt: Date | string;
   id: number;
-  name: string | null;
-  token: string;
+  ipAddress: any | null;
+  operation: string;
+  time: Date | string;
   type: string;
   updatedAt: Date | string;
   userId: number | null;
@@ -34,11 +36,9 @@ export class UserAuth extends Sequelize.Model<UserAuthAttributes, UserAuthCreati
   createUser(item: User, options: DbOptions): Promise<User>;
   getUser(options: DbOptions): Promise<User>;
   setUser(item: User, options: DbOptions): Promise<void>;
-  static loginWithUsernamePassword(args: UserAuthLoginWithUsernamePasswordArgs, context: DataContext): Promise<any>;
 
 }
 
-export type UserAuthStatic = typeof UserAuth;
+export type AuthLogStatic = typeof AuthLog;
 
-export interface UserAuthLoginWithUsernamePasswordArgs { }
  

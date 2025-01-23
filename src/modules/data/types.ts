@@ -49,7 +49,10 @@ export interface FindOptions extends SFindOptions {
 }
 
 export interface IDefinition extends Definition {
+  disablePrimaryKey?: boolean;
+  disableEventLog?: boolean;
   options?: DefinitionOptions & {
+    timestamps?: boolean;
     tableName?: string;
     indexes?: any[];
   };

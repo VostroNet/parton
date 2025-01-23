@@ -8,6 +8,7 @@ import { buildOptions, DataModulesModels, getDatabase } from '../data';
 import models from './models';
 import DatabaseContext from '../../types/models';
 import { CoreModuleEvent, CoreModuleEvents } from '../core/types';
+import { createContextFromRequest } from '../express';
 
 export interface BearerAuthModule extends IModule, CoreModuleEvents, DataModulesModels {
 
@@ -19,12 +20,13 @@ export const bearerAuthModule: BearerAuthModule = {
   models,
   [CoreModuleEvent.AuthProviderRegister]: async (passport, system) => {
     passport.use(
-      new BearerStrategy(async (token, done) => {
+      new BearerStrategy({
+        passReqToCallback: true
+      }, async (req, token, done) => {
         try {
           const db = await getDatabase<DatabaseContext>(system);
           const { UserAuth, Role } = db.models;
-          const context = await createContext(system, undefined, undefined, undefined, true);
-
+          const context = await createContextFromRequest(req, system, true);
           const userAuths = await UserAuth.findAll(
             buildOptions(context, {
               where: {
@@ -55,8 +57,20 @@ export const bearerAuthModule: BearerAuthModule = {
                 },
               ),
             );
+            
+            await system.execute(CoreModuleEvent.AuthLoginSuccessResponse, {
+              type: "bearer",
+              user,
+              ip: req.ip
+            }, context);
             return done(null, user, { scope: 'all' });
           }
+          
+          await system.execute(CoreModuleEvent.AuthLoginFailureResponse, {
+            type: 'bearer',
+            ref: {},
+            ip: req.ip,
+          }, context);
           return done(null, false);
         } catch (err) {
           return done(err);

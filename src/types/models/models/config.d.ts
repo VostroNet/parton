@@ -10,18 +10,18 @@ export interface ConfigCreationAttributes {
 }
 export interface ConfigAttributes {
   config: any;
-  createdAt: any;
+  createdAt: Date | string;
   id: number;
   type: string;
-  updatedAt: any;
+  updatedAt: Date | string;
 
 }
 export class Config extends Sequelize.Model<ConfigAttributes, ConfigCreationAttributes> {
   config: any;
-  createdAt: any;
+  createdAt: Date | string;
   id: number;
   type: string;
-  updatedAt: any;
+  updatedAt: Date | string;
 
 
 

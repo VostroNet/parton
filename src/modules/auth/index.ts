@@ -4,7 +4,7 @@ import DatabaseContext from '../../types/models';
 import { User } from '../../types/models/models/user';
 import { IModule } from '../../types/system';
 import { CoreModuleEvent, CoreModuleEvents, IAuthProvider, IUser } from '../core/types';
-import { buildOptions, DataModulesModels, getDatabase } from '../data';
+import { buildOptions, DataModulesModels, getDatabase, getDatabaseFromContext } from '../data';
 import models from './models';
 import passport, { PassportStatic } from 'passport';
 import { createContextFromRequest, ExpressEvent, ExpressModuleEvents } from '../express';
@@ -22,6 +22,27 @@ export const authModule: AuthModule = {
   name: 'auth',
   dependencies: ['core', 'data'],
   models: models,
+  [CoreModuleEvent.AuthLoginSuccessResponse]: async (data, context) => {
+    const db = await getDatabaseFromContext<DatabaseContext>(context);
+    const { AuthLog } = db.models;
+    return AuthLog.create({
+      type: data.type,
+      userId: data.user.id,
+      ipAddress: data.ip,
+      operation: "accept",
+    }, buildOptions(context));
+  },
+
+  [CoreModuleEvent.AuthLoginFailureResponse]: async (data, context) => {
+
+    const db = await getDatabaseFromContext<DatabaseContext>(context);
+    const { AuthLog } = db.models;
+    return AuthLog.create({
+      type: data.type,
+      ipAddress: data.ip,
+      operation: "denied",
+    });
+  },
   [CoreModuleEvent.UserSerialize]: async (user: IUser<User>, system: System) => {
     return `${user.id}`;
   },

@@ -6,7 +6,7 @@ import Sequelize, {Model} from "sequelize";
 import {SiteRole} from "./site-role";
 
 export interface SiteCreationAttributes {
-  default?: any;
+  default?: boolean;
   displayName?: string;
   doc?: any;
   docHash?: string;
@@ -15,27 +15,27 @@ export interface SiteCreationAttributes {
 
 }
 export interface SiteAttributes {
-  createdAt: any;
-  default: any;
+  createdAt: Date | string;
+  default: boolean;
   displayName: string;
   doc: any;
   docHash: string;
   id: number;
   name: string;
   sitePath: string;
-  updatedAt: any;
+  updatedAt: Date | string;
 
 }
 export class Site extends Sequelize.Model<SiteAttributes, SiteCreationAttributes> {
-  createdAt: any;
-  default: any;
+  createdAt: Date | string;
+  default: boolean;
   displayName: string;
   doc: any;
   docHash: string;
   id: number;
   name: string;
   sitePath: string;
-  updatedAt: any;
+  updatedAt: Date | string;
   siteRoles?: SiteRole[] | null;
   addSiteRole(item: SiteRole, options: DbOptions): Promise<SiteRole>;
   addSiteRoles(items: SiteRole[], options: DbOptions): Promise<SiteRole[]>;

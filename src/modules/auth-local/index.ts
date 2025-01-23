@@ -8,9 +8,10 @@ import { createOptions, DataModulesModels, getDatabase } from '../data';
 import models from './models';
 import DatabaseContext from '../../types/models';
 import { CoreModuleEvent, CoreModuleEvents } from '../core/types';
-import { ExpressEvent, ExpressModuleEvents } from '../express';
+import { createContextFromRequest, ExpressEvent, ExpressModuleEvents } from '../express';
 import passport from 'passport';
 import bodyParser from "body-parser";
+import { Request } from 'express';
 
 export interface LocalAuthModule extends IModule, CoreModuleEvents, DataModulesModels,ExpressModuleEvents {
 
@@ -22,16 +23,31 @@ export const LocalAuthModule: LocalAuthModule = {
   models,
   [CoreModuleEvent.AuthProviderRegister]: async (passport, system) => {
     passport.use(
-      new LocalStrategy(async (username, password, done) => {
+      new LocalStrategy({
+        passReqToCallback: true
+      }, async (req: Request, username, password, done) => {
         try {
-          const context = await createContext(system, undefined, undefined, undefined, true);        
+          const context = await createContextFromRequest(req, system, true);
+          //const context = await createContext(system, undefined, undefined, undefined, true);        
           const db = await getDatabase<DatabaseContext>(system);
           const { UserAuth } = db.models;
           const user = await UserAuth.loginWithUsernamePassword({ username, password }, context);
-
+          
           if (user) {
+            await system.execute(CoreModuleEvent.AuthLoginSuccessResponse, {
+              type: "local",
+              user,
+              ip: req.ip
+            }, context);
             return done(null, user, { scope: 'all' });
           }
+          await system.execute(CoreModuleEvent.AuthLoginFailureResponse, {
+            type: 'local',
+            ref: {
+              username,
+            },
+            ip: req.ip,
+          }, context);
           return done(null, false);
         } catch (err) {
           return done(err);

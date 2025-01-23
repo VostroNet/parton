@@ -1,4 +1,4 @@
-import { Model, ModelStatic, QueryOptions, Transaction } from "sequelize";
+import { DataTypes, Model, ModelStatic, QueryOptions, Sequelize, Transaction } from "sequelize";
 
 import { System } from "../../system";
 import { IModule } from "../../types/system";
@@ -7,6 +7,7 @@ import waterfall from "../../utils/waterfall";
 import { DataConfig, DataEvent, DataEvents, getContextFromOptions, getDatabase, getTableNameFromModel } from ".";
 import { DataHookEvent, DataHookEvents, DataModelHookEvents } from "./hooks";
 import { AbstractQuery } from "sequelize/lib/dialects/abstract/query";
+import { IDefinition } from "./types";
 
 
 async function createTriggerFunctionQuery(model: ModelStatic<Model<any, any>>, system: System) : Promise<string[]> {
@@ -72,20 +73,20 @@ BEGIN
   RETURN NULL; -- Skip the operation.
 END;
 $$ LANGUAGE plpgsql;`);
-      if(system.getConfig<DataConfig>().data.reset) {
-        // arr.push(`DROP TRIGGER IF EXISTS "${triggerEventName}" ON ${schemaPrefix}"${tableName}";`);
-        // arr.push(`DROP TRIGGER IF EXISTS "${triggerName}" ON ${schemaPrefix}"${tableName}_log";`);
-        arr.push(`DROP TABLE IF EXISTS ${eventLogSchemaPrefix}"${tableName}_log" CASCADE;`);
-      }
-      arr.push(`
-CREATE TABLE IF NOT EXISTS ${eventLogSchemaPrefix}"${tableName}_log" (
-  "id" uuid default uuid_generate_v4(),
-  "time" TIMESTAMPTZ NOT NULL default now(),
-  "rowId" integer NOT NULL,
-  "operation" VARCHAR(10) NOT NULL, 
-  "data" JSONB,
-  "userId" integer NOT NULL
-);`);
+      // if(system.getConfig<DataConfig>().data.reset) {
+      //   // arr.push(`DROP TRIGGER IF EXISTS "${triggerEventName}" ON ${schemaPrefix}"${tableName}";`);
+      //   // arr.push(`DROP TRIGGER IF EXISTS "${triggerName}" ON ${schemaPrefix}"${tableName}_log";`);
+      //   arr.push(`DROP TABLE IF EXISTS ${eventLogSchemaPrefix}"${tableName}_log" CASCADE;`);
+      // }
+//       arr.push(`
+// CREATE TABLE IF NOT EXISTS ${eventLogSchemaPrefix}"${tableName}_log" (
+//   "id" uuid default uuid_generate_v4(),
+//   "time" TIMESTAMPTZ NOT NULL default now(),
+//   "rowId" integer NOT NULL,
+//   "operation" VARCHAR(10) NOT NULL, 
+//   "data" JSONB,
+//   "userId" integer NOT NULL
+// );`);
       arr.push(`  
 CREATE OR REPLACE TRIGGER "${tableName}_prevent_update_delete_trigger"
 BEFORE UPDATE OR DELETE ON ${eventLogSchemaPrefix}"${tableName}_log"
@@ -191,14 +192,66 @@ export const eventLogModule: IModule & DataEvents & DataModelHookEvents & DataHo
   ) => {
     afterSave(options, system);
   },
+  [DataEvent.ConfigureComplete]: async (models, system) => {
+    // const db = await getDatabase(system);
+    await waterfall(Object.keys(models)
+      .filter((modelName) => {
+        const model = models[modelName] as IDefinition;
+        return !model.disableEventLog;
+      })
+    , async (modelName: string) => {
+      const modelDef = models[modelName] as IDefinition & {logTableName: string};
+      (models[modelName] as IDefinition & {logTableName: string}).logTableName = `${modelDef.options?.tableName || modelName.toLowerCase()}_log`
+      const def: IDefinition = {
+        name: `${modelName}Log`,
+        disableEventLog: true,
+        define: {
+          time: {
+            type: DataTypes.DATE,
+            defaultValue: Sequelize.fn("NOW"),
+          },
+          rowId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+          },
+          operation: {
+            type: DataTypes.ENUM,
+            values: ["INSERT", "UPDATE", "DELETE"],
+            allowNull: false,
+          },
+          data: {
+            type: DataTypes.JSONB,
+            allowNull: true,
+          },
+          userId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+          },
+        },
+        disablePrimaryKey: true,
+        options: {
+          timestamps: false,
+          tableName: `${(modelDef.options?.tableName || modelName.toLowerCase())}_log`,
+        } as any
+      };
+      models[def.name] = def;
+
+    });
+    return models;
+  },
   [DataEvent.Connected]: async (system) => {
     const db = await getDatabase(system);
-    if (system.getConfig<DataConfig>().data.sequelize.dialect === "postgres") {
-      await db.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`);
-    }
-    await waterfall(Object.keys(db.models), async (modelName: string) => {
+    // if (system.getConfig<DataConfig>().data.sequelize.dialect === "postgres") {
+    //   await db.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`);
+
+    await waterfall(Object.keys(db.models).filter((modelName) => {
+      const model = db.models[modelName];
+      //IDefinition & {logTable: boolean}
+      return !model.definition.disableEventLog;
+    }), async (modelName: string) => {
       system.logger.debug("Creating trigger for model", modelName);
       const model = db.models[modelName];
+      // const tableName = model.getTableName();
       const qArr = await createTriggerFunctionQuery(model, system);
       await waterfall(qArr, async(q) => {
         try {
