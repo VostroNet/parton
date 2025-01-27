@@ -164,7 +164,7 @@ export interface ItemPageData {
   layout: {
     path: string;
     props: any;
-  };
+  } | string;
   sublayouts: {
     path: string;
     placeholder: string;

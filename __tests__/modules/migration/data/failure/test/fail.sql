@@ -1,0 +1,1 @@
+INSERT INTO complex_table (name, value) VALUES ('test', 'value');

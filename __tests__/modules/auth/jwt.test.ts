@@ -9,6 +9,7 @@ import fetch from 'node-fetch'
 
 import jwtAuthModule, { JwtConfig } from "../../../src/modules/auth-jwt";
 import coreModule from '../../../src/modules/core';
+import authModule from "../../../src/modules/auth";
 import { CoreConfig, RoleDoc } from '../../../src/modules/core/types';
 import dataModule, { createOptions, getDatabase } from '../../../src/modules/data';
 import expressModule, { ExpressEvent, ExpressModuleEvents } from '../../../src/modules/express';
@@ -169,6 +170,7 @@ describe('modules:auth:jwks', () => {
         expressModule,
         dataModule,
         coreModule,
+        authModule,
         jwtAuthModule,
         fieldHashModule,
         roleUpsertModule,
@@ -287,6 +289,7 @@ describe('modules:auth:jwks', () => {
         expressModule,
         dataModule,
         coreModule,
+        authModule,
         // bearerAuthModule,
         jwtAuthModule,
         fieldHashModule,
@@ -381,6 +384,7 @@ describe('modules:auth:jwks', () => {
         expressModule,
         dataModule,
         coreModule,
+        authModule,
         jwtAuthModule,
         fieldHashModule,
         roleUpsertModule,

@@ -3,7 +3,7 @@ import Sequelize from 'sequelize';
 
 import { Role } from '../../types/models/models/role';
 import { User } from '../../types/models/models/user';
-import { MutationType, RoleDoc, RoleModelPermissionLevel } from '../core/types';
+import { IUser, MutationType, RoleDoc, RoleModelPermissionLevel } from '../core/types';
 
 import { DataContext, FindOptions } from './types';
 
@@ -93,8 +93,8 @@ export async function validateFindOptions(
 }
 
 // Fallback checker if hooks is added to the model to still check for the field permission.
-export async function validateDirectUserKey(
-  user: User,
+export async function validateDirectUserKey<T>(
+  user: IUser<T>,
   model: any,
   roleLevel: RoleModelPermissionLevel,
   context: DataContext,
@@ -178,7 +178,7 @@ export async function validateMutation<T>(
     throw new Error('EDENYONSELF');
   }
   // if wildcard table perms, allow all
-  if(!mutationKey.table && mutationKey.doc && !tablePerms?.f) {
+  if (!mutationKey.table && mutationKey.doc && !tablePerms?.f) {
     options.valid = true;
     options.validated = true;
     return model;
@@ -228,7 +228,7 @@ export async function validateMutation<T>(
     return model;
   }
 
-  const user = await getUserFromOptions(options);
+  const user = await getUserFromOptions<User>(options);
   if (!user) {
     throw new Error('no user provided to validate mutation options');
   }
@@ -260,12 +260,12 @@ export function getRoleFromOptions(
   const context = getContextFromOptions(options) || {};
   return context.role;
 }
-export async function getUserFromOptions(
+export async function getUserFromOptions<T>(
   options: FindOptions = {},
-): Promise<User | undefined> {
+): Promise<IUser<T> | undefined> {
   const context = getContextFromOptions(options) || {};
   if (!context.getUser) {
     return undefined;
   }
-  return context.getUser();
+  return context.getUser<T>();
 }

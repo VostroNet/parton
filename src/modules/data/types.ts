@@ -5,6 +5,7 @@ import { System } from "../../system";
 import { Role } from "../../types/models/models/role";
 import { User } from "../../types/models/models/user";
 import { Site } from '../../types/models/models/site';
+import { IUser } from '../core/types';
 
 // export interface IMigration {
 //   name: string,
@@ -20,7 +21,7 @@ export interface DataContext {
   role?: Role | undefined;
   site?: Site | undefined;
   override?: boolean;
-  getUser?: () => Promise<User | undefined>;
+  getUser?: <T>() => Promise<IUser<T> | undefined>;
   // getRequest?: () => {req: Request , res: Response};/
   logout?: () => void;
   login?: (user: any) => void;

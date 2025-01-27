@@ -39,7 +39,7 @@ export interface JwksEndpoint {
 
 export const jwtAuthModule: JwtAuthModule = {
   name: 'jwt-auth',
-  dependencies: ["core"],
+  dependencies: ["core", "auth"],
   models,
   [CoreModuleEvent.AuthProviderRegister]: async (passport, system) => {
     const authConfig = system.getConfig<JwtConfig>()

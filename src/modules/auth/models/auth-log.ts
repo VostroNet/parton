@@ -9,7 +9,7 @@ import { FindOptions, IDefinition } from '../../data/types';
 import { validateFindOptions, validateMutation } from '../../data/validation';
 import { MutationType } from '../../core/types';
 
-const userAuthModel: IDefinition = {
+const authLogModel: IDefinition = {
   name: 'AuthLog',
   disableEventLog: true,
   define: {
@@ -24,7 +24,7 @@ const userAuthModel: IDefinition = {
     },
     type: {
       type: DataTypes.ENUM,
-      values: ["local", "bearer"]
+      values: []
     },
     ipAddress: {
       type: DataTypes.INET,
@@ -99,4 +99,4 @@ const userAuthModel: IDefinition = {
   },
 };
 
-export default userAuthModel;
+export default authLogModel;

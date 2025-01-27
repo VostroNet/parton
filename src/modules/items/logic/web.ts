@@ -74,13 +74,21 @@ export async function getPageFromItem(
 ) {
   const store = rwcd.data;
   const layout = item.data?.layout;
-  if (!layout?.path) {
+  let layoutPath: string | undefined;
+  let layoutProps;;
+  if (typeof layout === 'string') {
+    layoutPath = layout;
+  } else {
+    layoutPath = layout?.path;
+    layoutProps = layout?.props;
+  }
+  if (!layoutPath) {
     // if no layout path is defined, we can't render the page
     console.warn(`No layout path defined for item ${item.id}`);
     return undefined;
   }
-  const layoutItem = getItemByPath<ItemLayoutData>(layout.path, store);
-  if(!layoutItem) {
+  const layoutItem = getItemByPath<ItemLayoutData>(layoutPath, store);
+  if (!layoutItem) {
     return undefined;
   }
 
@@ -123,10 +131,10 @@ export async function getPageFromItem(
     props: item.data?.props,
     layout: {
       id: layoutItem.id,
-      path: layout.path,
+      path: layoutPath,
       props: Object.assign(
         {},
-        layout.props || {},
+        layoutProps || {},
         layoutItem.data?.props || {},
       ),
     },

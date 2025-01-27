@@ -26,7 +26,7 @@ const userAuthModel: IDefinition = {
     type: {
       //TODO: update gqlize to support enum
       type: DataTypes.ENUM,
-      values: ['local'],
+      values: [],
       allowNull: false,
       comment: 'This is the type of user auth for organized identification.',
     } as any,

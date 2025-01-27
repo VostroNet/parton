@@ -1,4 +1,4 @@
-import { DataTypes, Model, ModelStatic, QueryOptions, Sequelize, Transaction } from "sequelize";
+import { DataTypes, Model, ModelStatic, QueryOptions, QueryTypes, Sequelize, Transaction } from "sequelize";
 
 import { System } from "../../system";
 import { IModule } from "../../types/system";
@@ -10,7 +10,7 @@ import { AbstractQuery } from "sequelize/lib/dialects/abstract/query";
 import { IDefinition } from "./types";
 
 
-async function createTriggerFunctionQuery(model: ModelStatic<Model<any, any>>, system: System) : Promise<string[]> {
+async function createTriggerFunctionQuery(model: ModelStatic<Model<any, any>>, system: System): Promise<string[]> {
 
   // TODO: get options for writer user to remove any priviledge of dropping trigger?
   const db = await getDatabase(system);
@@ -18,11 +18,11 @@ async function createTriggerFunctionQuery(model: ModelStatic<Model<any, any>>, s
   let isTimescale = false;
   if (dialect === "postgres") {
     const rows: any[] = await db.query(`SELECT * FROM pg_extension where "extname" = 'timescaledb';`);
-    if(rows.length > 0) {
+    if (rows.length > 0) {
       isTimescale = true;
     }
   }
-  const {tableName, schema} = getTableNameFromModel(model)
+  const { tableName, schema } = getTableNameFromModel(model)
   const schemaPrefix = `"${schema}".`
   const eventLogSchemaPrefix = `"${schema}".`;
   // const tableObject = model.getTableName();
@@ -38,27 +38,27 @@ async function createTriggerFunctionQuery(model: ModelStatic<Model<any, any>>, s
   const triggerEventName = `tr_ev_${triggerName}`;
   const arr: string[] = [];
 
-  switch(dialect) {
+  switch (dialect) {
     case "sqlite":
-//       arr.push(`CREATE TABLE IF NOT EXISTS ${tableName}_log (
-//   "id" text PRIMARY KEY default hex(randomblob(16)),
-//   "time" text NOT NULL default now(),
-//   "rowId" integer NOT NULL,
-//   "operation" VARCHAR(10) NOT NULL,
-//   "data" JSONB NOT NULL,
-// );`)
-//       arr.push(`CREATE TRIGGER IF NOT EXISTS "${triggerName}_insert"
-//   AFTER INSERT ON "${tableName}"
-// BEGIN
-//   columns = PRAGMA (table_info(${tableName}));
-//   json = json_object();
-//   FOR column IN columns LOOP
-//     json = json_set(json, column.name, new.column);
-//   END LOOP;
-//   INSERT INTO "${tableName}_log" (id, operation, data, "createdAt", "updatedAt")
-//     VALUES (hex(randomblob(16)), 'INSERT', json, now(), now());
-// END;`);
-    break;
+      //       arr.push(`CREATE TABLE IF NOT EXISTS ${tableName}_log (
+      //   "id" text PRIMARY KEY default hex(randomblob(16)),
+      //   "time" text NOT NULL default now(),
+      //   "rowId" integer NOT NULL,
+      //   "operation" VARCHAR(10) NOT NULL,
+      //   "data" JSONB NOT NULL,
+      // );`)
+      //       arr.push(`CREATE TRIGGER IF NOT EXISTS "${triggerName}_insert"
+      //   AFTER INSERT ON "${tableName}"
+      // BEGIN
+      //   columns = PRAGMA (table_info(${tableName}));
+      //   json = json_object();
+      //   FOR column IN columns LOOP
+      //     json = json_set(json, column.name, new.column);
+      //   END LOOP;
+      //   INSERT INTO "${tableName}_log" (id, operation, data, "createdAt", "updatedAt")
+      //     VALUES (hex(randomblob(16)), 'INSERT', json, now(), now());
+      // END;`);
+      break;
     case "postgres":
       // log update or delete protection -- start
       arr.push(`
@@ -73,26 +73,31 @@ BEGIN
   RETURN NULL; -- Skip the operation.
 END;
 $$ LANGUAGE plpgsql;`);
-      // if(system.getConfig<DataConfig>().data.reset) {
-      //   // arr.push(`DROP TRIGGER IF EXISTS "${triggerEventName}" ON ${schemaPrefix}"${tableName}";`);
-      //   // arr.push(`DROP TRIGGER IF EXISTS "${triggerName}" ON ${schemaPrefix}"${tableName}_log";`);
-      //   arr.push(`DROP TABLE IF EXISTS ${eventLogSchemaPrefix}"${tableName}_log" CASCADE;`);
+      // if (system.getConfig<DataConfig>().data.reset) {
+
+      // arr.push(`DROP TRIGGER IF EXISTS "${triggerEventName}" ON ${schemaPrefix}"${tableName}";`);
+      // arr.push(`DROP TRIGGER IF EXISTS "${triggerName}" ON ${schemaPrefix}"${tableName}_log";`);
+      // arr.push(`DROP TABLE IF EXISTS ${eventLogSchemaPrefix}"${tableName}_log" CASCADE;`);
       // }
-//       arr.push(`
-// CREATE TABLE IF NOT EXISTS ${eventLogSchemaPrefix}"${tableName}_log" (
-//   "id" uuid default uuid_generate_v4(),
-//   "time" TIMESTAMPTZ NOT NULL default now(),
-//   "rowId" integer NOT NULL,
-//   "operation" VARCHAR(10) NOT NULL, 
-//   "data" JSONB,
-//   "userId" integer NOT NULL
-// );`);
-      arr.push(`  
-CREATE OR REPLACE TRIGGER "${tableName}_prevent_update_delete_trigger"
+      //       arr.push(`
+      // CREATE TABLE IF NOT EXISTS ${eventLogSchemaPrefix}"${tableName}_log" (
+      //   "id" uuid default uuid_generate_v4(),
+      //   "time" TIMESTAMPTZ NOT NULL default now(),
+      //   "rowId" integer NOT NULL,
+      //   "operation" VARCHAR(10) NOT NULL, 
+      //   "data" JSONB,
+      //   "userId" integer NOT NULL
+      // );`);\
+      const readOnlyTriggerName = `${tableName}_prevent_update_delete_trigger`
+      const readOnlyTriggerExists = await db.query(`SELECT * FROM pg_trigger WHERE tgname = '${readOnlyTriggerName}';`, { type: QueryTypes.SELECT });
+      if (readOnlyTriggerExists.length === 0) {
+        arr.push(`  
+CREATE TRIGGER "${readOnlyTriggerName}"
 BEFORE UPDATE OR DELETE ON ${eventLogSchemaPrefix}"${tableName}_log"
 FOR EACH ROW EXECUTE FUNCTION ${eventLogSchemaPrefix}prevent_update_delete();`);
-  // log update or delete protection -- end
-      if(isTimescale) {
+      }
+      // log update or delete protection -- end
+      if (isTimescale) {
         arr.push(`SELECT create_hypertable('${eventLogSchemaPrefix}"${tableName}_log"', 'time', if_not_exists => TRUE);`);
       }
       arr.push(`CREATE OR REPLACE FUNCTION ${eventLogSchemaPrefix}"${triggerName}"() 
@@ -119,8 +124,10 @@ BEGIN
   END IF;
 END;
 $$ LANGUAGE 'plpgsql' COST 100 VOLATILE NOT LEAKPROOF; `);
-    arr.push(`DO $$ BEGIN
-CREATE OR REPLACE TRIGGER "${triggerEventName}"
+      const triggerExists = await db.query(`SELECT * FROM pg_trigger WHERE tgname = '${triggerEventName}';`, { type: QueryTypes.SELECT });
+      if (triggerExists.length === 0) {
+        arr.push(`DO $$ BEGIN
+CREATE TRIGGER "${triggerEventName}"
   BEFORE INSERT OR UPDATE OR DELETE 
   ON ${schemaPrefix}"${tableName}"
   FOR EACH ROW
@@ -128,7 +135,8 @@ CREATE OR REPLACE TRIGGER "${triggerEventName}"
 EXCEPTION
   WHEN others THEN null;
 END $$;`);
-    break;
+      }
+      break;
   }
   return arr;
 }
@@ -137,7 +145,7 @@ END $$;`);
 export const eventLogModule: IModule & DataEvents & DataModelHookEvents & DataHookEvents = {
   name: "event-logs",
   dependencies: ["data"],
-  [DataHookEvent.BeforeSave]: async(instance: Model<any, any>, options: any, modelName: string, system: System) => {
+  [DataHookEvent.BeforeSave]: async (instance: Model<any, any>, options: any, modelName: string, system: System) => {
     await beforeSave(options, system)
     return instance;
   },
@@ -146,16 +154,16 @@ export const eventLogModule: IModule & DataEvents & DataModelHookEvents & DataHo
     afterSave(options, system);
     return instance;
   },
-  [DataHookEvent.BeforeBulkCreate]: async(
+  [DataHookEvent.BeforeBulkCreate]: async (
     instances: Model<any, any>[],
-      options: any,
-      modelName: string,
-      system: System
-    ) => {
+    options: any,
+    modelName: string,
+    system: System
+  ) => {
     await beforeSave(options, system);
-    return instances; 
+    return instances;
   },
-  [DataHookEvent.AfterBulkCreate]: async(
+  [DataHookEvent.AfterBulkCreate]: async (
     instances: Model<any, any>[],
     options: any,
     modelName: string,
@@ -164,28 +172,28 @@ export const eventLogModule: IModule & DataEvents & DataModelHookEvents & DataHo
     afterSave(options, system);
     return instances;
   },
-  [DataHookEvent.BeforeBulkDestroy]: async(
+  [DataHookEvent.BeforeBulkDestroy]: async (
     options: any,
     modelName: string,
     system: System
   ) => {
     await beforeSave(options, system);
   },
-  [DataHookEvent.AfterBulkDestroy]: async(
+  [DataHookEvent.AfterBulkDestroy]: async (
     options: any,
     modelName: string,
     system: System
   ) => {
     afterSave(options, system);
   },
-  [DataHookEvent.BeforeBulkUpdate]: async(
+  [DataHookEvent.BeforeBulkUpdate]: async (
     options: any,
     modelName: string,
     system: System
   ) => {
     await beforeSave(options, system);
   },
-  [DataHookEvent.AfterBulkUpdate]: async(
+  [DataHookEvent.AfterBulkUpdate]: async (
     options: any,
     modelName: string,
     system: System
@@ -199,44 +207,44 @@ export const eventLogModule: IModule & DataEvents & DataModelHookEvents & DataHo
         const model = models[modelName] as IDefinition;
         return !model.disableEventLog;
       })
-    , async (modelName: string) => {
-      const modelDef = models[modelName] as IDefinition & {logTableName: string};
-      (models[modelName] as IDefinition & {logTableName: string}).logTableName = `${modelDef.options?.tableName || modelName.toLowerCase()}_log`
-      const def: IDefinition = {
-        name: `${modelName}Log`,
-        disableEventLog: true,
-        define: {
-          time: {
-            type: DataTypes.DATE,
-            defaultValue: Sequelize.fn("NOW"),
+      , async (modelName: string) => {
+        const modelDef = models[modelName] as IDefinition & { logTableName: string };
+        (models[modelName] as IDefinition & { logTableName: string }).logTableName = `${modelDef.options?.tableName || modelName.toLowerCase()}_log`
+        const def: IDefinition = {
+          name: `${modelName}Log`,
+          disableEventLog: true,
+          define: {
+            time: {
+              type: DataTypes.DATE,
+              defaultValue: Sequelize.fn("NOW"),
+            },
+            rowId: {
+              type: DataTypes.INTEGER,
+              allowNull: false,
+            },
+            operation: {
+              type: DataTypes.ENUM,
+              values: ["INSERT", "UPDATE", "DELETE"],
+              allowNull: false,
+            },
+            data: {
+              type: DataTypes.JSONB,
+              allowNull: true,
+            },
+            userId: {
+              type: DataTypes.INTEGER,
+              allowNull: false,
+            },
           },
-          rowId: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-          },
-          operation: {
-            type: DataTypes.ENUM,
-            values: ["INSERT", "UPDATE", "DELETE"],
-            allowNull: false,
-          },
-          data: {
-            type: DataTypes.JSONB,
-            allowNull: true,
-          },
-          userId: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-          },
-        },
-        disablePrimaryKey: true,
-        options: {
-          timestamps: false,
-          tableName: `${(modelDef.options?.tableName || modelName.toLowerCase())}_log`,
-        } as any
-      };
-      models[def.name] = def;
+          disablePrimaryKey: true,
+          options: {
+            timestamps: false,
+            tableName: `${(modelDef.options?.tableName || modelName.toLowerCase())}_log`,
+          } as any
+        };
+        models[def.name] = def;
 
-    });
+      });
     return models;
   },
   [DataEvent.Connected]: async (system) => {
@@ -253,16 +261,16 @@ export const eventLogModule: IModule & DataEvents & DataModelHookEvents & DataHo
       const model = db.models[modelName];
       // const tableName = model.getTableName();
       const qArr = await createTriggerFunctionQuery(model, system);
-      await waterfall(qArr, async(q) => {
+      await waterfall(qArr, async (q) => {
         try {
           await db.query(q)
-        } catch(err) {
-          console.log("err", err, q); 
+        } catch (err) {
+          console.log("err", err, q);
           throw err;
         }
       });
     });
-    
+
   },
   // [DataHookEvent.BeforeQuery]: async function(options: QueryOptions, query: AbstractQuery, system: System, module: IModule) {
   //   console.log("beforeQuery", arguments);
@@ -273,21 +281,24 @@ async function beforeSave(
   options: any,
   system: System
 ) {
-  
+
   if (!options) {
     throw new Error("Options is required");
   }
   const db = await getDatabase(system);
 
   const context = getContextFromOptions(options);
-  const currentUser = await context.getUser();
+  if (!context?.getUser) {
+    throw new Error("User is required to save data");
+  }
+  const currentUser = await context?.getUser();
   if (!currentUser) {
     throw new Error("User is required to save data");
   }
   switch (system.getConfig<DataConfig>().data.sequelize.dialect) {
     case "postgres":
       const parent = options.transaction;
-      if(!options.transaction) {
+      if (!options.transaction) {
         const t = await db.transaction({
           isolationLevel: Transaction.ISOLATION_LEVELS.READ_COMMITTED,
           transaction: parent,
@@ -315,8 +326,8 @@ async function beforeSave(
       break;
   }
 }
-async function afterSave(options: {transaction: Transaction, immediate: boolean}, system: System) {
-  
+async function afterSave(options: { transaction: Transaction, immediate: boolean }, system: System) {
+
   // console.log("afterSave", options);
   if (options.immediate) {
     system.logger.debug("event log - committing transaction");

@@ -131,20 +131,20 @@ export function createOptions<T>(o: any, options: FindOptions = {}) {
   return opts as T;
 }
 
-export function buildOptions<T>(context: Context, options?: T) : T {
+export function buildOptions<T>(context: Context, options?: T): T {
   return createOptions(context, options) as T;
 }
 
 
 
 
-export function getDatabaseFromOptions<T extends Omit<Sequelize, 'models'> & {models: T["models"]}>(
+export function getDatabaseFromOptions<T extends Omit<Sequelize, 'models'> & { models: T["models"] }>(
   options: FindOptions,
 ): Promise<T> {
   const context = getContextFromOptions(options);
   return getDatabaseFromContext<T>(context);
 }
-export function getDatabaseFromContext<T extends Omit<Sequelize, 'models'> & {models: T["models"]}>(
+export function getDatabaseFromContext<T extends Omit<Sequelize, 'models'> & { models: T["models"] }>(
   context: DataContext,
 ): Promise<T> {
   return getDatabase<T>(context.system);
@@ -173,6 +173,17 @@ export function getContextFromOptions(options: FindOptions): DataContext {
     // eslint-disable-next-line functional/no-throw-statements
     throw new Error('context is not defined');
   }
+  if (context.override && !context.getUser) {
+    context.getUser = async function getUser(): Promise<IUser<any>> {
+      return {
+        id: -1,
+        userName: "system",
+        role: {
+          name: "system"
+        }
+      };
+    };
+  }
   return context;
 }
 
@@ -187,7 +198,7 @@ export function getRoleFromOptions(
   return context.role;
 }
 // let gqlManager: GQLManager;
-export async function getDatabase<T extends Omit<Sequelize, 'models'> & {models: T["models"]}>(
+export async function getDatabase<T extends Omit<Sequelize, 'models'> & { models: T["models"] }>(
   system: System,
 ): Promise<T> {
   const dataModule = system.get<DataModule>('data');
@@ -293,7 +304,7 @@ export const dataModule: DataModule = {
     }
     return schema;
   },
-  
+
   [CoreModuleEvent.GetAllRoles]: async (roles: IRole[] | undefined, system: System) => {
     const db = await getDatabase<DatabaseContext>(system);
     const { Role } = db.models;
@@ -314,7 +325,7 @@ export const dataModule: DataModule = {
     core.setOptions(DataEvent.Setup, {
       ignoreReturn: true,
     });
-    core.get<DataModule>('data').getDatabase = <T extends Omit<Sequelize, 'models'> & {models: T["models"]}>() => getDatabase<T>(core);
+    core.get<DataModule>('data').getDatabase = <T extends Omit<Sequelize, 'models'> & { models: T["models"] }>() => getDatabase<T>(core);
     core.get<DataModule>('data').getDefinition = <
       T extends IDefinition | undefined,
     >(
@@ -564,12 +575,12 @@ export const dataModule: DataModule = {
       site,
     };
   },
-  [GqlJdtEvent.Configure]: async function(options, system) {
+  [GqlJdtEvent.Configure]: async function (options, system) {
     const db = await getDatabase<DatabaseContext>(system);
     return {
       ...options,
-      scalarPostProcessor: (typeDef: IJtdMin<IDataJTDMetadata>, name, graphqlType: GraphQLType, {data, type}: JtdCurrentObject, isScalarType) => {
-        if(graphqlType.toString() === "ID") {
+      scalarPostProcessor: (typeDef: IJtdMin<IDataJTDMetadata>, name, graphqlType: GraphQLType, { data, type }: JtdCurrentObject, isScalarType) => {
+        if (graphqlType.toString() === "ID") {
           // console.log("ID", typeDef);
 
           // TODO: better way, maybe look into graphql extensions to include rel info
@@ -577,25 +588,25 @@ export const dataModule: DataModule = {
           // if (name === "siteId") {
           //   console.log("siteId", typeDef);
           // }
-          
-          if(!model) {
+
+          if (!model) {
             return typeDef;
           }
           if (model.associations) {
             const assoc = Object.keys(model?.associations).find((key) => {
-              return  model.associations[key]?.identifierField === name;
+              return model.associations[key]?.identifierField === name;
             });
             const association = model?.associations[assoc];
             if (association) {
               typeDef.md = {
-                ...typeDef.md, 
+                ...typeDef.md,
                 rel: association.target?.name,
                 relType: association.associationType,
                 access: association.associationAccessor,
               };
             }
           }
-          if(model.primaryKeyAttributes?.indexOf(name) > -1) {
+          if (model.primaryKeyAttributes?.indexOf(name) > -1) {
             typeDef.md.pk = true;
           }
         }
@@ -604,9 +615,9 @@ export const dataModule: DataModule = {
         // }
         // if (isScalarType && (graphqlType as GraphQLScalarType).name === "ID" && data.interfaces?.[0]?.name === "Node") {
 
-          
+
         // }
-       
+
         return typeDef;
       },
     }
