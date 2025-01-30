@@ -6,7 +6,7 @@ import Sequelize, {Model} from "sequelize";
 export interface ConfigLogCreationAttributes {
   data?: any | null;
   operation?: string;
-  rowId?: number;
+  row_id?: number;
   time?: Date | string;
   userId?: number;
 
@@ -14,7 +14,7 @@ export interface ConfigLogCreationAttributes {
 export interface ConfigLogAttributes {
   data: any | null;
   operation: string;
-  rowId: number;
+  row_id: number;
   time: Date | string;
   userId: number;
 
@@ -22,7 +22,7 @@ export interface ConfigLogAttributes {
 export class ConfigLog extends Sequelize.Model<ConfigLogAttributes, ConfigLogCreationAttributes> {
   data: any | null;
   operation: string;
-  rowId: number;
+  row_id: number;
   time: Date | string;
   userId: number;
 

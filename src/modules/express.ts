@@ -6,7 +6,7 @@ import type Express from 'express';
 import express from 'express';
 import expressSession, { SessionOptions } from 'express-session';
 
-import { createContext, System } from '../system';
+import { createContext, getSystemFromSession, System } from '../system';
 import { Config } from '../types/config';
 import { SystemEvent } from '../types/events';
 import { HttpEventType, HttpModule } from './http';
@@ -16,6 +16,8 @@ import { IUser } from './core/types';
 
 export enum ExpressEvent {
   Initialize = 'express:initialize',
+  Configure = 'express:configure',
+  ConfigureComplete = 'express:configure:complete',
   Ready = 'express:ready',
   Request = 'express:request',
   Use = 'express:use',
@@ -34,6 +36,16 @@ export interface ExpressModuleEvents {
     core: System,
     module: IModule,
   ): Promise<Express.Application>;
+  [ExpressEvent.Configure]?(
+    express: Express.Application,
+    core: System,
+    module: IModule,
+  ): Promise<Express.Application>;
+  [ExpressEvent.ConfigureComplete]?(
+    express: Express.Application,
+    core: System,
+    module: IModule,
+  ): Promise<void>;
   [ExpressEvent.Ready]?(
     express: Express.Application,
     core: System,
@@ -172,7 +184,24 @@ export const expressModule: IExpressModule = {
       expressApp,
       system,
     );
-
+    return system;
+  },
+  [SystemEvent.Configure]: async (system: System) => {
+    const expressApp = system.get<IExpressModule>('express').express;
+    await system.execute<Express.Application>(
+      ExpressEvent.Configure,
+      expressApp,
+      system,
+    );
+    return system;
+  },
+  [SystemEvent.ConfigureComplete]: async (system: System) => {
+    const expressApp = system.get<IExpressModule>('express').express;
+    await system.execute<Express.Application>(
+      ExpressEvent.ConfigureComplete,
+      expressApp,
+      system,
+    );
     expressApp.use((req, res) => {
       if (system.getConfig().devMode) {
         return res
@@ -237,10 +266,13 @@ export default expressModule;
 
 export async function createContextFromRequest(
   req: Express.Request,
-  system: System,
+  system?: System,
   override = false,
   initContext?: Context | undefined,
 ) {
+  if (!system) {
+    system = getSystemFromSession();
+  }
   return createContext(
     system,
     req.user as IUser<any>,

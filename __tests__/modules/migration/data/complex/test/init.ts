@@ -1,7 +1,7 @@
- 
-import path from "path";
 
-import { MigratorArgs } from "../../../../../../src/modules/data/types";
+import path from "path";
+import { MigratorArgs } from "../../../../../../src/modules/migration";
+
 export const dependencies = []; // add if this query needs to be run after a dependency
 export async function up({
   context: {

@@ -6,7 +6,7 @@ import Sequelize, {Model} from "sequelize";
 export interface UserAuthLogCreationAttributes {
   data?: any | null;
   operation?: string;
-  rowId?: number;
+  row_id?: number;
   time?: Date | string;
   userId?: number;
 
@@ -14,7 +14,7 @@ export interface UserAuthLogCreationAttributes {
 export interface UserAuthLogAttributes {
   data: any | null;
   operation: string;
-  rowId: number;
+  row_id: number;
   time: Date | string;
   userId: number;
 
@@ -22,7 +22,7 @@ export interface UserAuthLogAttributes {
 export class UserAuthLog extends Sequelize.Model<UserAuthLogAttributes, UserAuthLogCreationAttributes> {
   data: any | null;
   operation: string;
-  rowId: number;
+  row_id: number;
   time: Date | string;
   userId: number;
 

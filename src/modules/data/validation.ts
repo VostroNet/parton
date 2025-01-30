@@ -3,14 +3,45 @@ import Sequelize from 'sequelize';
 
 import { Role } from '../../types/models/models/role';
 import { User } from '../../types/models/models/user';
-import { IUser, MutationType, RoleDoc, RoleModelPermissionLevel } from '../core/types';
+import { IUser, MutationType, RoleDoc, RoleModelPermission, RoleModelPermissionLevel, RoleSchema } from '../core/types';
 
 import { DataContext, FindOptions } from './types';
+import { getContextFromSession } from '../../system';
 
 function invalidateFindOptions(options: FindOptions) {
   options.valid = false;
   options.where = Sequelize.literal('1=0');
   return options;
+}
+
+function getRolePermissionsFromSchema(roleSchema: RoleSchema, tableName: string) {
+  let roleSchemaObj: RoleModelPermission[] = [];
+  if (roleSchema) {
+    roleSchemaObj.push(roleSchema);
+  }
+  if (roleSchema.models) {
+    roleSchemaObj.push(roleSchema.models);
+    if (tableName && roleSchema.models[tableName]) {
+      roleSchemaObj.push(roleSchema.models[tableName]);
+    }
+  }
+  return mergeRolePermissions(roleSchemaObj);
+}
+
+export function mergeRolePermissions(arr: RoleModelPermission[]) {
+  return arr.reduce((acc, schema) => {
+    return mergeRolePermission(acc, schema);
+  }, {});
+}
+
+export function mergeRolePermission(a: RoleModelPermission, b: RoleModelPermission) {
+  return {
+    r: (b?.r !== undefined ? b.r : a?.r),
+    s: (b?.s !== undefined ? b.s : a?.s),
+    u: (b?.u !== undefined ? b.u : a?.u),
+    d: (b?.d !== undefined ? b.d : a?.d),
+    w: (b?.w !== undefined ? b.w : a?.w),
+  };
 }
 
 export async function validateFindOptions(
@@ -40,15 +71,14 @@ export async function validateFindOptions(
   if (!schema) {
     throw new Error('no schema found for role');
   }
-  const tablePerms = schema?.models?.[tableName];
-  if (!schema.r && !tablePerms?.r) {
+  const permissions = getRolePermissionsFromSchema(schema, tableName);
+
+  // const tablePerms = schema?.models?.[tableName];
+  if (!permissions.r) {
     return invalidateFindOptions(options);
   }
   let roleLevel = RoleModelPermissionLevel.self;
-  if (
-    schema.r !== RoleModelPermissionLevel.self ||
-    (tablePerms?.r === true || tablePerms?.r === RoleModelPermissionLevel.global)
-  ) {
+  if (permissions.r === RoleModelPermissionLevel.global) {
     roleLevel = RoleModelPermissionLevel.global;
   }
 
@@ -131,46 +161,27 @@ export async function validateMutation<T>(
   if (!schema) {
     throw new Error('no schema found for role');
   }
-  const tablePerms = (schema.models || {})[tableName];
-  let mutationKey:
-    | {
-      doc?: boolean | RoleModelPermissionLevel;
-      table?: boolean | RoleModelPermissionLevel;
-    }
-    | undefined = undefined;
+  const permissions = getRolePermissionsFromSchema(schema, tableName);
+  let permissionKey: RoleModelPermissionLevel | boolean = undefined;
   switch (mutationType) {
     case MutationType.create:
-      mutationKey = {
-        doc: schema.w,
-        table: tablePerms?.w,
-      };
+      permissionKey = permissions.w;
       break;
     case MutationType.update:
-      mutationKey = {
-        doc: schema.u,
-        table: tablePerms?.u,
-      };
+      permissionKey = permissions.u;
       break;
     case MutationType.destroy:
-      mutationKey = {
-        doc: schema.d,
-        table: tablePerms?.d,
-      };
+      permissionKey = permissions.d;
       break;
     default:
       throw new Error('invalid mutation type');
   }
 
-  if (!mutationKey.doc && !mutationKey.table) {
+  if (!permissionKey) {
     throw new Error('ENOPERMS');
   }
   let roleLevel = RoleModelPermissionLevel.self;
-  if (
-    (mutationKey.table === true ||
-      mutationKey.table === RoleModelPermissionLevel.global) &&
-    (mutationKey.doc === true ||
-      mutationKey.doc === RoleModelPermissionLevel.global)
-  ) {
+  if (permissionKey === RoleModelPermissionLevel.global) {
     roleLevel = RoleModelPermissionLevel.global;
   }
 
@@ -178,22 +189,23 @@ export async function validateMutation<T>(
     throw new Error('EDENYONSELF');
   }
   // if wildcard table perms, allow all
-  if (!mutationKey.table && mutationKey.doc && !tablePerms?.f) {
+  if (roleLevel === RoleModelPermissionLevel.global) {
     options.valid = true;
     options.validated = true;
     return model;
   }
+  const tableFields = schema.models?.[tableName]?.f;
 
 
-  if (!tablePerms?.f) {
+  if (!tableFields) {
     throw new Error('ENOPERMFIELDS');
   }
   const fieldCheck = Object.keys((model as any)._changed).reduce(
     (valid: any, fieldName: string) => {
-      if (!tablePerms?.f || !valid) {
+      if (!tableFields || !valid) {
         return false;
       }
-      const fieldPerms = tablePerms.f[fieldName];
+      const fieldPerms = tableFields[fieldName];
       if (!fieldPerms) {
         return false;
       }
@@ -222,11 +234,11 @@ export async function validateMutation<T>(
   if (!fieldCheck) {
     throw new Error('EFCFAILED');
   }
-  if (roleLevel === RoleModelPermissionLevel.global) {
-    options.valid = true;
-    options.validated = true;
-    return model;
-  }
+  // if (roleLevel === RoleModelPermissionLevel.global) {
+  //   options.valid = true;
+  //   options.validated = true;
+  //   return model;
+  // }
 
   const user = await getUserFromOptions<User>(options);
   if (!user) {
@@ -241,11 +253,14 @@ export async function validateMutation<T>(
 }
 
 export function getContextFromOptions(options: FindOptions): DataContext {
-  let context = options.context || {};
-  if (options.getGraphQLArgs) {
+  let context = options.context;
+  if (options?.getGraphQLArgs) {
     context = options.getGraphQLArgs().context;
-  } else if (context.getGraphQLArgs) {
+  } else if (context?.getGraphQLArgs) {
     context = context.getGraphQLArgs().context;
+  }
+  if (!context) {
+    context = getContextFromSession();
   }
   return context;
 }
@@ -268,4 +283,12 @@ export async function getUserFromOptions<T>(
     return undefined;
   }
   return context.getUser<T>();
+}
+
+
+export function validateClassMethodAccess(roleDoc: RoleDoc, modelName: string, methodName: string) {
+  if (!roleDoc) {
+    return undefined;
+  }
+  return mergeRolePermissions([roleDoc.schema, roleDoc.schema.models?.[modelName], roleDoc.schema.models?.[modelName]?.cm[methodName]]);
 }

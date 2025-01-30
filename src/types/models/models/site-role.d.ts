@@ -12,8 +12,8 @@ export interface SiteRoleCreationAttributes {
   default?: boolean;
   doc?: any;
   docHash?: string;
-  roleId?: number | null;
-  siteId?: number | null;
+  roleId?: number;
+  siteId?: number;
 
 }
 export interface SiteRoleAttributes {
@@ -23,9 +23,8 @@ export interface SiteRoleAttributes {
   default: boolean;
   doc: any;
   docHash: string;
-  id: number;
-  roleId: number | null;
-  siteId: number | null;
+  roleId: number;
+  siteId: number;
   updatedAt: Date | string;
 
 }
@@ -36,9 +35,8 @@ export class SiteRole extends Sequelize.Model<SiteRoleAttributes, SiteRoleCreati
   default: boolean;
   doc: any;
   docHash: string;
-  id: number;
-  roleId: number | null;
-  siteId: number | null;
+  roleId: number;
+  siteId: number;
   updatedAt: Date | string;
   role?: Role | null;
   site?: Site | null;

@@ -73,7 +73,7 @@ describe('modules:data:migrations', () => {
     }
     const db = await getDatabase<DatabaseContext>(core);
     const [results] = await db.query('SELECT * FROM "SequelizeMeta";') as { name: string }[][];
-    expect(results).toHaveLength(1);
+    expect(results).toHaveLength(2);
     expect(results[0].name).toBe('test1/init');
     await core.shutdown();
   });

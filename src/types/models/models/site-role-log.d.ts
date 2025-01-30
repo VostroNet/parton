@@ -6,7 +6,8 @@ import Sequelize, {Model} from "sequelize";
 export interface SiteRoleLogCreationAttributes {
   data?: any | null;
   operation?: string;
-  rowId?: number;
+  row_roleId?: number;
+  row_siteId?: number;
   time?: Date | string;
   userId?: number;
 
@@ -14,7 +15,8 @@ export interface SiteRoleLogCreationAttributes {
 export interface SiteRoleLogAttributes {
   data: any | null;
   operation: string;
-  rowId: number;
+  row_roleId: number;
+  row_siteId: number;
   time: Date | string;
   userId: number;
 
@@ -22,7 +24,8 @@ export interface SiteRoleLogAttributes {
 export class SiteRoleLog extends Sequelize.Model<SiteRoleLogAttributes, SiteRoleLogCreationAttributes> {
   data: any | null;
   operation: string;
-  rowId: number;
+  row_roleId: number;
+  row_siteId: number;
   time: Date | string;
   userId: number;
 

@@ -1,24 +1,25 @@
 import { GraphQLSchema } from 'graphql';
-import { createYoga, YogaInitialContext, YogaServerInstance } from 'graphql-yoga';
+import { createYoga, YogaInitialContext, YogaServerInstance, YogaServerOptions } from 'graphql-yoga';
 
-import { System, SystemContext } from '../system';
+import { System, SystemContext, withContext } from '../system';
 import { Context, IModule } from '../types/system';
 import { createHexString } from '../utils/string';
 
 import { createContextFromRequest, ExpressEvent, ExpressModuleEvents } from './express';
 import { CoreModuleEvent, CoreModuleEvents, IRole } from './core/types';
+import { Config } from '../types/config';
 
 // export enum YogaEventType {
-//   Initialize = 'yoga:initialize',
+//   OnRequest = 'yoga:request',
 // }
 
-// export type RedisModuleEvents = {
-//   [key in RedisEventType]?: (redis: Redis, core: System) => Promise<void>;
+// export type YogaModuleEvents = {
+//   [key in YogaEventType]?: (executed: boolean, execute: (initContext: any) => void, core: System) => Promise<boolean> | boolean;
 // };
 
 
 // import { Plugin } from 'graphql-yoga'
- 
+
 // function useContext(): Plugin {
 //   return {
 //     async onContextBuilding(args) {
@@ -37,6 +38,7 @@ import { CoreModuleEvent, CoreModuleEvents, IRole } from './core/types';
 // }
 
 
+
 export interface IYogaModule
   extends IModule,
   CoreModuleEvents,
@@ -48,6 +50,10 @@ export interface IYogaModule
 export interface GraphQLContext extends YogaInitialContext, Context {
   system: System;
 }
+export interface YogaConfig extends Config {
+  yoga?: YogaServerOptions<any, any>
+}
+
 
 export const yogaModule: IYogaModule = {
   name: 'yoga',
@@ -66,18 +72,21 @@ export const yogaModule: IYogaModule = {
     if (system.get<IYogaModule>('yoga').servers[hexId]) {
       delete system.get<IYogaModule>('yoga').servers[hexId];
     }
+    const yogaConfig = system.getConfig<YogaConfig>().yoga;
     const yoga = createYoga({
-      schema,
       batching: true,
+      graphiql: true,
+      ...yogaConfig,
+      schema,
       context: async (initialContext: GraphQLContext, ...args) => {
         // bodyInit should be the express request passed in.
         const context = await createContextFromRequest((initialContext.request as any).bodyInit, system) as SystemContext;
         return context;
       },
-      graphiql: true,
       graphqlEndpoint: `/graphql.api/${hexId}`,
       // plugins: [useContext()],
     });
+
     system.get<IYogaModule>('yoga').servers[hexId] = yoga;
     return schema
   },
@@ -99,7 +108,9 @@ export const yogaModule: IYogaModule = {
             req.url = `/graphql.api/${hexId}`;
             req.originalUrl = `/graphql.api/${hexId}`;
           }
-          system.get<IYogaModule>('yoga').servers[hexId](req, res);
+          withContext(context, async () => {
+            return system.get<IYogaModule>('yoga').servers[hexId](req, res);
+          })
           return;
         }
         return next();

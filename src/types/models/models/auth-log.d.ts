@@ -7,6 +7,7 @@ import {User} from "./user";
 export interface AuthLogCreationAttributes {
   ipAddress?: any | null;
   operation?: string;
+  ref?: any | null;
   time?: Date | string;
   type?: string;
   userId?: number | null;
@@ -17,6 +18,7 @@ export interface AuthLogAttributes {
   id: number;
   ipAddress: any | null;
   operation: string;
+  ref: any | null;
   time: Date | string;
   type: string;
   updatedAt: Date | string;
@@ -28,6 +30,7 @@ export class AuthLog extends Sequelize.Model<AuthLogAttributes, AuthLogCreationA
   id: number;
   ipAddress: any | null;
   operation: string;
+  ref: any | null;
   time: Date | string;
   type: string;
   updatedAt: Date | string;

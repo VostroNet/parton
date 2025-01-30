@@ -5,9 +5,8 @@ import path from 'path';
 import { Jam } from '@vostro/sandwich';
 import minimist from 'minimist';
 
-import { System } from './system';
+import { System, withSession } from './system';
 import { Config } from './types/config';
-import { SystemEvent } from './types/events';
 import { Project } from './types/system';
 import { importFile } from './utils/fs';
 import { createDebugLogger } from './utils/logger';
@@ -45,15 +44,20 @@ export default async (args: minimist.ParsedArgs) => {
 
   logger.debug('loading core');
   const system = new System(cfg);
-  logger.debug('firing load');
-  await system.load();
-  logger.debug('firing initialize');
-  await system.initialize();
-  logger.debug('firing configure');
-  await system.configure();
-  logger.debug('firing system:ready');
-  await system.ready();
+  await withSession(async () => {
+    logger.debug('firing load');
+    await system.load();
+    logger.debug('firing initialize');
+    await system.initialize();
+    logger.debug('firing configure');
+    await system.configure();
+    logger.debug('firing configure:complete');
+    await system.configureComplete();
+    logger.debug('firing system:ready');
+    await system.ready();
+  }, system);
+
   // await system.execute(SystemEvent.Ready, system);
-  
+
   logger.debug('finished');
 };

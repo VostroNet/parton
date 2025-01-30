@@ -17,7 +17,7 @@ export interface Item<T> {
   name: string;
   type: string | ItemType;
   parentId?: ItemId;
-  template?: ItemId;
+  templatePath?: string;
   displayName?: string;
   index?: number;
   data?: T;
@@ -74,7 +74,7 @@ export interface ImportItem<T> extends ImportRef {
   id?: ItemId;
   name: string;
   type?: string | ItemType;
-  template?: string;
+  templatePath?: string;
   displayName?: string;
   index?: number;
   data?: T;

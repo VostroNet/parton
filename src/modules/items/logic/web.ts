@@ -1,9 +1,8 @@
 // import Url from "url";
-
 import { GraphQLError } from 'graphql';
 
-import { Role } from '../../../types/models/models/role';
-import { DataContext } from '../../data/types';
+// import { Role } from '../../../types/models/models/role';
+// import { DataContext } from '../../data/types';
 import {
   Item,
   ItemIdRef,
@@ -15,11 +14,12 @@ import {
   SiteRoleWebCacheDoc,
 } from '../types';
 import { getItemByPath } from '../utils';
-import { createContextFromRequest } from '../../express';
-import { getSystemFromContext, SystemContext } from '../../../system';
+// import { createContextFromRequest } from '../../express';
+// import { getSystemFromContext, SystemContext } from '../../../system';
 import { minimatch } from 'minimatch';
 import path from 'path';
 import { Context } from '../../../types/system';
+import { getSystemFromSession } from '../../../system';
 
 // export function getTopItemFromUri(store: RoleWebCacheDoc, uri: Url.URL) {
 //   const hostname = uri
@@ -164,7 +164,8 @@ export async function getPageResolver(
   const { uri, levels } = args;
   const url = new URL(uri);
 
-  const system = getSystemFromContext(context);
+  const system = getSystemFromSession();
+
   // const reqContext = await createContextFromRequest(context.request, system, context.override, context.transaction) as SystemContext;
 
   if (!context.siteRole?.cacheDoc) {

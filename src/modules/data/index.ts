@@ -4,7 +4,7 @@ import SequelizeAdapter from '@azerothian/gqlize-adapter-sequelize';
 import { Model, ModelStatic, Op, Options, Sequelize } from 'sequelize';
 import { Options as SequelizeOptions } from 'sequelize';
 
-import { System } from '../../system';
+import { getContextFromSession, System } from '../../system';
 import { Config } from '../../types/config';
 import { SystemEvent } from '../../types/events';
 import DatabaseContext from '../../types/models';
@@ -36,7 +36,9 @@ export enum DataEvent {
   Configure = 'data:configure',
   ConfigureComplete = 'data:configure-complete',
   Connected = 'data:connected',
+  BeforeSync = 'data:before-sync',
   Setup = 'data:setup',
+
   Loaded = 'data:loaded',
   ModelHook = 'data:model-hook',
 }
@@ -54,6 +56,10 @@ export type DataEvents = {
     core: System,
   ) => Promise<{ [key: string]: any }>;
   readonly [DataEvent.Connected]?: (
+    core: System,
+    gqlManager: GQLManager,
+  ) => Promise<void>;
+  readonly [DataEvent.BeforeSync]?: (
     core: System,
     gqlManager: GQLManager,
   ) => Promise<void>;
@@ -170,8 +176,11 @@ export function getContextFromOptions(options: FindOptions): DataContext {
     context = context.getGraphQLArgs().context;
   }
   if (!context) {
-    // eslint-disable-next-line functional/no-throw-statements
-    throw new Error('context is not defined');
+    context = getContextFromSession();
+    if (!context) {
+      // eslint-disable-next-line functional/no-throw-statements
+      throw new Error('context is not defined');
+    }
   }
   if (context.override && !context.getUser) {
     context.getUser = async function getUser(): Promise<IUser<any>> {
@@ -325,6 +334,9 @@ export const dataModule: DataModule = {
     core.setOptions(DataEvent.Setup, {
       ignoreReturn: true,
     });
+    core.setOptions(DataEvent.BeforeSync, {
+      ignoreReturn: true,
+    });
     core.get<DataModule>('data').getDatabase = <T extends Omit<Sequelize, 'models'> & { models: T["models"] }>() => getDatabase<T>(core);
     core.get<DataModule>('data').getDefinition = <
       T extends IDefinition | undefined,
@@ -347,6 +359,7 @@ export const dataModule: DataModule = {
     }, {} as any);
 
     models = await core.execute(DataEvent.Configure, models, core);
+
     models = await core.execute(DataEvent.ConfigureComplete, models, core);
 
     const globalHooks = Object.keys(DataHookEvent).reduce((hooks, hookName) => {
@@ -408,6 +421,9 @@ export const dataModule: DataModule = {
       // }
     }
     await core.get<DataModule>('data').gqlManager?.initialise();
+
+    await core.execute(DataEvent.BeforeSync, core, core.get<DataModule>('data').gqlManager);
+
     if (cfg.data.reset) {
       await core.get<DataModule>('data').gqlManager?.reset({});
     }
@@ -504,9 +520,15 @@ export const dataModule: DataModule = {
     const db = await getDatabase<DatabaseContext>(system);
     const { Site, Role, SiteRole } = db.models;
     let { role, site, user } = context;
-
+    if (system.cache.has(`site:${ref?.hostname}`)) {
+      site = system.cache.get(`site:${ref?.hostname}`);
+    }
     if (!site && ref?.hostname) {
       site = await Site.getSiteByHostname(ref.hostname, { system, override: true, role: { name: "system" } });
+      system.cache.set(`site:${ref.hostname}`, site, { size: 1 });
+    }
+    if (!site && system.cache.has("site:default",)) {
+      site = system.cache.get("site:default");
     }
     if (!site) {
       site = await Site.findOne(createOptions({ override: true }, {
@@ -514,6 +536,7 @@ export const dataModule: DataModule = {
           default: true
         }
       }));
+      system.cache.set("site:default", site, { size: 1 });
     }
 
     if (!role && user?.role) {
@@ -524,14 +547,20 @@ export const dataModule: DataModule = {
     let siteRole: SiteRole | undefined;
 
     if (site?.id && role?.id) {
-      siteRole = await SiteRole.findOne(
-        createOptions({ override: true }, {
-          where: {
-            siteId: site.id,
-            roleId: role.id,
-          },
-        })
-      );
+      if (system.cache.has(`siterole:${site.id}:${role.id}`)) {
+        siteRole = system.cache.get(`siterole:${site.id}:${role.id}`);
+      } else {
+
+        siteRole = await SiteRole.findOne(
+          createOptions({ override: true }, {
+            where: {
+              siteId: site.id,
+              roleId: role.id,
+            },
+          })
+        );
+        system.cache.set(`siterole:${site.id}:${role.id}`, siteRole, { size: 1 });
+      }
     }
     // if (!siteRole && !role && site?.id) {
     //   siteRole = await SiteRole.findOne(
@@ -551,19 +580,24 @@ export const dataModule: DataModule = {
     //   );
     // }
     if (!siteRole && site?.id) {
-      siteRole = await SiteRole.findOne(createOptions({ override: true }, {
-        where: {
-          siteId: site.id,
-          doc: {
-            default: true,
-          }
-        },
-        include: [{
-          model: Role,
-          as: 'role',
-          required: true,
-        }]
-      }));
+      if (system.cache.has(`siterole:${site.id}:default`)) {
+        siteRole = system.cache.get(`siterole:${site.id}:default`);
+      } else {
+        siteRole = await SiteRole.findOne(createOptions({ override: true }, {
+          where: {
+            siteId: site.id,
+            doc: {
+              default: true,
+            }
+          },
+          include: [{
+            model: Role,
+            as: 'role',
+            required: true,
+          }]
+        }));
+        system.cache.set(`siterole:${site.id}:default`, siteRole, { size: 1 });
+      }
     }
     if (siteRole && !role) {
       role = siteRole.role;

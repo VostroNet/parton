@@ -45,8 +45,8 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0
       '@vostro/sandwich':
-        specifier: ^0.3.1
-        version: 0.3.1(typescript@5.7.3)
+        specifier: file:.yalc/@vostro/sandwich
+        version: file:.yalc/@vostro/sandwich(typescript@5.7.3)
       bcrypt:
         specifier: ^5.1.1
         version: 5.1.1(encoding@0.1.13)
@@ -104,6 +104,9 @@ importers:
       jose:
         specifier: ^5.9.6
         version: 5.9.6
+      lru-cache:
+        specifier: ^11.0.2
+        version: 11.0.2
       minimatch:
         specifier: ^10.0.1
         version: 10.0.1
@@ -2125,8 +2128,8 @@ packages:
   '@vostro/object-visit@1.1.0':
     resolution: {integrity: sha512-PoRnLnokaqADO1mUpGCwTjruJbTW+ameXCOPPylPqGfLIgLGJe33MFWYVnaq4y9vxQuSJVPleA4wuGordmBWIw==}
 
-  '@vostro/sandwich@0.3.1':
-    resolution: {integrity: sha512-UkdhjlvYBcAedIadCKVks98+5Tkrdu2Vuc3E8Vs3ttRy/6M3CqR+Fh8Qr5VJyeBHGZoyyMXW6RxVzfYipCn6Hw==}
+  '@vostro/sandwich@file:.yalc/@vostro/sandwich':
+    resolution: {directory: .yalc/@vostro/sandwich, type: directory}
     peerDependencies:
       typescript: ^5.0.0
 
@@ -8535,7 +8538,7 @@ snapshots:
 
   '@vostro/object-visit@1.1.0': {}
 
-  '@vostro/sandwich@0.3.1(typescript@5.7.3)':
+  '@vostro/sandwich@file:.yalc/@vostro/sandwich(typescript@5.7.3)':
     dependencies:
       debug: 4.4.0
       deepmerge: 4.3.1

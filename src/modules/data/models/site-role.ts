@@ -10,6 +10,8 @@ const siteDefinition: IHashDefinition = {
     default: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
     doc: { type: DataTypes.JSONB, allowNull: false, defaultValue: {} },
     docHash: { type: DataTypes.STRING, allowNull: false },
+    roleId: { type: DataTypes.INTEGER, primaryKey: true, allowNull: false },
+    siteId: { type: DataTypes.INTEGER, primaryKey: true, allowNull: false },
   },
   relationships: [{
     type: 'belongsTo',
@@ -28,6 +30,10 @@ const siteDefinition: IHashDefinition = {
   }],
   options: {
     tableName: 'sites-roles',
+    indexes: [{
+      fields: ['siteId', 'roleId'],
+      unique: true,
+    }]
   },
 };
 export default siteDefinition;

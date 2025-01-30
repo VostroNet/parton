@@ -6,7 +6,7 @@ import Sequelize, {Model} from "sequelize";
 export interface SiteLogCreationAttributes {
   data?: any | null;
   operation?: string;
-  rowId?: number;
+  row_id?: number;
   time?: Date | string;
   userId?: number;
 
@@ -14,7 +14,7 @@ export interface SiteLogCreationAttributes {
 export interface SiteLogAttributes {
   data: any | null;
   operation: string;
-  rowId: number;
+  row_id: number;
   time: Date | string;
   userId: number;
 
@@ -22,7 +22,7 @@ export interface SiteLogAttributes {
 export class SiteLog extends Sequelize.Model<SiteLogAttributes, SiteLogCreationAttributes> {
   data: any | null;
   operation: string;
-  rowId: number;
+  row_id: number;
   time: Date | string;
   userId: number;
 

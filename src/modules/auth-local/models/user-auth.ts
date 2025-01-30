@@ -37,7 +37,7 @@ const userAuthModel: IDefinition = {
   },
   options: {
     classMethods: {
-      async loginWithUsernamePassword(args: {username: string, password: string}, context: Context) {
+      async loginWithUsernamePassword(args: { username: string, password: string }, context: Context) {
         const { username, password } = args;
         const system = getSystemFromContext(context);
         const db = await getDatabase<DatabaseContext>(system);
@@ -55,7 +55,7 @@ const userAuthModel: IDefinition = {
               required: true,
               where: {
                 [Op.or]: [
-                  Sequelize.where(Sequelize.fn('lower', Sequelize.col('username')), username.toLowerCase().trim()),
+                  Sequelize.where(Sequelize.fn('lower', Sequelize.col('userName')), username.toLowerCase().trim()),
                   Sequelize.where(Sequelize.fn('lower', Sequelize.col('email')), username.toLowerCase().trim()),
                 ],
               },

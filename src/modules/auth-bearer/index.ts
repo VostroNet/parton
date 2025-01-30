@@ -66,11 +66,11 @@ export const bearerAuthModule: BearerAuthModule = {
             return done(null, user, { scope: 'all' });
           }
 
-          await system.execute(CoreModuleEvent.AuthLoginFailure, {
-            type: 'bearer',
-            ref: {},
-            ip: req.ip,
-          }, context);
+          // await system.execute(CoreModuleEvent.AuthLoginFailure, {
+          //   type: 'bearer',
+          //   ref: {},
+          //   ip: req.ip,
+          // }, context);
           return done(null, false);
         } catch (err) {
           return done(err);
