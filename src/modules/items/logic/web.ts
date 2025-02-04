@@ -1,8 +1,4 @@
-// import Url from "url";
-import { GraphQLError } from 'graphql';
 
-// import { Role } from '../../../types/models/models/role';
-// import { DataContext } from '../../data/types';
 import {
   Item,
   ItemIdRef,
@@ -14,12 +10,13 @@ import {
   SiteRoleWebCacheDoc,
 } from '../types';
 import { getItemByPath } from '../utils';
-// import { createContextFromRequest } from '../../express';
-// import { getSystemFromContext, SystemContext } from '../../../system';
 import { minimatch } from 'minimatch';
 import path from 'path';
 import { Context } from '../../../types/system';
-import { getSystemFromSession } from '../../../system';
+import { buildOptions, getDatabase } from '../../data';
+import DatabaseContext from '../../../types/models';
+import { Site } from '../../../types/models/models/site';
+import { Op } from 'sequelize';
 
 // export function getTopItemFromUri(store: RoleWebCacheDoc, uri: Url.URL) {
 //   const hostname = uri
@@ -49,13 +46,24 @@ export async function getPageFromSiteRoleWebCache(
   levels: number = 0,
 ): Promise<Page | undefined> {
   let itemId = rwcd.web?.paths[webPath];
+  // let exactPath = webPath;
   if (!itemId) {
-    for (const path in rwcd.web.paths) {
-      if (minimatch(webPath, path, {
-        // matchBase: true,
-        partial: true,
-      })) {
+    const paths = Object.keys(rwcd.web.paths).sort((a, b) => {
+      return b.length - a.length;
+    }).filter((p) => {
+      return p.endsWith('/*');
+    });
+    for (const path of paths) {
+      const match = minimatch(webPath, path, {
+        partial: false,
+      });
+      if (match) {
         itemId = rwcd.web.paths[path];
+        webPath = path.replace("/**/*", "");
+        if (webPath === "") {
+          webPath = "/";
+        }
+        break;
       }
     }
     if (!itemId) {
@@ -70,7 +78,7 @@ export async function getPageFromItem(
   rwcd: SiteRoleWebCacheDoc,
   item: Item<ItemPageData>,
   webPath: string,
-  levels: number = 0,
+  levels: number = 0
 ) {
   const store = rwcd.data;
   const layout = item.data?.layout;
@@ -164,12 +172,32 @@ export async function getPageResolver(
   const { uri, levels } = args;
   const url = new URL(uri);
 
-  const system = getSystemFromSession();
+  // const system = getSystemFromSession();
 
   // const reqContext = await createContextFromRequest(context.request, system, context.override, context.transaction) as SystemContext;
 
-  if (!context.siteRole?.cacheDoc) {
-    throw new GraphQLError('Cache doc is corrupt, unable to retrieve page');
+  // if (!context.siteRole?.cacheDoc) {
+  //   throw new GraphQLError('Cache doc is corrupt, unable to retrieve page');
+  // }
+
+  const db = await getDatabase<DatabaseContext>();
+  const { Site } = db.models;
+
+  const site: Site = await Site.getSiteByHostname(url.hostname, context);
+  let siteRoles = await site.getSiteRoles(buildOptions(context, {
+    where: { roleId: context.role.id },
+  }));
+  if (siteRoles.length === 0) {
+    siteRoles = await site.getSiteRoles(buildOptions(context, {
+      where: {
+        default: true,
+      }
+    }));
   }
-  return getPageFromSiteRoleWebCache(context.siteRole.cacheDoc, url.pathname, levels);
+  if (siteRoles.length === 0) {
+    throw new Error('404');
+  }
+
+  const siteRole = siteRoles[0];
+  return getPageFromSiteRoleWebCache(siteRole.cacheDoc, url.pathname, levels);
 }

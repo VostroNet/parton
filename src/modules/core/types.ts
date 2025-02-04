@@ -29,10 +29,15 @@ import { ClIModule } from '../cli';
 //   Filter = 5,
 // };
 
+
+
+
 export enum RoleModelPermissionLevel {
-  global = 'g', // no filter applied
-  self = 's', // this ensures the type of filter applied uses the context of the current user
+  global = 'global', // no filter applied
+  self = 'self', // this ensures the type of filter applied uses the context of the current user
 }
+
+export type RoleModelPermissionLevelType = RoleModelPermissionLevel;
 
 export interface Permission {
   r?: boolean | RoleModelPermissionLevel; // Read

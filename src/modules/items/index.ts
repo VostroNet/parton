@@ -100,23 +100,17 @@ function createPathFromItem(
   data: WebData,
   store: ItemData,
 ) {
-  let newPath = `${parentPath}/${item.name}`;
+  const currentPath = `${parentPath}/${item.name}`;
   if (item.data?.dynamic) {
-    newPath += '/**/*';
+    data.paths[`${currentPath}/**/*`] = item.id;
   }
-  // if(!item.id) {
-  //   // eslint-disable-next-line functional/no-throw-statements
-  //   throw new Error("Invalid item id");
-  // }
-  data.paths[newPath] = item.id;
-  if (item.data?.dynamic) {
-    return;
-  }
+  data.paths[currentPath] = item.id;
+
   if (item.children?.length > 0) {
     item.children.forEach((childId) => {
       const child = store.items[childId];
       if (child) {
-        createPathFromItem(child, newPath, data, store);
+        createPathFromItem(child, currentPath, data, store);
       }
     });
   }

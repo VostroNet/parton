@@ -3,7 +3,7 @@ import { Definition, DefinitionOptions } from '@azerothian/gqlize/lib/types';
 
 import { System } from "../../system";
 import { Role } from "../../types/models/models/role";
-import { User } from "../../types/models/models/user";
+// import { User } from "../../types/models/models/user";
 import { Site } from '../../types/models/models/site';
 import { IUser } from '../core/types';
 

@@ -61,7 +61,7 @@ describe("modules:items:page", () => {
           default: true,
         },
       },
-      include:[{
+      include: [{
         model: Site,
         as: 'site',
         required: true,
@@ -160,7 +160,7 @@ describe("modules:items:page", () => {
           default: true,
         },
       },
-      include:[{
+      include: [{
         model: Site,
         as: 'site',
         required: true,
@@ -247,7 +247,7 @@ describe("modules:items:page", () => {
           default: true,
         },
       },
-      include:[{
+      include: [{
         model: Site,
         as: 'site',
         required: true,
@@ -344,7 +344,7 @@ describe("modules:items:page", () => {
           default: true,
         },
       },
-      include:[{
+      include: [{
         model: Site,
         as: 'site',
         required: true,
@@ -424,7 +424,7 @@ describe("modules:items:page", () => {
     expect(role).toBeDefined();
     expect(role).not.toBeNull();
     const siteRoles = await role.getSiteRoles(createOptions(systemContext, {
-      include:[{
+      include: [{
         model: Site,
         as: 'site',
         required: true,
@@ -463,7 +463,7 @@ describe("modules:items:page", () => {
     expect(page?.webPath).toBe('/');
     await core.shutdown();
   });
-  
+
   test("getPageResolver - get sub url - dynamic", async () => {
 
     const { siteModule, roles } = await createTestSite();
@@ -504,7 +504,7 @@ describe("modules:items:page", () => {
     expect(role).toBeDefined();
     expect(role).not.toBeNull();
     const siteRoles = await role.getSiteRoles(createOptions(systemContext, {
-      include:[{
+      include: [{
         model: Site,
         as: 'site',
         required: true,
@@ -540,7 +540,7 @@ describe("modules:items:page", () => {
     // expect(page?.displayName).toBeDefined();
     // expect(page?.displayName).toBe('Sub');
     expect(page?.webPath).toBeDefined();
-    expect(page?.webPath).toBe('/randoms');
+    expect(page?.webPath).toBe('/');
     await core.shutdown();
   });
 });

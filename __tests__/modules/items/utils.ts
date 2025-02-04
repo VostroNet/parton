@@ -6,6 +6,7 @@ import { ImportSite, ItemTemplateDataType, ItemType, SiteRoleDoc } from "../../.
 import { fieldHashModule } from "../../../src/modules/utils/field-hash";
 import { roleUpsertModule } from "../../../src/modules/utils/role-upsert";
 import { createSiteSetupModule } from "../../../src/modules/items/setup";
+import path from "path";
 
 
 export async function createDynamicSite() {
@@ -96,7 +97,31 @@ export async function createTestSite() {
   };
   const siteModule = await createSiteSetupModule([
     createTestSiteDefinition("test", ["test.com"], true, itemRoles),
-    createTestSiteDefinition("dynamic", ["dynamic.com"], false, itemRoles,  {
+    createTestSiteDefinition("dynamic-root", ["dynamic-root.com"], false, itemRoles, {
+      name: 'website',
+      type: ItemType.Folder,
+      templatePath: "/templates/page",
+      data: {
+        dynamic: true,
+        props: {
+          "title": "Page"
+        },
+        layout: {
+          path: "/layouts/main",
+          props: {
+            title: "Test"
+          }
+        },
+        sublayouts: [{
+          placeholder: "main",
+          path: "/sublayouts/sub1",
+        }, {
+          placeholder: "main",
+          path: "/sublayouts/sub2"
+        }],
+      },
+    }),
+    createTestSiteDefinition("dynamic", ["dynamic.com"], false, itemRoles, {
       name: 'website',
       type: ItemType.Folder,
       templatePath: "/templates/page",
@@ -117,8 +142,71 @@ export async function createTestSite() {
           placeholder: "main",
           path: "/sublayouts/sub2"
         }],
-        dynamic: true
       },
+      children: [{
+        name: 'sub',
+        displayName: 'Sub',
+        type: ItemType.Folder,
+        templatePath: "/templates/page",
+        data: {
+          props: {
+            "title": "Page"
+          },
+          layout: {
+            path: "/layouts/main",
+            props: {
+              title: "Test"
+            }
+          },
+          sublayouts: [{
+            placeholder: "main",
+            path: "/sublayouts/sub1",
+          }],
+        },
+      }, {
+        name: 'dynamic',
+        displayName: 'Sub',
+        type: ItemType.Folder,
+        templatePath: "/templates/page",
+        data: {
+          dynamic: true,
+          props: {
+            "title": "Page"
+          },
+          layout: {
+            path: "/layouts/main",
+            props: {
+              title: "Test"
+            }
+          },
+          sublayouts: [{
+            placeholder: "main",
+            path: "/sublayouts/sub1",
+          }],
+        },
+        children: [{
+          name: 'view',
+          displayName: 'Sub',
+          type: ItemType.Folder,
+          templatePath: "/templates/page",
+          data: {
+            dynamic: true,
+            props: {
+              "title": "Page"
+            },
+            layout: {
+              path: "/layouts/main",
+              props: {
+                title: "Test"
+              }
+            },
+            sublayouts: [{
+              placeholder: "main",
+              path: "/sublayouts/sub1",
+            }],
+          },
+        }],
+      }],
     }),
     createTestSiteDefinition("admin-only", ["admin-only.com"], false, {
       admin: {

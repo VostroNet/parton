@@ -4,7 +4,7 @@ import SequelizeAdapter from '@azerothian/gqlize-adapter-sequelize';
 import { Model, ModelStatic, Op, Options, Sequelize } from 'sequelize';
 import { Options as SequelizeOptions } from 'sequelize';
 
-import { getContextFromSession, System } from '../../system';
+import { getContextFromSession, getSystemFromSession, System } from '../../system';
 import { Config } from '../../types/config';
 import { SystemEvent } from '../../types/events';
 import DatabaseContext from '../../types/models';
@@ -137,7 +137,7 @@ export function createOptions<T>(o: any, options: FindOptions = {}) {
   return opts as T;
 }
 
-export function buildOptions<T>(context: Context, options?: T): T {
+export function buildOptions<T>(context: Context, options: T = undefined): T {
   return createOptions(context, options) as T;
 }
 
@@ -208,8 +208,15 @@ export function getRoleFromOptions(
 }
 // let gqlManager: GQLManager;
 export async function getDatabase<T extends Omit<Sequelize, 'models'> & { models: T["models"] }>(
-  system: System,
+  system?: System,
 ): Promise<T> {
+  if (!system) {
+    system = getSystemFromSession();
+  }
+  if (!system) {
+    throw new Error("system is not defined");
+  }
+
   const dataModule = system.get<DataModule>('data');
   const gqlManager = dataModule.gqlManager;
   if (!gqlManager) {

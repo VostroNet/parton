@@ -3,10 +3,11 @@ import Sequelize from 'sequelize';
 
 import { Role } from '../../types/models/models/role';
 import { User } from '../../types/models/models/user';
-import { IUser, MutationType, RoleDoc, RoleModelPermission, RoleModelPermissionLevel, RoleSchema } from '../core/types';
+import { IUser, MutationType, RoleDoc, RoleModelPermission, RoleModelPermissionLevel, RoleModelPermissionLevelType, RoleSchema } from '../core/types';
 
 import { DataContext, FindOptions } from './types';
 import { getContextFromSession } from '../../system';
+import { Context } from '../../types/system';
 
 function invalidateFindOptions(options: FindOptions) {
   options.valid = false;
@@ -14,7 +15,7 @@ function invalidateFindOptions(options: FindOptions) {
   return options;
 }
 
-function getRolePermissionsFromSchema(roleSchema: RoleSchema, tableName: string) {
+function getRolePermissionsFromSchema(roleSchema: RoleSchema, tableName: string, fieldName?: string) {
   let roleSchemaObj: RoleModelPermission[] = [];
   if (roleSchema) {
     roleSchemaObj.push(roleSchema);
@@ -23,6 +24,9 @@ function getRolePermissionsFromSchema(roleSchema: RoleSchema, tableName: string)
     roleSchemaObj.push(roleSchema.models);
     if (tableName && roleSchema.models[tableName]) {
       roleSchemaObj.push(roleSchema.models[tableName]);
+    }
+    if (fieldName && roleSchema.models[tableName]?.f && roleSchema.models[tableName].f[fieldName]) {
+      roleSchemaObj.push(roleSchema.models[tableName].f[fieldName]);
     }
   }
   return mergeRolePermissions(roleSchemaObj);
@@ -48,7 +52,7 @@ export async function validateFindOptions(
   tableName: string,
   options: FindOptions,
   whereKey: any,
-  whereFunc: (user: any, roleLevel: RoleModelPermissionLevel) => any = (
+  whereFunc: <T extends RoleModelPermissionLevelType>(user: any, roleLevel: T) => any = (
     user: any,
   ) => user.id,
   denyOnSelf = false,
@@ -123,10 +127,10 @@ export async function validateFindOptions(
 }
 
 // Fallback checker if hooks is added to the model to still check for the field permission.
-export async function validateDirectUserKey<T>(
+export async function validateDirectUserKey<T, T1 extends RoleModelPermissionLevelType>(
   user: IUser<T>,
   model: any,
-  roleLevel: RoleModelPermissionLevel,
+  roleLevel: T1,
   context: DataContext,
   fieldCheck: any,
 ) {
@@ -275,6 +279,13 @@ export function getRoleFromOptions(
   const context = getContextFromOptions(options) || {};
   return context.role;
 }
+export function getCurrentRole(context?: Context): Role | undefined {
+  if (!context) {
+    context = getContextFromSession();
+  }
+  return context.role;
+}
+
 export async function getUserFromOptions<T>(
   options: FindOptions = {},
 ): Promise<IUser<T> | undefined> {
@@ -286,9 +297,34 @@ export async function getUserFromOptions<T>(
 }
 
 
-export function validateClassMethodAccess(roleDoc: RoleDoc, modelName: string, methodName: string) {
+export function getClassMethodPermissions(roleDoc: RoleDoc, modelName: string, methodName: string) {
   if (!roleDoc) {
     return undefined;
   }
   return mergeRolePermissions([roleDoc.schema, roleDoc.schema.models?.[modelName], roleDoc.schema.models?.[modelName]?.cm[methodName]]);
+}
+
+
+export async function getPermissionLevel<T extends RoleModelPermissionLevelType>(context: Context, queryType: string, modelName: string, fieldName?: string): Promise<T | undefined> {
+  const role = await getCurrentRole(context);
+  const modelPermissions = getRolePermissionsFromSchema(role.doc.schema, modelName, fieldName);
+
+  switch (queryType) {
+    case 'query':
+      return modelPermissions.r as T;
+    case 'mutation':
+      if (fieldName === 'create') {
+        return modelPermissions.w as T;
+      } else if (fieldName === 'update') {
+        return modelPermissions.u as T;
+      } else if (fieldName === 'delete') {
+        return modelPermissions.d as T;
+      } else {
+        const cmAccess = getClassMethodPermissions(role.doc as RoleDoc, modelName, fieldName);
+        return cmAccess?.w as T;
+      }
+    default:
+      return undefined;
+  }
+
 }
