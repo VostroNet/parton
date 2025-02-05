@@ -88,18 +88,21 @@ END;
 $$ LANGUAGE plpgsql;`);
 
 
+        if (system.getConfig<DataConfig>().data.reset) {
+          await db.query(`DROP TABLE IF EXISTS ${eventLogSchemaPrefix}"${tableName}_log" CASCADE;`);
+          await db.query(`
+            CREATE TABLE IF NOT EXISTS ${eventLogSchemaPrefix}"${tableName}_log" (
+              "time" TIMESTAMPTZ NOT NULL default now(),
+              "operation" VARCHAR(10) NOT NULL, 
+              "primaryKeys" JSONB,
+              "data" JSONB,
+              "userId" integer NOT NULL
+            );`);
+          if (isTimescale) {
+            await db.query(`SELECT create_hypertable('${eventLogSchemaPrefix}"${tableName}_log"', 'time', if_not_exists => TRUE);`);
+          }
+        }
 
-        // arr.push(`DROP TABLE IF EXISTS ${eventLogSchemaPrefix}"${tableName}_log" CASCADE;`);
-        // }
-        //       arr.push(`
-        // CREATE TABLE IF NOT EXISTS ${eventLogSchemaPrefix}"${tableName}_log" (
-        //   "id" uuid default uuid_generate_v4(),
-        //   "time" TIMESTAMPTZ NOT NULL default now(),
-        //   "rowId" integer NOT NULL,
-        //   "operation" VARCHAR(10) NOT NULL, 
-        //   "data" JSONB,
-        //   "userId" integer NOT NULL
-        // );`);\
         const readOnlyTriggerName = `${tableName}_prevent_update_delete_trigger`
         const readOnlyTriggerExists = await db.query(`SELECT * FROM pg_trigger WHERE tgname = '${readOnlyTriggerName}';`, { type: QueryTypes.SELECT });
         if (readOnlyTriggerExists.length === 0) {
@@ -109,15 +112,13 @@ BEFORE UPDATE OR DELETE ON ${eventLogSchemaPrefix}"${tableName}_log"
 FOR EACH ROW EXECUTE FUNCTION ${eventLogSchemaPrefix}prevent_update_delete();`);
         }
         // log update or delete protection -- end
-        if (isTimescale) {
-          await db.query(`SELECT create_hypertable('${eventLogSchemaPrefix}"${tableName}_log"', 'time', if_not_exists => TRUE);`);
-        }
+
         // const keys = modelDef.primaryKeys || ["id"];
         const keys = (model as any).primaryKeyAttributes;
         // await db.query(keys.map((pk) => `ALTER TABLE ${eventLogSchemaPrefix}"${tableName}_log" ADD COLUMN IF NOT EXISTS "row_${pk}" integer NOT NULL;`).join("\n"));
-        const columns = keys.map((pk) => `"row_${pk}"`).join(",");
-        const newFieldsRef = keys.map((pk) => `NEW."${pk}"`).join(",");
-        const oldFieldsRef = keys.map((pk) => `OLD."${pk}"`).join(",");
+        // const columns = keys.map((pk) => `"row_${pk}"`).join(",");
+        const newFieldsRef = keys.map((pk) => `"${pk}": "'|| NEW."${pk}"||'"`).join(",");
+        const oldFieldsRef = keys.map((pk) => `"${pk}": "'|| OLD."${pk}"||'"`).join(",");
         const loggingFunc = `CREATE OR REPLACE FUNCTION ${eventLogSchemaPrefix}"${triggerName}"() 
   RETURNS TRIGGER AS $$
   DECLARE current_user_id varchar;
@@ -128,16 +129,16 @@ BEGIN
     RAISE EXCEPTION 'User id is required.';
   END IF;
   IF (TG_OP = 'DELETE') THEN
-    INSERT INTO ${eventLogSchemaPrefix}"${tableName}_log" ("time", operation, data, "userId", ${columns})
-    VALUES (now(), 'DELETE', NULL, current_user_id::int, ${oldFieldsRef});
+    INSERT INTO ${eventLogSchemaPrefix}"${tableName}_log" ("time", operation, data, "userId", "primaryKeys")
+    VALUES (now(), 'DELETE', NULL, current_user_id::int, ('{${oldFieldsRef}}')::jsonb);
     RETURN OLD;
   ELSEIF (TG_OP = 'UPDATE') THEN
-    INSERT INTO ${eventLogSchemaPrefix}"${tableName}_log" ("time", operation, data, "userId", ${columns})
-    VALUES (now(),'UPDATE', row_to_json(NEW), current_user_id::int, ${newFieldsRef});
+    INSERT INTO ${eventLogSchemaPrefix}"${tableName}_log" ("time", operation, data, "userId", "primaryKeys")
+    VALUES (now(),'UPDATE', row_to_json(NEW), current_user_id::int, ('{${newFieldsRef}}')::jsonb);
     RETURN NEW;
   ELSEIF (TG_OP = 'INSERT') THEN
-    INSERT INTO ${eventLogSchemaPrefix}"${tableName}_log" ("time",  operation, data, "userId", ${columns})
-    VALUES (now(),'INSERT', row_to_json(NEW), current_user_id::int, ${newFieldsRef});
+    INSERT INTO ${eventLogSchemaPrefix}"${tableName}_log" ("time",  operation, data, "userId", "primaryKeys")
+    VALUES (now(),'INSERT', row_to_json(NEW), current_user_id::int, ('{${newFieldsRef}}')::jsonb);
     RETURN NEW;
   END IF;
 END;
@@ -293,7 +294,7 @@ export const eventLogModule: IModule & DataEvents & DataModelHookEvents & DataHo
       await waterfall(Object.keys(db.models).filter((modelName) => {
         const model = db.models[modelName];
         //IDefinition & {logTable: boolean}
-        return !model.definition.disableEventLog;
+        return !model.definition?.disableEventLog;
       }), async (modelName: string) => {
         system.logger.debug("Creating trigger for model", modelName);
         const model = db.models[modelName];
