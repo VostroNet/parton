@@ -57,7 +57,7 @@ export async function getPageFromSiteRoleWebCache(
       const match = minimatch(webPath, path, {
         partial: false,
       });
-      if (match) {
+      if (match || (webPath === "/" && (path === "/**/*" || path === "/*"))) {
         itemId = rwcd.web.paths[path];
         webPath = path.replace("/**/*", "");
         if (webPath === "") {

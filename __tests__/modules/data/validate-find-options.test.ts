@@ -28,7 +28,7 @@ describe('validate find options ', () => {
     expect(result.valid).toBe(true);
     expect(result.where).toEqual({id: "test"});
   });
-  test('if doc denies read access then deny read even if table allows read', async () => {
+  test('if global denies read access then allow read even if table allows', async () => {
     const findOptions = createFindOptions({id: "test"}, {
       schema: {
         r: false,
@@ -44,8 +44,10 @@ describe('validate find options ', () => {
       }
     });
     const result = await validateFindOptions("tableName", findOptions, "whereKey", undefined, false);
-    expect(result.valid).toBe(false);
-    expect(result.where).toEqual({val: "1=0"});
+    expect(result.valid).toBe(true);
+    expect(result.where).toEqual({
+      id: "test"
+    });
   });
 
   test('doc allows read access but table denies access', async () => {
@@ -70,7 +72,7 @@ describe('validate find options ', () => {
         r: RoleModelPermissionLevel.self,
         models: {
           tableName: {
-            r: true
+            r: RoleModelPermissionLevel.self,
           }
         }
       }
@@ -117,7 +119,7 @@ describe('validate find options ', () => {
         r: RoleModelPermissionLevel.self,
         models: {
           tableName: {
-            r: true,
+            r: RoleModelPermissionLevel.self,
           },
         },
       },
@@ -135,7 +137,7 @@ describe('validate find options ', () => {
         r: RoleModelPermissionLevel.self,
         models: {
           tableName: {
-            r: true,
+            r: RoleModelPermissionLevel.self,
           },
         },
       },
@@ -160,7 +162,7 @@ describe('validate find options ', () => {
         r: RoleModelPermissionLevel.self,
         models: {
           tableName: {
-            r: true,
+            r: RoleModelPermissionLevel.self,
           },
         },
       },

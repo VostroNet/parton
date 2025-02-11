@@ -82,7 +82,7 @@ export async function validateFindOptions(
     return invalidateFindOptions(options);
   }
   let roleLevel = RoleModelPermissionLevel.self;
-  if (permissions.r === RoleModelPermissionLevel.global) {
+  if (permissions.r === RoleModelPermissionLevel.global || permissions.r === true) {
     roleLevel = RoleModelPermissionLevel.global;
   }
 
@@ -95,32 +95,34 @@ export async function validateFindOptions(
   }
 
   const user = await getUserFromOptions(options);
-  const filter = {
-    [whereKey]: await whereFunc(user, roleLevel),
-  };
+  if (roleLevel === RoleModelPermissionLevel.self) {
+    const filter = {
+      [whereKey]: await whereFunc(user, roleLevel),
+    };
 
-  // TODO: use object-visit to validate the where clause.
+    // TODO: use object-visit to validate the where clause.
 
-  if (options.where) {
-    if (!options.originalWhere) {
-      options.originalWhere = [];
-    }
-    options.originalWhere.push(Object.assign({}, options.where));
-    if ((options.where as any)[whereKey]) {
-      options.where = Object.assign({}, options.where, {
-        [Op]: [
-          {
-            [whereKey]: (options.where as any)[whereKey],
-          },
-          filter,
-        ],
-      });
-      delete (options.where as any)[whereKey];
+    if (options.where) {
+      if (!options.originalWhere) {
+        options.originalWhere = [];
+      }
+      options.originalWhere.push(Object.assign({}, options.where));
+      if ((options.where as any)[whereKey]) {
+        options.where = Object.assign({}, options.where, {
+          [Op]: [
+            {
+              [whereKey]: (options.where as any)[whereKey],
+            },
+            filter,
+          ],
+        });
+        delete (options.where as any)[whereKey];
+      } else {
+        options.where = Object.assign({}, options.where, filter);
+      }
     } else {
-      options.where = Object.assign({}, options.where, filter);
+      options.where = filter;
     }
-  } else {
-    options.where = filter;
   }
   options.valid = true;
   return options;
@@ -185,7 +187,7 @@ export async function validateMutation<T>(
     throw new Error('ENOPERMS');
   }
   let roleLevel = RoleModelPermissionLevel.self;
-  if (permissionKey === RoleModelPermissionLevel.global) {
+  if (permissionKey === RoleModelPermissionLevel.global || permissionKey === true) {
     roleLevel = RoleModelPermissionLevel.global;
   }
 
@@ -193,7 +195,7 @@ export async function validateMutation<T>(
     throw new Error('EDENYONSELF');
   }
   // if wildcard table perms, allow all
-  if (roleLevel === RoleModelPermissionLevel.global) {
+  if (roleLevel === RoleModelPermissionLevel.global && !schema.models?.[tableName]?.f) {
     options.valid = true;
     options.validated = true;
     return model;
@@ -238,11 +240,11 @@ export async function validateMutation<T>(
   if (!fieldCheck) {
     throw new Error('EFCFAILED');
   }
-  // if (roleLevel === RoleModelPermissionLevel.global) {
-  //   options.valid = true;
-  //   options.validated = true;
-  //   return model;
-  // }
+  if (roleLevel === RoleModelPermissionLevel.global) {
+    options.valid = true;
+    options.validated = true;
+    return model;
+  }
 
   const user = await getUserFromOptions<User>(options);
   if (!user) {

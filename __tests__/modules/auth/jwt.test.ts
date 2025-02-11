@@ -60,6 +60,7 @@ describe('modules:auth:jwks', () => {
         dataModule,
         coreModule,
         // bearerAuthModule,
+        authModule,
         jwtAuthModule,
         fieldHashModule,
         roleUpsertModule,
@@ -93,6 +94,8 @@ describe('modules:auth:jwks', () => {
     const core = new System(config);
     await core.load();
     await core.initialize();
+    await core.configure();
+    await core.configureComplete()
     await core.ready();
 
     const context = await createContext(core, undefined, undefined, undefined, true);

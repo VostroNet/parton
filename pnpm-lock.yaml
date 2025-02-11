@@ -26,6 +26,9 @@ importers:
       '@azerothian/object-loader':
         specifier: ^0.0.3
         version: 0.0.3
+      '@azerothian/sandwich':
+        specifier: ^0.3.2
+        version: 0.3.2(typescript@5.7.3)
       '@graphql-tools/stitch':
         specifier: ^9.4.14
         version: 9.4.14(graphql@16.10.0)
@@ -44,9 +47,6 @@ importers:
       '@vostro/object-visit':
         specifier: ^1.1.0
         version: 1.1.0
-      '@vostro/sandwich':
-        specifier: file:.yalc/@vostro/sandwich
-        version: file:.yalc/@vostro/sandwich(typescript@5.7.3)
       bcrypt:
         specifier: ^5.1.1
         version: 5.1.1(encoding@0.1.13)
@@ -333,6 +333,11 @@ packages:
 
   '@azerothian/object-loader@0.0.3':
     resolution: {integrity: sha512-ySXaPZxOMYrS5w1hJNetBXMutqaISts+KyF02F8C3k8Ydi/5DGW7/jht5wZdYNa1DoValHIcLG3+Lz0BdpgNuA==}
+
+  '@azerothian/sandwich@0.3.2':
+    resolution: {integrity: sha512-WckiCFOxgeB/cyaJ2xgCJ3kOH5JwOfUS+A0j9Yj2+xVl6/2fnII28EdG1TnPDSSMlCOzjdCyIzzLkXM4DdzgQg==}
+    peerDependencies:
+      typescript: ^5.0.0
 
   '@babel/code-frame@7.26.2':
     resolution: {integrity: sha512-RJlIHRueQgwWitWgF8OdFYGZX328Ax5BCemNGlqHfplnRT9ESi8JkFlvaVYbS+UubVY6dpv87Fs2u5M29iNFVQ==}
@@ -2127,11 +2132,6 @@ packages:
 
   '@vostro/object-visit@1.1.0':
     resolution: {integrity: sha512-PoRnLnokaqADO1mUpGCwTjruJbTW+ameXCOPPylPqGfLIgLGJe33MFWYVnaq4y9vxQuSJVPleA4wuGordmBWIw==}
-
-  '@vostro/sandwich@file:.yalc/@vostro/sandwich':
-    resolution: {directory: .yalc/@vostro/sandwich, type: directory}
-    peerDependencies:
-      typescript: ^5.0.0
 
   '@whatwg-node/disposablestack@0.0.5':
     resolution: {integrity: sha512-9lXugdknoIequO4OYvIjhygvfSEgnO8oASLqLelnDhkRjgBZhc39shC3QSlZuyDO9bgYSIVa2cHAiN+St3ty4w==}
@@ -6470,6 +6470,16 @@ snapshots:
       '@vostro/object-visit': 1.1.0
       yaml: 2.7.0
 
+  '@azerothian/sandwich@0.3.2(typescript@5.7.3)':
+    dependencies:
+      debug: 4.4.0
+      deepmerge: 4.3.1
+      is-plain-object: 5.0.0
+      typescript: 5.7.3
+      uuid: 9.0.1
+    transitivePeerDependencies:
+      - supports-color
+
   '@babel/code-frame@7.26.2':
     dependencies:
       '@babel/helper-validator-identifier': 7.25.9
@@ -8537,16 +8547,6 @@ snapshots:
   '@vostro/graphql16@16.8.1': {}
 
   '@vostro/object-visit@1.1.0': {}
-
-  '@vostro/sandwich@file:.yalc/@vostro/sandwich(typescript@5.7.3)':
-    dependencies:
-      debug: 4.4.0
-      deepmerge: 4.3.1
-      is-plain-object: 5.0.0
-      typescript: 5.7.3
-      uuid: 9.0.1
-    transitivePeerDependencies:
-      - supports-color
 
   '@whatwg-node/disposablestack@0.0.5':
     dependencies:

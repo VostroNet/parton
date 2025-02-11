@@ -44,7 +44,7 @@ describe('validate find options ', () => {
         w: false,
         models: {
           tableName: {
-            w: true,
+            w: false,
             f: {
               id: {
                 w: true,
@@ -206,10 +206,10 @@ describe('validate find options ', () => {
         w: RoleModelPermissionLevel.self,
         models: {
           tableName: {
-            w: true,
+            w: RoleModelPermissionLevel.self,
             f: {
               id: {
-                w: true,
+                w: RoleModelPermissionLevel.self,
               },
             },
           },
@@ -240,10 +240,10 @@ describe('validate find options ', () => {
         w: RoleModelPermissionLevel.self,
         models: {
           tableName: {
-            w: true,
+            w: RoleModelPermissionLevel.self,
             f: {
               id: {
-                w: true,
+                w: RoleModelPermissionLevel.self,
               },
             },
           },
@@ -302,16 +302,16 @@ describe('validate find options ', () => {
     const findOptions = createFindOptions({id: "test"}, {
       schema: {
         u: false,
-        models: {
-          tableName: {
-            u: true,
-            f: {
-              id: {
-                u: true,
-              },
-            },
-          },
-        },
+        // models: {
+        //   tableName: {
+        //     u: true,
+        //     f: {
+        //       id: {
+        //         u: true,
+        //       },
+        //     },
+        //   },
+        // },
       },
     }, {
       where: {

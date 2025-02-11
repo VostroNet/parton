@@ -1,5 +1,5 @@
 import { describe, expect, test } from '@jest/globals';
-import { LoafEvent } from '@vostro/sandwich';
+import { LoafEvent } from '@azerothian/sandwich';
 
 import { System } from '../../../src/system';
 import { SystemEvent } from '../../../src/types/events';

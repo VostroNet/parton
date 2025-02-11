@@ -1,8 +1,8 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
 
-import { DependencyInfo } from '@vostro/sandwich';
-import { kitchen } from '@vostro/sandwich';
+import { DependencyInfo } from '@azerothian/sandwich';
+import { kitchen } from '@azerothian/sandwich';
 import { glob } from 'glob';
 import { SequelizeStorage, Umzug } from 'umzug';
 

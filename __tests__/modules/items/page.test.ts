@@ -429,7 +429,7 @@ describe("modules:items:page", () => {
         as: 'site',
         required: true,
         where: {
-          name: 'dynamic'
+          name: 'dynamic-root'
         }
       }]
     }));
@@ -438,9 +438,9 @@ describe("modules:items:page", () => {
     const siteRole = siteRoles[0]
 
 
-    const context = await createContextFromRequest({ hostname: 'dynamic.com' } as any, core, false);
+    const context = await createContextFromRequest({ hostname: 'dynamic-root.com' } as any, core, false);
 
-    const page = await getPageResolver({}, { uri: 'https://dynamic.com/', levels: 0 }, context);
+    const page = await getPageResolver({}, { uri: 'https://dynamic-root.com/', levels: 0 }, context);
     expect(page).toBeDefined();
     expect(page?.layout).toBeDefined();
     expect(page?.layout?.path).toBe('/layouts/main');
@@ -520,7 +520,7 @@ describe("modules:items:page", () => {
 
     const context = await createContextFromRequest({ hostname: 'dynamic.com' } as any, core, false);
 
-    const page = await getPageResolver({}, { uri: 'https://dynamic.com/randoms', levels: 0 }, context);
+    const page = await getPageResolver({}, { uri: 'https://dynamic.com/dynamic/randoms', levels: 0 }, context);
     expect(page).toBeDefined();
     expect(page?.layout).toBeDefined();
     expect(page?.layout?.path).toBe('/layouts/main');
@@ -530,17 +530,17 @@ describe("modules:items:page", () => {
     expect(page?.props).toBeDefined();
     expect(page?.props?.title).toBe('Page');
 
-    const pageItemId = siteRole?.cacheDoc?.web?.paths['/**/*'];
+    const pageItemId = siteRole?.cacheDoc?.web?.paths['/dynamic/**/*'];
     // const pageItem = role?.cacheDoc.data?.items[pageItemId];
     expect(page?.id).toBeDefined();
     expect(page?.id).toBe(pageItemId);
     expect(page?.values).toBeDefined();
     expect(page?.name).toBeDefined();
-    expect(page?.name).toBe('website');
+    expect(page?.name).toBe('dynamic');
     // expect(page?.displayName).toBeDefined();
     // expect(page?.displayName).toBe('Sub');
     expect(page?.webPath).toBeDefined();
-    expect(page?.webPath).toBe('/');
+    expect(page?.webPath).toBe('/dynamic');
     await core.shutdown();
   });
 });

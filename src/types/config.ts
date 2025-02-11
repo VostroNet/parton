@@ -1,4 +1,4 @@
-import { Jam } from '@vostro/sandwich';
+import { Jam } from '@azerothian/sandwich';
 // import {Logger} from "./logger";
 
 // export type ConfigModule = string | ISlice

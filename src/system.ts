@@ -1,4 +1,4 @@
-import { ISlice, Loaf, LoafEvent, Logger } from '@vostro/sandwich';
+import { ISlice, Loaf, LoafEvent, Logger } from '@azerothian/sandwich';
 
 import { LRUCache } from 'lru-cache'
 
@@ -15,7 +15,7 @@ import { IRole, ISite, IUser } from './modules/core/types';
 
 
 import { createNamespace, getNamespace } from 'cls-hooked';
-import Chains from '@vostro/sandwich/lib/utils/chains';
+import Chains from '@azerothian/sandwich/lib/utils/chains';
 
 export const clsSession = createNamespace("parton");
 

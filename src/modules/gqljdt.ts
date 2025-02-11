@@ -122,10 +122,14 @@ export const gqljdtModule: IGqlJdtModule = {
         if (!cache) {
           return res.status(404).send('Not found');
         }
-        return res.setHeader(`Content-Type`, cache.header)//.send(cache.pack);
-          .write(cache.pack, () => {
-            res.end();
-          });
+        res.setHeader(`Content-Type`, cache.header)
+        return res.write(cache.pack, () => {
+          res.end();
+        });
+        // return res.setHeader(`Content-Type`, cache.header)//.send(cache.pack);
+        //   .write(cache.pack, () => {
+        //     res.end();
+        //   });
         // return res.send(cache.pack);
       }
       return res.redirect('/');

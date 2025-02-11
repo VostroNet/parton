@@ -2,7 +2,7 @@
 // import { Config, Project, SystemEventType } from './types/system';
 import path from 'path';
 
-import { Jam } from '@vostro/sandwich';
+import { Jam } from '@azerothian/sandwich';
 import minimist from 'minimist';
 
 import { System, withSession } from './system';

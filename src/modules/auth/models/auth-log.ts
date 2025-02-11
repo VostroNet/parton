@@ -15,7 +15,7 @@ const authLogModel: IDefinition = {
   define: {
     time: {
       type: DataTypes.DATE,
-      defaultValue: Sequelize.fn("NOW"),
+      defaultValue: Sequelize.literal("CURRENT_TIMESTAMP")  //TODO ensure postgresql and mysql compatibility Sequelize.fn("now"),
     },
     operation: {
       type: DataTypes.ENUM,

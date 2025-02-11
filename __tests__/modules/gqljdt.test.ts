@@ -74,6 +74,7 @@ describe("modules:services:gqljdt", () => {
       await core.load();
       await core.initialize();
       await core.configure();
+      await core.configureComplete();
       await core.ready();
     } catch (err: any) {
       expect(err).toBeUndefined();
@@ -91,7 +92,7 @@ describe("modules:services:gqljdt", () => {
     await core.shutdown();
   });
 
-  test("express endpoint - /gqljdt.api/:id", async () => {
+  test("express endpoint - gqljdt.api - id", async () => {
 
     const { siteModule, roles } = await createTestSite();
     const config: CoreConfig = {
@@ -126,6 +127,7 @@ describe("modules:services:gqljdt", () => {
       await core.load();
       await core.initialize();
       await core.configure();
+      await core.configureComplete();
       await core.ready();
     } catch (err: any) {
       expect(err).toBeUndefined();

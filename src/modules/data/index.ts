@@ -244,11 +244,16 @@ async function beforeQuery(options: FindOptions, modelName: string) {
       modelName === 'User' ? 'id' : 'userId',
       (user) => {
         //TODO: check if has relation to user if not set denyOnSelf to true
+        
+        if(!user?.id) {
+          throw new Error("Access is denied");
+        }
         if (modelName === 'User') {
           return {
             id: user.id,
           };
         }
+
         return {
           userId: user.id,
         };

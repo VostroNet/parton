@@ -1,4 +1,4 @@
-import { DependencyInfo, ISlice, oneOf } from '@vostro/sandwich';
+import { DependencyInfo, ISlice, oneOf } from '@azerothian/sandwich';
 
 import { SystemEvents } from './events';
 
